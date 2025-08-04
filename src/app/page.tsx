@@ -50,10 +50,15 @@ async function getContests(): Promise<GetContestsResponse> {
 
     const data = await response.json();
     return { contests: data.objects };
-  } catch (err: any) {
-    console.error("Fetch error:", err);
+  } catch (err: unknown) {
+  console.error("Fetch error:", err);
+  if (err instanceof Error) {
     return { error: err.message };
+  } else {
+    return { error: "Unknown error" };
   }
+}
+
 }
 
 // --- Page Component (Server Component) ---
