@@ -2,6 +2,7 @@ import React from 'react';
 import ContestClientComponent from '@/src/app/ContestClientComponent';
 import type { Contest } from './types/contest';
 import { parseAsUTC } from './lib/date';
+export const dynamic = "force-dynamic";
 
 interface GetContestsResponse {
   contests?: Contest[];
