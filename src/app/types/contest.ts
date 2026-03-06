@@ -5,5 +5,7 @@ export interface Contest {
   href: string;
   start: string;
   duration: number;
+  status?: "BEFORE" | "CODING" | "FINISHED";
+  end?: string;
   formattedStartIST?: string;
 }
