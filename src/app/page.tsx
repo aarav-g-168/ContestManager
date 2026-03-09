@@ -104,12 +104,12 @@ export default async function HomePage() {
           <p>
             Made with ❤️ by {""}
             <a
-              href="https://clist.by/"
+              href="https://aaravgupta.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-indigo-600 hover:underline"
             >
-              Aarav.dev!!
+              Aarav!!
             </a>
           </p>
         </footer>
