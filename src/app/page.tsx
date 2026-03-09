@@ -100,6 +100,18 @@ export default async function HomePage() {
           />
         )}
 
+        <div className="flex justify-end mb-6 mt-4">
+          <a
+            href="/contests"
+            className="group text-indigo-600 font-semibold flex items-center gap-1"
+          >
+            View All Upcoming Contests
+            <span className="transform transition-transform group-hover:translate-x-1">
+              →
+            </span>
+          </a>
+        </div>
+
         <footer className="text-center mt-12 text-gray-500">
           <p>
             Made with ❤️ by {""}

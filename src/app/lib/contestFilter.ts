@@ -1,7 +1,7 @@
 import { Contest } from "../types/contest";
 
 const DAYS_LIMIT = 7;
-const MAX_CONTESTS = 6;
+const MAX_CONTESTS = 8;
 
 export function getHomePageContests(contests: Contest[]): Contest[] {
   const now = new Date();
