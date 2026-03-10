@@ -92,8 +92,8 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
           {hasMounted ? <CountdownTimer startTime={contest.start} /> : <span className="text-sm font-semibold text-indigo-600">Loading...</span>}
         </div>
         <h3 className="text-lg font-bold text-gray-800 mb-2 leading-tight">{contest.event}</h3>
-        <div className="text-sm text-gray-600 space-y-1">
-          <p><strong>Starts:</strong>
+        <div className="text-sm text-gray-700 space-y-1">
+          <p><strong>Starts : </strong>
             {/* --- HYDRATION FIX --- */}
             {/* Conditionally render the formatted time only on the client */}
             {hasMounted
@@ -101,7 +101,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
               : (contest.formattedStartIST ?? '...')
             }
           </p>
-          <p><strong>Duration:</strong> {formatDuration(contest.duration)}</p>
+          <p><strong>Duration : </strong> {formatDuration(contest.duration)}</p>
         </div>
       </div>
       <div className="bg-gray-50 p-4">

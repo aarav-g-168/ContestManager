@@ -78,10 +78,10 @@ export default async function HomePage() {
     <div className="bg-gray-100 min-h-screen font-sans">
       <div className="container mx-auto p-4 md:p-8">
         <header className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-3 mt-7">
             Upcoming Coding Contests
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 mb-10">
             Your one-stop dashboard for competitive programming events.
           </p>
         </header>
@@ -103,7 +103,7 @@ export default async function HomePage() {
         <div className="flex justify-end mb-6 mt-4">
           <a
             href="/contests"
-            className="group text-indigo-600 font-semibold flex items-center gap-1"
+            className="group text-black font-semibold flex items-center gap-1"
           >
             View All Upcoming Contests
             <span className="transform transition-transform group-hover:translate-x-1">
@@ -119,7 +119,7 @@ export default async function HomePage() {
               href="https://aaravgupta.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-indigo-600 hover:underline"
+              className="text-indigo-600 hover:underline mt-1 inline-block"
             >
               Aarav!!
             </a>
