@@ -8,7 +8,7 @@ export default function ContestsPage() {
       </h1>
 
       <p className="text-center text-gray-600">
-        
+        All the upcoming programming contests from various platforms in one place. Stay tuned.
       </p>
     </div>
   );
