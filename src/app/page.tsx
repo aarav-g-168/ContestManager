@@ -75,7 +75,7 @@ export default async function HomePage() {
   }));
 
   return (
-    <div className="bg-gray-100 min-h-screen font-sans">
+    <div className="bg-gray-300 min-h-screen font-sans">
       <div className="container mx-auto p-4 md:p-8">
         <header className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-3 mt-7">

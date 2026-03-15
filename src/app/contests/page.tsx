@@ -58,7 +58,7 @@ export default async function ContestsPage() {
   }));
 
   return (
-    <div className="bg-gray-100 min-h-screen font-sans">
+    <div className="bg-gray-300 min-h-screen font-sans">
       <div className="container mx-auto p-4 md:p-8">
 
         <header className="text-center mb-8">
