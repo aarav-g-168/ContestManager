@@ -1,6 +1,6 @@
-import ContestClientComponent from "@/src/app/ContestClientComponent";
-import type { Contest } from "../types/contest";
-import { parseAsUTC } from "../lib/date";
+import ContestClientComponent from "@/src/components/ContestClientComponent";
+import type { Contest } from "../../types/contest";
+import { parseAsUTC } from "@/src/lib/date";
 
 export const dynamic = "force-dynamic";
 

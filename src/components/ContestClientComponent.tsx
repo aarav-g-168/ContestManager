@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import type { Contest } from './types/contest';
-import { parseAsUTC } from './lib/date';
+import type { Contest } from '../types/contest';
+import { parseAsUTC } from '@/src/lib/date';
 
 const formatDuration = (seconds: number): string => {
   if (seconds <= 0) return "bhenchod";

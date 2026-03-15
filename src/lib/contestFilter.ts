@@ -1,4 +1,4 @@
-import { Contest } from "../types/contest";
+import { Contest } from "@/src/types/contest";
 
 const DAYS_LIMIT = 7;
 const MAX_CONTESTS = 8;
