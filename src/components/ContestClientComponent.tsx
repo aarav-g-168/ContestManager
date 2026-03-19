@@ -147,7 +147,7 @@ export default function ContestClientComponent({ initialContests }: ContestClien
 
   return (
     <>
-      {/* <div className="bg-white p-4 rounded-lg shadow-md mb-8">
+      <div className="bg-white p-4 rounded-lg shadow-md mb-8">
         <h3 className="font-bold text-gray-700 mb-3">Filter by Platform:</h3>
         <div className="flex flex-wrap gap-2">
           {allPlatforms.map(platform => (
@@ -171,7 +171,7 @@ export default function ContestClientComponent({ initialContests }: ContestClien
             </button>
           )}
         </div>
-      </div> */}
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredContests.length > 0 ? (
