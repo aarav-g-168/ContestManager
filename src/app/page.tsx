@@ -78,7 +78,6 @@ export default async function HomePage() {
 
         <ContestClientComponent
           initialContests={contestsWithFormattedStart}
-          // ❗ no showFilters → homepage stays clean
         />
 
         <div className="flex justify-end mb-6 mt-4">

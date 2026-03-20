@@ -4,11 +4,7 @@ import { parseAsUTC } from "@/src/lib/date";
 
 export const dynamic = "force-dynamic";
 
-interface GetContestsResponse {
-  contests?: Contest[];
-  error?: string;
-}
-
+// ✅ Secure API key (NOT exposed to client)
 const API_KEY = process.env.CLIST_API_KEY;
 
 async function getContests(): Promise<Contest[]> {
@@ -17,7 +13,9 @@ async function getContests(): Promise<Contest[]> {
   }
 
   const now = new Date().toISOString();
-  const future = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  const future = new Date(
+    Date.now() + 30 * 24 * 60 * 60 * 1000
+  ).toISOString();
 
   const API_URL =
     `https://clist.by/api/v4/contest/?start__gte=${now}&start__lte=${future}&order_by=start`;
@@ -38,11 +36,20 @@ async function getContests(): Promise<Contest[]> {
 }
 
 export default async function ContestsPage() {
-  const { contests, error } = await getContests();
+  let contests: Contest[] = [];
 
-  const allContests = contests ?? [];
+  try {
+    contests = await getContests();
+  } catch (error) {
+    return (
+      <div className="text-center text-red-600 p-10">
+        <h2 className="text-xl font-bold">Failed to load contests</h2>
+        <p>{(error as Error).message}</p>
+      </div>
+    );
+  }
 
-  const contestsWithFormattedStart = allContests.map((c: Contest) => ({
+  const contestsWithFormattedStart = contests.map((c: Contest) => ({
     ...c,
     formattedStartIST:
       parseAsUTC(c.start).toLocaleString("en-IN", {
@@ -66,17 +73,10 @@ export default async function ContestsPage() {
           </h1>
         </header>
 
-        {error ? (
-          <div className="text-center bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg">
-            <p className="font-bold">An Error Occurred</p>
-            <p>{error}</p>
-          </div>
-        ) : (
-          <ContestClientComponent
-            initialContests={contestsWithFormattedStart}
-            showFilters={true}
-          />
-        )}
+        <ContestClientComponent
+          initialContests={contestsWithFormattedStart}
+          showFilters={true}
+        />
 
       </div>
     </div>

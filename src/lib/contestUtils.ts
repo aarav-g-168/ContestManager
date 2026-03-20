@@ -29,6 +29,6 @@ export function getHomePageContests(contests: Contest[]) {
     sortContests(
       filterContestsByDays(contests, 7)
     ),
-    6
+    8
   );
 }
