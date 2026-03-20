@@ -5,7 +5,6 @@ import { parseAsUTC } from "@/src/lib/date";
 
 export const dynamic = "force-dynamic";
 
-// ✅ FIXED: remove NEXT_PUBLIC
 const API_KEY = process.env.CLIST_API_KEY;
 
 async function getContests(): Promise<Contest[]> {
