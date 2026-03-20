@@ -9,11 +9,11 @@ interface GetContestsResponse {
   error?: string;
 }
 
-const API_KEY = process.env.NEXT_PUBLIC_CLIST_API_KEY;
+const API_KEY = process.env.CLIST_API_KEY;
 
-async function getContests(): Promise<GetContestsResponse> {
+async function getContests(): Promise<Contest[]> {
   if (!API_KEY) {
-    return { error: "API Key is not configured on the server." };
+    throw new Error("API Key is not configured");
   }
 
   const now = new Date().toISOString();
@@ -22,20 +22,19 @@ async function getContests(): Promise<GetContestsResponse> {
   const API_URL =
     `https://clist.by/api/v4/contest/?start__gte=${now}&start__lte=${future}&order_by=start`;
 
-  try {
-    const response = await fetch(API_URL, {
-      headers: {
-        Authorization: `ApiKey ${API_KEY}`,
-      },
-      cache: "no-store",
-    });
+  const response = await fetch(API_URL, {
+    headers: {
+      Authorization: `ApiKey ${API_KEY}`,
+    },
+    cache: "no-store",
+  });
 
-    const data = await response.json();
-
-    return { contests: data.objects };
-  } catch (err) {
-    return { error: "Failed to fetch contests" };
+  if (!response.ok) {
+    throw new Error(`CLIST API error: ${response.status}`);
   }
+
+  const data = await response.json();
+  return data.objects;
 }
 
 export default async function ContestsPage() {
@@ -75,6 +74,7 @@ export default async function ContestsPage() {
         ) : (
           <ContestClientComponent
             initialContests={contestsWithFormattedStart}
+            showFilters={true}
           />
         )}
 

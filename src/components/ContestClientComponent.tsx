@@ -119,9 +119,10 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
 };
 interface ContestClientComponentProps {
   initialContests: Contest[];
+  showFilters?: boolean;
 }
 
-export default function ContestClientComponent({ initialContests }: ContestClientComponentProps) {
+export default function ContestClientComponent({ initialContests, showFilters = false }: ContestClientComponentProps) {
   const [contests] = useState<Contest[]>(initialContests);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
 
