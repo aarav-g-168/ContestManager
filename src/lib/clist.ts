@@ -9,7 +9,7 @@ export async function fetchContests(): Promise<Contest[]> {
   const res = await fetch(
     `${CLIST_API}?username=${username}&api_key=${apiKey}&limit=100`,
     {
-      next: { revalidate: 3600 }, // will store cache for 1 hour
+      next: { revalidate: 1800 }, // will store cached data for 30 minutes....only hits the API once per 30 minutes
     }
   );
 

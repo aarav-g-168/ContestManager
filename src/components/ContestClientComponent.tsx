@@ -94,8 +94,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
         <h3 className="text-lg font-bold text-gray-800 mb-2 leading-tight">{contest.event}</h3>
         <div className="text-sm text-gray-700 space-y-1">
           <p><strong>Starts : </strong>
-            {/* --- HYDRATION FIX --- */}
-            {/* Conditionally render the formatted time only on the client */}
+            {/*HYDRATION FIX....HTML rendered on the server != React renders on the client*/}
             {hasMounted
               ? formatStartTime(contest.start)
               : (contest.formattedStartIST ?? '...')

@@ -4,7 +4,6 @@ import { parseAsUTC } from "@/src/lib/date";
 
 export const dynamic = "force-dynamic";
 
-// ✅ Secure API key (NOT exposed to client)
 const API_KEY = process.env.CLIST_API_KEY;
 
 async function getContests(): Promise<Contest[]> {
@@ -24,10 +23,13 @@ async function getContests(): Promise<Contest[]> {
     headers: {
       Authorization: `ApiKey ${API_KEY}`,
     },
-    cache: "no-store",
+    next: { revalidate: 1800 } // 30 minutes,
   });
 
   if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error("RATE_LIMIT");
+    }
     throw new Error(`CLIST API error: ${response.status}`);
   }
 
@@ -41,10 +43,31 @@ export default async function ContestsPage() {
   try {
     contests = await getContests();
   } catch (error) {
+    const message = (error as Error).message;
+
+    // // Rate limit handling
+    // if (message === "RATE_LIMIT") {
+    //   return (
+    //     <div className="text-center p-10">
+    //       <h2 className="text-xl font-bold text-red-600">
+    //         Too many requests..
+    //       </h2>
+    //       <p className="text-white mt-2">
+    //         We are getting too many requests right now. Please try again in a few minutes.
+    //       </p>
+    //       <a
+    //         href="/contests"
+    //         className="mt-4 inline-block px-4 py-2 bg-indigo-600 text-white rounded"
+    //       >
+    //         Retry
+    //       </a>
+    //     </div>
+    //   );
+    // }
     return (
       <div className="text-center text-red-600 p-10">
         <h2 className="text-xl font-bold">Failed to load contests</h2>
-        <p>{(error as Error).message}</p>
+        <p>{message}</p>
       </div>
     );
   }
