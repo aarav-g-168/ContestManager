@@ -45,25 +45,25 @@ export default async function ContestsPage() {
   } catch (error) {
     const message = (error as Error).message;
 
-    // // Rate limit handling
-    // if (message === "RATE_LIMIT") {
-    //   return (
-    //     <div className="text-center p-10">
-    //       <h2 className="text-xl font-bold text-red-600">
-    //         Too many requests..
-    //       </h2>
-    //       <p className="text-white mt-2">
-    //         We are getting too many requests right now. Please try again in a few minutes.
-    //       </p>
-    //       <a
-    //         href="/contests"
-    //         className="mt-4 inline-block px-4 py-2 bg-indigo-600 text-white rounded"
-    //       >
-    //         Retry
-    //       </a>
-    //     </div>
-    //   );
-    // }
+    // Rate limit handling
+    if (message === "RATE_LIMIT") {
+      return (
+        <div className="text-center p-10">
+          <h2 className="text-xl font-bold text-red-600">
+            Too many requests..
+          </h2>
+          <p className="text-white mt-2">
+            We are getting too many requests right now. Please try again in a few minutes.
+          </p>
+          <a
+            href="/contests"
+            className="mt-4 inline-block px-4 py-2 bg-indigo-600 text-white rounded"
+          >
+            Retry
+          </a>
+        </div>
+      );
+    }
     return (
       <div className="text-center text-red-600 p-10">
         <h2 className="text-xl font-bold">Failed to load contests</h2>
