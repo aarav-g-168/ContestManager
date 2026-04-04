@@ -1,42 +1,37 @@
 {
   "compilerOptions": {
-    // Basic Options
-    "target": "es5", // Target ECMAScript version
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ], // Standard library files to include
-    "allowJs": true, // Allow JavaScript files to be compiled
-    "skipLibCheck": true, // Skip type checking of declaration files
-    "esModuleInterop": true, // Enables compatibility with CommonJS modules
-    "allowSyntheticDefaultImports": true, // Allow default imports from modules with no default export
-    "strict": true, // Enable all strict type-checking options
-    "forceConsistentCasingInFileNames": true, // Disallow inconsistently-cased references to the same file
-    // Module Resolution
-    "module": "esnext", // Specify module code generation
-    "moduleResolution": "bundler", // Use the modern 'bundler' resolution strategy
-    "resolveJsonModule": true, // Allow importing .json files
-    "isolatedModules": true, // Ensure each file can be transpiled without relying on other files
-    // Project Options
-    "jsx": "react-jsx", // Preserve JSX to be handled by Next.js
-    "incremental": true, // Enable incremental compilation
-    "noEmit": true, // Do not emit output files, Next.js handles this
-    // --- Import Alias Configuration ---
-    "baseUrl": ".", // Base directory to resolve non-absolute module names
+    /* Core */
+    "target": "ESNext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "strict": true,
+
+    /* Modules */
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* Next.js */
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+
+    /* File Handling */
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+
+    /* Paths (FIXED for future TS) */
     "paths": {
-      "@/*": [
-        "./*"
-      ] // Maps '@/' to the project root directory
+      "@/*": ["./*"]
     },
-    // Next.js Specific
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+
+    /* TEMP: Silence TS 7 warning */
+    "ignoreDeprecations": "6.0"
   },
-  // Files to include in the compilation
+
   "include": [
     "next-env.d.ts",
     "**/*.ts",
@@ -44,8 +39,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  // Files to exclude from compilation
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
