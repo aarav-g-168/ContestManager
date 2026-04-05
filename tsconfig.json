@@ -23,13 +23,10 @@
     "isolatedModules": true,
     "skipLibCheck": true,
 
-    /* Paths (FIXED for future TS) */
+    /* Paths */
     "paths": {
       "@/*": ["./*"]
-    },
-
-    /* TEMP: Silence TS 7 warning */
-    "ignoreDeprecations": "6.0"
+    }
   },
 
   "include": [
