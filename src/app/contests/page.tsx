@@ -53,7 +53,7 @@ export default async function ContestsPage() {
             Too many requests...
           </h2>
           <p className="text-white mt-2">
-            We are getting too many requests right now. Please try again in a few minutes.
+            We are getting too many requests right now...Please try again in a few minutes.
           </p>
           <a
             href="/contests"
