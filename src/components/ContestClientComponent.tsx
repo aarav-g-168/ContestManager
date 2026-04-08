@@ -158,7 +158,7 @@ export default function ContestClientComponent({ initialContests, showFilters = 
       {showFilters && (
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 mb-8">
           <h3 className="text-sm font-semibold text-gray-600 mb-3">
-            Filter by Platform
+            Filter by Platform:
           </h3>
 
           {/* Dropdown Button */}
@@ -219,7 +219,7 @@ export default function ContestClientComponent({ initialContests, showFilters = 
                   onClick={() => setSelectedPlatforms([])}
                   className="mt-3 text-xs text-red-500 hover:underline"
                 >
-                  Clear all
+                  Clear all!
                 </button>
               )}
             </div>
