@@ -50,7 +50,7 @@ export default async function ContestsPage() {
       return (
         <div className="text-center p-10">
           <h2 className="text-xl font-bold text-red-600">
-            Too many requests...
+            Too many requests at the moment...
           </h2>
           <p className="text-white mt-2">
             We are getting too many requests right now...Please try again in a few minutes.
