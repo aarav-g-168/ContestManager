@@ -122,7 +122,7 @@ export default async function HomePage() {
               rel="noopener noreferrer"
               className="text-indigo-600 hover:underline mt-1 inline-block"
             >
-              Aarav!!
+              Aarav !!
             </a>
           </p>
         </footer>
