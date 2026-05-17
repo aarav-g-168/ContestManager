@@ -4,6 +4,25 @@ import React, { useState, useMemo, useEffect } from 'react';
 import type { Contest } from '../types/contest';
 import { parseAsUTC } from '@/src/lib/date';
 
+import { Check, ChevronsUpDown } from "lucide-react";
+
+import { Button } from "@/src/components/ui/button";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/src/components/ui/popover";
+
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/src/components/ui/command";
+
 const formatDuration = (seconds: number): string => {
   if (seconds <= 0) return "bhenchod";
   const hours = Math.floor(seconds / 3600);
@@ -145,13 +164,8 @@ export default function ContestClientComponent({ initialContests, showFilters = 
     }
     return contests.filter(c => selectedPlatforms.includes(c.host));
   }, [contests, selectedPlatforms]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const filteredPlatforms = useMemo(() => {
-    return allPlatforms.filter(p =>
-      p.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [allPlatforms, search]);
+
+  
 
   return (
     <>
