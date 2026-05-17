@@ -165,79 +165,83 @@ export default function ContestClientComponent({ initialContests, showFilters = 
     return contests.filter(c => selectedPlatforms.includes(c.host));
   }, [contests, selectedPlatforms]);
 
-  
+
 
   return (
     <>
       {showFilters && (
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 mb-8">
-          <h3 className="text-sm font-semibold text-gray-600 mb-3">
-            Filter by Platform:
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 mb-8 flex items-center gap-4">
+
+          <h3 className="text-sm font-semibold text-gray-600 whitespace-nowrap">
+            Filter by Platform
           </h3>
 
-          {/* Dropdown Button */}
-          <button
-            onClick={() => setIsOpen(prev => !prev)}
-            className="w-72 px-4 py-2.5 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 transition flex items-center justify-between text-sm"
-          >
-            <span className="text-gray-700">
-              {selectedPlatforms.length > 0
-                ? `${selectedPlatforms.length} selected`
-                : "Select platforms"}
-            </span>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                className="w-[280px] justify-between"
+              >
+                {selectedPlatforms.length > 0
+                  ? `${selectedPlatforms.length} selected`
+                  : "Select platforms"}
 
-            <span className="text-gray-400">
-              ▼
-            </span>
-          </button>
-          {selectedPlatforms.length > 0 && (
-            <p className="mt-2 text-xs text-gray-500">
-              Selected: {selectedPlatforms.join(", ")}
-            </p>
-          )}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
 
-          {/* Dropdown Panel */}
-          {isOpen && (
-            <div className="absolute z-20 mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-lg p-3 ">
+            <PopoverContent className="w-[280px] p-0">
+              <Command>
+                <CommandInput placeholder="Search platforms..." />
 
-              {/* Search */}
-              <input
-                type="text"
-                placeholder="Search platforms..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full mb-3 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 placeholder:text-gray-400"
-              />
+                <CommandList>
+                  <CommandEmpty>No platform found.</CommandEmpty>
 
-              {/* List */}
-              <div className="max-h-52 overflow-y-auto space-y-2">
-                {filteredPlatforms.map(platform => (
-                  <label
-                    key={platform}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-100 cursor-pointer text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedPlatforms.includes(platform)}
-                      onChange={() => handlePlatformToggle(platform)}
-                      className="accent-indigo-600"
-                    />
-                    <span className="text-gray-700">{platform}</span>
-                  </label>
-                ))}
-              </div>
+                  <CommandGroup className="max-h-64 overflow-y-auto">
+                    {allPlatforms.map((platform) => {
+                      const isSelected =
+                        selectedPlatforms.includes(platform);
 
-              {/* Footer */}
+                      return (
+                        <CommandItem
+                          key={platform}
+                          onSelect={() =>
+                            handlePlatformToggle(platform)
+                          }
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <div
+                            className={`flex h-4 w-4 items-center justify-center rounded border ${isSelected
+                                ? "bg-indigo-600 border-indigo-600"
+                                : "border-gray-300"
+                              }`}
+                          >
+                            {isSelected && (
+                              <Check className="h-3 w-3 text-white" />
+                            )}
+                          </div>
+
+                          <span>{platform}</span>
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+
               {selectedPlatforms.length > 0 && (
-                <button
-                  onClick={() => setSelectedPlatforms([])}
-                  className="mt-3 text-xs text-red-500 hover:underline"
-                >
-                  Clear all!
-                </button>
+                <div className="border-t p-2">
+                  <button
+                    onClick={() => setSelectedPlatforms([])}
+                    className="text-xs text-red-500 hover:underline"
+                  >
+                    Clear all
+                  </button>
+                </div>
               )}
-            </div>
-          )}
+            </PopoverContent>
+          </Popover>
         </div>
       )}
 
