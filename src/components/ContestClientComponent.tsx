@@ -145,6 +145,7 @@ export default function ContestClientComponent({ initialContests, showFilters = 
   const [contests] = useState<Contest[]>(initialContests);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("soonest");
   const allPlatforms = useMemo(() => {
     const platforms = new Set(contests.map(c => c.host));
     return Array.from(platforms).sort();
@@ -165,7 +166,41 @@ export default function ContestClientComponent({ initialContests, showFilters = 
     return contests.filter(c => selectedPlatforms.includes(c.host));
   }, [contests, selectedPlatforms]);
 
+  const sortedContests = useMemo(() => {
+    const sorted = [...filteredContests];
 
+    switch (sortBy) {
+      case "latest":
+        return sorted.sort(
+          (a, b) =>
+            new Date(b.start).getTime() -
+            new Date(a.start).getTime()
+        );
+
+      case "duration-short":
+        return sorted.sort(
+          (a, b) => a.duration - b.duration
+        );
+
+      case "duration-long":
+        return sorted.sort(
+          (a, b) => b.duration - a.duration
+        );
+
+      case "platform":
+        return sorted.sort((a, b) =>
+          a.host.localeCompare(b.host)
+        );
+
+      case "soonest":
+      default:
+        return sorted.sort(
+          (a, b) =>
+            new Date(a.start).getTime() -
+            new Date(b.start).getTime()
+        );
+    }
+  }, [filteredContests, sortBy]);
 
   return (
     <>
@@ -213,8 +248,8 @@ export default function ContestClientComponent({ initialContests, showFilters = 
                         >
                           <div
                             className={`flex h-4 w-4 items-center justify-center rounded border ${isSelected
-                                ? "bg-indigo-600 border-indigo-600"
-                                : "border-gray-300"
+                              ? "bg-indigo-600 border-indigo-600"
+                              : "border-gray-300"
                               }`}
                           >
                             {isSelected && (
@@ -242,12 +277,25 @@ export default function ContestClientComponent({ initialContests, showFilters = 
               )}
             </PopoverContent>
           </Popover>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="soonest">Soonest First</option>
+            <option value="latest">Latest First</option>
+            <option value="duration-short">Shortest Duration</option>
+            <option value="duration-long">Longest Duration</option>
+            <option value="platform">Platform A-Z</option>
+          </select>
+
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredContests.length > 0 ? (
-          filteredContests.map(contest => <ContestCard key={contest.id} contest={contest} />)
+          sortedContests.map(contest => <ContestCard key={contest.id} contest={contest} />)
         ) : (
           <p className="col-span-full text-center text-xl font-semibold text-gray-700">No upcoming contests found for the selected platforms.</p>
         )}
