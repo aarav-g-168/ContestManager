@@ -144,7 +144,7 @@ interface ContestClientComponentProps {
 export default function ContestClientComponent({ initialContests, showFilters = false }: ContestClientComponentProps) {
   const [contests] = useState<Contest[]>(initialContests);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-
+  const [open, setOpen] = useState(false);
   const allPlatforms = useMemo(() => {
     const platforms = new Set(contests.map(c => c.host));
     return Array.from(platforms).sort();
@@ -176,7 +176,7 @@ export default function ContestClientComponent({ initialContests, showFilters = 
             Filter by Platform
           </h3>
 
-          <Popover>
+          <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -206,9 +206,9 @@ export default function ContestClientComponent({ initialContests, showFilters = 
                       return (
                         <CommandItem
                           key={platform}
-                          onSelect={() =>
-                            handlePlatformToggle(platform)
-                          }
+                          onSelect={() => {
+                            handlePlatformToggle(platform);
+                          }}
                           className="flex items-center gap-2 cursor-pointer"
                         >
                           <div
