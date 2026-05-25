@@ -1,7 +1,9 @@
-import ContestClientComponent from "@/src/components/ContestClientComponent";
-import { getHomePageContests } from "@/src/lib/contestUtils";
+import ContestClientComponent from "@/components/ContestClientComponent";
+import { getHomePageContests } from "@/lib/contestUtils";
 import type { Contest } from "../types/contest";
-import { parseAsUTC } from "@/src/lib/date";
+import { parseAsUTC } from "@/lib/date";
+import ThemeToggle from "@/components/theme-toggle";
+import Navbar from "@/components/Navbar";
 
 export const dynamic = "force-dynamic";
 
@@ -85,48 +87,56 @@ export default async function HomePage() {
   }));
 
   return (
-    <div className="bg-gray-300 min-h-screen font-sans">
-      <div className="container mx-auto p-4 md:p-8">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-3 mt-7">
-            Upcoming Coding Contests
-          </h1>
-          <p className="text-lg text-gray-600 mb-10">
-            Your one-stop dashboard for competitive programming events.
-          </p>
-        </header>
+  <div className="bg-gray-300 dark:bg-black min-h-screen font-sans">
 
-        <ContestClientComponent
-          initialContests={contestsWithFormattedStart}
-          showFilters={false}
-        />
+    <Navbar />
 
-        <div className="flex justify-end mb-6 mt-4">
-          <a
-            href="/contests"
-            className="group text-black font-semibold flex items-center gap-1"
-          >
-            View All Upcoming Contests
-            <span className="transform transition-transform group-hover:translate-x-1">
-              →
-            </span>
-          </a>
-        </div>
+    <div className="container mx-auto p-4 md:p-8">
 
-        <footer className="text-center mt-12 text-gray-500">
-          <p>
-            Made with ❤️ by{" "}
-            <a
-              href="https://aaravgupta.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-indigo-600 hover:underline mt-1 inline-block"
-            >
-              Aarav !!
-            </a>
-          </p>
-        </footer>
+      <header className="text-center mb-8">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 dark:text-white mb-3 mt-7">
+          Upcoming Coding Contests
+        </h1>
+
+        <p className="text-lg text-gray-600 dark:text-gray-300 mb-10">
+          Your one-stop dashboard for competitive programming events.
+        </p>
+      </header>
+
+      <ContestClientComponent
+        initialContests={contestsWithFormattedStart}
+        showFilters={false}
+      />
+
+      <div className="flex justify-end mb-6 mt-4">
+        <a
+          href="/contests"
+          className="group text-black dark:text-white font-semibold flex items-center gap-1"
+        >
+          View All Upcoming Contests
+
+          <span className="transform transition-transform group-hover:translate-x-1">
+            →
+          </span>
+        </a>
       </div>
+
+      <footer className="text-center mt-12 text-gray-500 dark:text-gray-400">
+        <p>
+          Made with ❤️ by{" "}
+
+          <a
+            href="https://aaravgupta.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-indigo-600 hover:underline mt-1 inline-block"
+          >
+            Aarav !!
+          </a>
+        </p>
+      </footer>
+
     </div>
-  );
+  </div>
+);
 }

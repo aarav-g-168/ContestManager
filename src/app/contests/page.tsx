@@ -1,6 +1,7 @@
-import ContestClientComponent from "@/src/components/ContestClientComponent";
+import ContestClientComponent from "@/components/ContestClientComponent";
 import type { Contest } from "../../types/contest";
-import { parseAsUTC } from "@/src/lib/date";
+import { parseAsUTC } from "@/lib/date";
+import Navbar from "@/components/Navbar";
 
 export const dynamic = "force-dynamic";
 
@@ -87,21 +88,24 @@ export default async function ContestsPage() {
   }));
 
   return (
-    <div className="bg-gray-300 min-h-screen font-sans">
-      <div className="container mx-auto p-4 md:p-8">
+  <div className="bg-gray-300 dark:bg-black min-h-screen font-sans">
 
-        <header className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-3 mt-7">
-            All Upcoming Contests
-          </h1>
-        </header>
+    <Navbar />
 
-        <ContestClientComponent
-          initialContests={contestsWithFormattedStart}
-          showFilters={true}
-        />
+    <div className="container mx-auto p-4 md:p-8">
 
-      </div>
+      <header className="text-center mb-8">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 dark:text-white mb-3 mt-7">
+          All Upcoming Contests
+        </h1>
+      </header>
+
+      <ContestClientComponent
+        initialContests={contestsWithFormattedStart}
+        showFilters={true}
+      />
+
     </div>
-  );
+  </div>
+);
 }

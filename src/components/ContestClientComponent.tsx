@@ -2,17 +2,17 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import type { Contest } from '../types/contest';
-import { parseAsUTC } from '@/src/lib/date';
+import { parseAsUTC } from '@/lib/date';
 
 import { Check, ChevronsUpDown } from "lucide-react";
 
-import { Button } from "@/src/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/src/components/ui/popover";
+} from "@/components/ui/popover";
 
 import {
   Command,
@@ -21,7 +21,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/src/components/ui/command";
+} from "@/components/ui/command";
 
 const formatDuration = (seconds: number): string => {
   if (seconds <= 0) return "bhenchod";
@@ -110,8 +110,8 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
           />
           {hasMounted ? <CountdownTimer startTime={contest.start} /> : <span className="text-sm font-semibold text-indigo-600">Loading...</span>}
         </div>
-        <h3 className="text-lg font-bold text-gray-800 mb-2 leading-tight">{contest.event}</h3>
-        <div className="text-sm text-gray-700 space-y-1">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 leading-tight">{contest.event}</h3>
+        <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
           <p><strong>Starts : </strong>
             {/*HYDRATION FIX....HTML rendered on the server != React renders on the client*/}
             {hasMounted
@@ -205,9 +205,9 @@ export default function ContestClientComponent({ initialContests, showFilters = 
   return (
     <>
       {showFilters && (
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 mb-8 flex items-center gap-4">
+        <div className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 mb-8 flex items-center gap-4">
 
-          <h3 className="text-sm font-semibold text-gray-600 whitespace-nowrap">
+          <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap">
             Filter by Platform
           </h3>
 
@@ -297,7 +297,7 @@ export default function ContestClientComponent({ initialContests, showFilters = 
         {filteredContests.length > 0 ? (
           sortedContests.map(contest => <ContestCard key={contest.id} contest={contest} />)
         ) : (
-          <p className="col-span-full text-center text-xl font-semibold text-gray-700">No upcoming contests found for the selected platforms.</p>
+          <p className="col-span-full text-center text-xl font-semibold text-gray-700 dark:text-gray-200">No upcoming contests found for the selected platforms.</p>
         )}
       </div>
     </>
