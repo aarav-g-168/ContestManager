@@ -6,13 +6,13 @@ import { parseAsUTC } from '@/lib/date';
 
 import { Check, ChevronsUpDown } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "./ui/button";
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "./ui/popover";
 
 import {
   Command,
@@ -21,7 +21,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from "./ui/command";
 
 const formatDuration = (seconds: number): string => {
   if (seconds <= 0) return "bhenchod";
