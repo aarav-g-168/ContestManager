@@ -94,7 +94,7 @@ export default async function HomePage() {
     <div className="container mx-auto p-4 md:p-8">
 
       <header className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 dark:text-white mb-3 mt-7">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-800 dark:text-white mb-3 mt-7">
           Upcoming Coding Contests
         </h1>
 
