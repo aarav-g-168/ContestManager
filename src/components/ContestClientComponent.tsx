@@ -99,7 +99,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
   const logoUrl = platformLogos[contest.host] || `https://placehold.co/100x40/f0f0f0/333?text=${contest.host.split('.')[0]}`;
 
   return (
-    <div className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 ease-in-out overflow-hidden flex flex-col">
+    <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-md">
       <div className="p-5 flex-grow">
         <div className="flex justify-between items-start mb-4">
           <img
@@ -110,8 +110,8 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
           />
           {hasMounted ? <CountdownTimer startTime={contest.start} /> : <span className="text-sm font-semibold text-indigo-600">Loading...</span>}
         </div>
-        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 leading-tight">{contest.event}</h3>
-        <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+        <h3 className="text-lg font-bold text-gray-800 dark:text-gray-300 mb-2 leading-tight">{contest.event}</h3>
+        <div className="text-sm text-gray-700 dark:text-gray-400 space-y-1">
           <p><strong>Starts : </strong>
             {/*HYDRATION FIX....HTML rendered on the server != React renders on the client*/}
             {hasMounted
@@ -122,12 +122,12 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
           <p><strong>Duration : </strong> {formatDuration(contest.duration)}</p>
         </div>
       </div>
-      <div className="bg-gray-50 p-4">
+      <div className="bg-gray-50 dark:bg-zinc-800 p-4">
         <a
           href={contest.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full block text-center bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+          className="w-full block text-center bg-indigo-600 text-white dark:bg-indigo-600 dark:text-gray-100 font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors duration-200"
         >
           Go to Contest
         </a>
