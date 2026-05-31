@@ -205,7 +205,7 @@ export default function ContestClientComponent({ initialContests, showFilters = 
   return (
     <>
       {showFilters && (
-        <div className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 mb-8 flex items-center gap-4">
+        <div className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 mb-8 flex items-center sm:flex-row gap-4 w-full">
 
           <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap">
             Filter by Platform
