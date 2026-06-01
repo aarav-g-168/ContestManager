@@ -5,8 +5,11 @@ import type { Contest } from '../types/contest';
 import { parseAsUTC } from '@/lib/date';
 
 import { Check, ChevronsUpDown } from "lucide-react";
+import { Bookmark } from "lucide-react";
 
 import { Button } from "./ui/button";
+
+import { useBookmarks } from "@/hooks/bookmarks";
 
 import {
   Popover,
@@ -79,7 +82,11 @@ const CountdownTimer = ({ startTime }: { startTime: string }) => {
   return <span className="text-sm font-semibold text-indigo-600">{timeLeft}</span>;
 };
 
-const ContestCard = ({ contest }: { contest: Contest }) => {
+const ContestCard = ({
+  contest,
+  isBookmarked,
+  onBookmarkToggle,
+}: ContestCardProps) => {
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
     setHasMounted(true);
@@ -99,7 +106,7 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
   const logoUrl = platformLogos[contest.host] || `https://placehold.co/100x40/f0f0f0/333?text=${contest.host.split('.')[0]}`;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/10 hover:border-indigo-500/30 group min-h-[48px]"> 
+    <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/10 hover:border-indigo-500/30 group min-h-[48px]">
       <div className="p-2 flex-grow">
         <div className="flex justify-between items-start mb-4">
           <img
@@ -109,6 +116,17 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
             onError={(e) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = `https://placehold.co/100x40/f0f0f0/333?text=${contest.host.split('.')[0]}`; }}
           />
           {hasMounted ? <CountdownTimer startTime={contest.start} /> : <span className="text-sm font-semibold text-indigo-600">Loading...</span>}
+          <button
+            onClick={() => onBookmarkToggle(contest.id)}
+            className="absolute top-4 right-4 hover:scale-110 transition-all duration-200"
+          >
+            <Bookmark
+              className={`h-5 w-5 ${isBookmarked
+                ? "fill-indigo-500 text-indigo-500"
+                : "text-gray-400 dark:text-gray-500"
+                }`}
+            />
+          </button>
         </div>
         <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2 leading-tight min-h-[48px]">{contest.event}</h3>
         <div className="text-sm text-gray-700 dark:text-gray-400 space-y-1">
@@ -136,6 +154,12 @@ const ContestCard = ({ contest }: { contest: Contest }) => {
   );
 };
 
+interface ContestCardProps {
+  contest: Contest;
+  isBookmarked: boolean;
+  onBookmarkToggle: (id: number) => void;
+}
+
 interface ContestClientComponentProps {
   initialContests: Contest[];
   showFilters?: boolean;
@@ -146,6 +170,7 @@ export default function ContestClientComponent({ initialContests, showFilters = 
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [sortBy, setSortBy] = useState("soonest");
+  const { bookmarkedContests, toggleBookmark } = useBookmarks();
   const allPlatforms = useMemo(() => {
     const platforms = new Set(contests.map(c => c.host));
     return Array.from(platforms).sort();
@@ -205,7 +230,7 @@ export default function ContestClientComponent({ initialContests, showFilters = 
   return (
     <>
       {showFilters && (
-        <div className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 mb-8 flex items-center sm:flex-row gap-4 w-full">
+        <div className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 mb-8 flex flex-col sm:flex-row gap-4 w-full">
 
           <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap">
             Filter by Platform
@@ -295,7 +320,12 @@ export default function ContestClientComponent({ initialContests, showFilters = 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredContests.length > 0 ? (
-          sortedContests.map(contest => <ContestCard key={contest.id} contest={contest} />)
+          sortedContests.map(contest => <ContestCard
+            key={contest.id}
+            contest={contest}
+            isBookmarked={bookmarkedContests.includes(contest.id)}
+            onBookmarkToggle={toggleBookmark}
+          />)
         ) : (
           <p className="col-span-full text-center text-xl font-semibold text-gray-700 dark:text-gray-200">No upcoming contests found for the selected platforms.</p>
         )}
