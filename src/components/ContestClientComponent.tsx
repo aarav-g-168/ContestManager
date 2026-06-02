@@ -135,8 +135,8 @@ const ContestCard = ({
             >
               <Bookmark
                 className={`h-9 w-6 ${isBookmarked
-                    ? "fill-indigo-500 text-indigo-500"
-                    : "text-gray-400 dark:text-gray-500"
+                  ? "fill-indigo-500 text-indigo-500"
+                  : "text-gray-400 dark:text-gray-500"
                   }`}
               />
             </button>
@@ -177,9 +177,10 @@ interface ContestCardProps {
 interface ContestClientComponentProps {
   initialContests: Contest[];
   showFilters?: boolean;
+  bookmarksOnly?: boolean;
 }
 
-export default function ContestClientComponent({ initialContests, showFilters = false }: ContestClientComponentProps) {
+export default function ContestClientComponent({ initialContests, showFilters = false, bookmarksOnly = false, }: ContestClientComponentProps) {
   const [contests] = useState<Contest[]>(initialContests);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
@@ -199,11 +200,27 @@ export default function ContestClientComponent({ initialContests, showFilters = 
   };
 
   const filteredContests = useMemo(() => {
-    if (selectedPlatforms.length === 0) {
-      return contests;
+    let result = contests;
+
+    if (bookmarksOnly) {
+      result = result.filter(contest =>
+        bookmarkedContests.includes(contest.id)
+      );
     }
-    return contests.filter(c => selectedPlatforms.includes(c.host));
-  }, [contests, selectedPlatforms]);
+
+    if (selectedPlatforms.length > 0) {
+      result = result.filter(contest =>
+        selectedPlatforms.includes(contest.host)
+      );
+    }
+
+    return result;
+  }, [
+    contests,
+    selectedPlatforms,
+    bookmarksOnly,
+    bookmarkedContests,
+  ]);
 
   const sortedContests = useMemo(() => {
     const sorted = [...filteredContests];
@@ -341,7 +358,9 @@ export default function ContestClientComponent({ initialContests, showFilters = 
             onBookmarkToggle={toggleBookmark}
           />)
         ) : (
-          <p className="col-span-full text-center text-xl font-semibold text-gray-700 dark:text-gray-200">No upcoming contests found for the selected platforms.</p>
+          <p className="col-span-full text-center text-xl font-semibold text-gray-700 dark:text-gray-200">{bookmarksOnly
+            ? "No bookmarked contests yet."
+            : "No upcoming contests found for the selected platforms."}</p>
         )}
       </div>
     </>
