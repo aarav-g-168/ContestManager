@@ -358,8 +358,8 @@ export default function ContestClientComponent({ initialContests, showFilters = 
             onBookmarkToggle={toggleBookmark}
           />)
         ) : (
-          <p className="col-span-full text-center text-xl font-semibold text-gray-700 dark:text-gray-200">{bookmarksOnly
-            ? "No bookmarked contests yet."
+          <p className="col-span-full text-center whitespace-pre-line text-xl font-semibold text-gray-700 dark:text-gray-200">{bookmarksOnly
+            ? "✨ No bookmarked contests yet.\nBrowse contests and save the ones you're interested in."
             : "No upcoming contests found for the selected platforms."}</p>
         )}
       </div>
