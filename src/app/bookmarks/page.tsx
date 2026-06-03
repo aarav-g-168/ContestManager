@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import ContestClientComponent from "@/components/ContestClientComponent";
 import Navbar from "@/components/Navbar";
 import { getContests } from "@/lib/getContests";
