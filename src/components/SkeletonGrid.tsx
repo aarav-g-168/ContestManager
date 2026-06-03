@@ -1,4 +1,4 @@
-import ContestSkeleton from "./tempSkeleton";
+import ContestSkeleton from "./ContestSkeleton";
 
 export default function SkeletonGrid() {
   return (
