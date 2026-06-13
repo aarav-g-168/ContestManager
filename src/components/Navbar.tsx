@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import ThemeToggle from "./theme-toggle";
+import AuthButton from "./AuthButton";
 
 export default function Navbar() {
   return (
@@ -39,7 +40,7 @@ export default function Navbar() {
           </Link>
 
           <ThemeToggle />
-
+          <AuthButton />
         </div>
 
       </div>
