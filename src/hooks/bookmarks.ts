@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { auth, db } from "@/lib/firebase";
+import type { Contest } from "@/types/contest";
 
 import {
   doc,
@@ -20,43 +21,44 @@ export function useBookmarks() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-    setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
 
-    if (!currentUser) {
-      setBookmarkedContests([]);
+      if (!currentUser) {
+        setBookmarkedContests([]);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const bookmarksRef = collection(
+          db,
+          "users",
+          currentUser.uid,
+          "bookmarks"
+        );
+
+        const snapshot = await getDocs(bookmarksRef);
+
+        const bookmarks = snapshot.docs.map(doc =>
+          Number(doc.id)
+        );
+
+        setBookmarkedContests(bookmarks);
+
+      } catch (error) {
+        console.error("Error fetching bookmarks:", error);
+      }
+
       setLoading(false);
-      return;
-    }
+    });
 
-    try {
-      const bookmarksRef = collection(
-        db,
-        "users",
-        currentUser.uid,
-        "bookmarks"
-      );
-
-      const snapshot = await getDocs(bookmarksRef);
-
-      const bookmarks = snapshot.docs.map(doc =>
-        Number(doc.id)
-      );
-
-      setBookmarkedContests(bookmarks);
-
-    } catch (error) {
-      console.error("Error fetching bookmarks:", error);
-    }
-
-    setLoading(false);
-  });
-
-  return () => unsubscribe();
-}, []);
+    return () => unsubscribe();
+  }, []);
 
   // Toggle bookmark
-  const toggleBookmark = async (contestId: number) => {
+  const toggleBookmark = async (contest: Contest) => {
+    const contestId = contest.id;
     if (!user) {
       alert("Please login to bookmark contests.");
       return;
@@ -78,9 +80,14 @@ export function useBookmarks() {
         );
       } else {
         await setDoc(bookmarkRef, {
-          contestId,
+          contestId: contest.id,
+          event: contest.event,
+          host: contest.host,
+          href: contest.href,
+          start: contest.start,
+          duration: contest.duration,
           createdAt: new Date(),
-        });
+        });;
 
         setBookmarkedContests(prev => [
           ...prev,

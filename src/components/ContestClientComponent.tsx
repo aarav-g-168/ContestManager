@@ -130,7 +130,7 @@ const ContestCard = ({
             </div>
 
             <button
-              onClick={() => onBookmarkToggle(contest.id)}
+              onClick={() => onBookmarkToggle(contest)}
               className="hover:scale-110 transition-all duration-200"
             >
               <Bookmark
@@ -171,7 +171,7 @@ const ContestCard = ({
 interface ContestCardProps {
   contest: Contest;
   isBookmarked: boolean;
-  onBookmarkToggle: (id: number) => void;
+  onBookmarkToggle: (contest: Contest) => void;
 }
 
 interface ContestClientComponentProps {
