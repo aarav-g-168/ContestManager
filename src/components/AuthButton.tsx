@@ -1,6 +1,8 @@
 "use client";
 
 import { auth } from "@/lib/firebase";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 import {
     GoogleAuthProvider,
@@ -10,10 +12,10 @@ import {
     User,
 } from "firebase/auth";
 
-import { useEffect, useState } from "react";
-
 export default function AuthButton() {
     const [user, setUser] = useState<User | null>(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -41,27 +43,83 @@ export default function AuthButton() {
         }
     };
 
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node)
+            ) {
+                setIsOpen(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     if (user) {
         return (
-            <div className="flex items-center gap-3">
-
-                <img
-                    src={user.photoURL || ""}
-                    alt="Profile"
-                    className="h-10 w-10 rounded-full border border-gray-300 dark:border-zinc-700"
-                />
-
-                <span className="hidden md:block text-sm font-medium text-gray-800 dark:text-white">
-                    {user.displayName}
-                </span>
+            <div className="relative" ref={dropdownRef}>
 
                 <button
-                    onClick={handleLogout}
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="flex items-center gap-2"
                 >
-                    Logout
+                    <img
+                        src={user.photoURL || ""}
+                        alt="Profile"
+                        className="h-10 w-10 rounded-full border border-gray-300 dark:border-zinc-700 hover:scale-105 transition-transform"
+                    />
+
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`h-4 w-4 text-gray-700 dark:text-gray-300 transition-transform ${isOpen ? "rotate-180" : ""
+                            }`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                        />
+                    </svg>
                 </button>
 
+                {isOpen && (
+                    <div className="absolute right-0 mt-3 w-48 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-50">
+
+                        <div className="px-4 py-3 border-b border-gray-200 dark:border-zinc-800">
+                            <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                                {user.displayName}
+                            </p>
+
+                            <p className="text-xs text-gray-500 truncate">
+                                {user.email}
+                            </p>
+                        </div>
+
+                        <Link
+                            href="/bookmarks"
+                            className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                        >
+                            📌 Bookmarks
+                        </Link>
+
+                        <button
+                            onClick={handleLogout}
+                            className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                        >
+                            Logout
+                        </button>
+
+                    </div>
+                )}
             </div>
         );
     }
