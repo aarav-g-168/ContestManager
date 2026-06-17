@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import type { Contest } from '../types/contest';
 import { parseAsUTC } from '@/lib/date';
 
 import { Check, ChevronsUpDown } from "lucide-react";
-import { Bookmark } from "lucide-react";
+import { Bookmark, MoreVertical, Bell } from "lucide-react";
 
 import { Button } from "./ui/button";
 
@@ -92,6 +92,30 @@ const ContestCard = ({
     setHasMounted(true);
   }, []);
 
+  // three dots menu state
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+    };
+  }, []);
+
   const platformLogos: { [key: string]: string } = {
     'codeforces.com': 'https://sta.codeforces.com/s/94338/images/codeforces-logo-with-text.png',
     'leetcode.com': 'https://leetcode.com/static/images/LeetCode_logo_rvs.png',
@@ -119,28 +143,80 @@ const ContestCard = ({
                 `https://placehold.co/100x40/f0f0f0/333?text=${contest.host.split('.')[0]}`;
             }}
           />
+          <div className="flex items-start justify-between mb-4">
+            <img
+              src={logoUrl}
+              alt={`${contest.host} logo`}
+              className="h-8 object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).onerror = null;
+                (e.target as HTMLImageElement).src =
+                  `https://placehold.co/100x40/f0f0f0/333?text=${contest.host.split(".")[0]}`;
+              }}
+            />
 
-          <div className="flex items-center gap-3">
-            <div className="text-sm font-semibold text-indigo-600">
+            <div className="flex items-center gap-2">
+
               {hasMounted ? (
                 <CountdownTimer startTime={contest.start} />
               ) : (
-                "Loading..."
+                <span className="text-sm font-semibold text-indigo-600">
+                  Loading...
+                </span>
               )}
-            </div>
 
-            <button
-              onClick={() => onBookmarkToggle(contest)}
-              className="hover:scale-110 transition-all duration-200"
-            >
-              <Bookmark
-                className={`h-9 w-6 ${isBookmarked
-                  ? "fill-indigo-500 text-indigo-500"
-                  : "text-gray-400 dark:text-gray-500"
-                  }`}
-              />
-            </button>
+              <div
+                className="relative"
+                ref={menuRef}
+              >
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <MoreVertical className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                </button>
+
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-50">
+
+                    <button
+                      onClick={() => {
+                        onBookmarkToggle(contest);
+                        setMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
+                    >
+                      <Bookmark
+                        className={`h-4 w-4 ${isBookmarked
+                            ? "fill-indigo-500 text-indigo-500"
+                            : ""
+                          }`}
+                      />
+
+                      {isBookmarked
+                        ? "Remove Bookmark"
+                        : "Bookmark"}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+
+                        alert("Reminder feature coming soon");
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
+                    >
+                      <Bell className="h-4 w-4" />
+                      Set Reminder
+                    </button>
+
+                  </div>
+                )}
+              </div>
+
+            </div>
           </div>
+
         </div>
         <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2 leading-tight min-h-[48px]">{contest.event}</h3>
         <div className="text-sm text-gray-700 dark:text-gray-400 space-y-1">
