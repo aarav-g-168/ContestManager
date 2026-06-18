@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { auth, db } from "@/lib/firebase";
+import { toast } from "sonner";
 
 import {
   collection,
@@ -76,6 +77,10 @@ export function useReminders() {
       reminderType,
       createdAt: new Date(),
     });
+
+    toast.success(
+      `Reminder set for ${reminderType} before contest`
+    );
 
     setReminders((prev) => [
       ...prev,
