@@ -5,7 +5,7 @@ import type { Contest } from '../types/contest';
 
 import { Check, ChevronsUpDown } from "lucide-react";
 import ContestCard from "./contestCard";
-
+import { useReminders } from "@/hooks/reminders";
 import { Button } from "./ui/button";
 import { useBookmarks } from "@/hooks/bookmarks";
 
@@ -28,9 +28,10 @@ interface ContestClientComponentProps {
   initialContests: Contest[];
   showFilters?: boolean;
   bookmarksOnly?: boolean;
+  remindersOnly?: boolean;
 }
 
-export default function ContestClientComponent({ initialContests, showFilters = false, bookmarksOnly = false, }: ContestClientComponentProps) {
+export default function ContestClientComponent({ initialContests, showFilters = false, bookmarksOnly = false, remindersOnly = false }: ContestClientComponentProps) {
   const [contests] = useState<Contest[]>(initialContests);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
@@ -49,8 +50,20 @@ export default function ContestClientComponent({ initialContests, showFilters = 
     );
   };
 
+  const {
+    reminders,
+    addReminder,
+    removeReminder,
+  } = useReminders();
+
   const filteredContests = useMemo(() => {
     let result = contests;
+
+    if (remindersOnly) {
+      result = result.filter(contest =>
+        reminders.includes(contest.id)
+      );
+    }
 
     if (bookmarksOnly) {
       result = result.filter(contest =>
@@ -206,11 +219,17 @@ export default function ContestClientComponent({ initialContests, showFilters = 
             contest={contest}
             isBookmarked={bookmarkedContests.includes(contest.id)}
             onBookmarkToggle={toggleBookmark}
+            hasReminder={reminders.includes(contest.id)}
+            onReminderSet={addReminder}
           />)
         ) : (
-          <p className="col-span-full text-center whitespace-pre-line text-xl font-semibold text-gray-700 dark:text-gray-200">{bookmarksOnly
-            ? "✨ No bookmarked contests yet.\nBrowse contests and save the ones you're interested in."
-            : "No upcoming contests found for the selected platforms."}</p>
+          <p className="col-span-full text-center whitespace-pre-line text-xl font-semibold text-gray-700 dark:text-gray-200">
+            {bookmarksOnly
+              ? "✨ No bookmarked contests yet.\nBrowse contests and save the ones you're interested in."
+              : remindersOnly
+                ? "🔔 No reminders set yet.\nSet reminders from the contest menu."
+                : "No upcoming contests found for the selected platforms."}
+          </p>
         )}
       </div>
     </>

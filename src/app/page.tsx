@@ -2,7 +2,6 @@ import ContestClientComponent from "@/components/ContestClientComponent";
 import { getHomePageContests } from "@/lib/contestUtils";
 import type { Contest } from "../types/contest";
 import { parseAsUTC } from "@/lib/date";
-import ThemeToggle from "@/components/theme-toggle";
 import Navbar from "@/components/Navbar";
 import { getContests } from "@/lib/getContests";
 

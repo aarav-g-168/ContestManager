@@ -40,12 +40,19 @@ interface ContestCardProps {
   contest: Contest;
   isBookmarked: boolean;
   onBookmarkToggle: (contest: Contest) => void;
+  hasReminder: boolean;
+
+  onReminderSet: (
+    contest: Contest,
+    reminderType: "1h" | "6h" | "24h"
+  ) => void;
 }
 
 export default function ContestCard({
   contest,
   isBookmarked,
   onBookmarkToggle,
+  onReminderSet,
 }: ContestCardProps) {
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
@@ -151,7 +158,42 @@ export default function ContestCard({
                       onClick={() => {
                         setMenuOpen(false);
 
-                        alert("Reminder feature coming soon");
+                        <div className="border-t border-gray-200 dark:border-zinc-800">
+
+                        <button
+                            onClick={() => {
+                            onReminderSet(contest, "1h");
+                            setMenuOpen(false);
+                            }}
+                            className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
+                        >
+                            <Bell className="h-4 w-4" />
+                            Remind 1h Before
+                        </button>
+
+                        <button
+                            onClick={() => {
+                            onReminderSet(contest, "6h");
+                            setMenuOpen(false);
+                            }}
+                            className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
+                        >
+                            <Bell className="h-4 w-4" />
+                            Remind 6h Before
+                        </button>
+
+                        <button
+                            onClick={() => {
+                            onReminderSet(contest, "24h");
+                            setMenuOpen(false);
+                            }}
+                            className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
+                        >
+                            <Bell className="h-4 w-4" />
+                            Remind 24h Before
+                        </button>
+
+                        </div>
                       }}
                       className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
                     >

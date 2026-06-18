@@ -39,6 +39,10 @@ export default function Navbar() {
             Bookmarks
           </Link>
 
+          <Link href="/reminders">
+            🔔 Reminders
+          </Link>
+          
           <ThemeToggle />
           <AuthButton />
         </div>
