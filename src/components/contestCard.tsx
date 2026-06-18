@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import type { Contest } from "@/types/contest";
 import { parseAsUTC } from "@/lib/date";
+import CountdownTimer from "./countdownTimer";
 
 import {
   Bookmark,
@@ -33,40 +34,6 @@ const formatStartTime = (utcDateString: string): string => {
     hour12: false,
     timeZone: 'Asia/Kolkata',
   }) + ' IST';
-};
-
-// CountdownTimer
-const CountdownTimer = ({ startTime }: { startTime: string }) => {
-  const [timeLeft, setTimeLeft] = useState<string>('');
-
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const difference = parseAsUTC(startTime).getTime() - Date.now();
-      if (difference > 0) {
-        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((difference / 1000 / 60) % 60);
-        const seconds = Math.floor((difference / 1000) % 60);
-
-        let timerString = '';
-        if (days > 0) timerString += `${days}d `;
-        if (hours > 0 || days > 0) timerString += `${hours}h `;
-        timerString += `${minutes}m ${seconds}s`;
-
-        setTimeLeft(timerString);
-      } else {
-        setTimeLeft('Started!');
-      }
-    };
-
-    calculateTimeLeft();
-
-    const timer = setInterval(calculateTimeLeft, 1000);
-
-    return () => clearInterval(timer);
-  }, [startTime]);
-
-  return <span className="text-sm font-semibold text-indigo-600">{timeLeft}</span>;
 };
 
 interface ContestCardProps {
