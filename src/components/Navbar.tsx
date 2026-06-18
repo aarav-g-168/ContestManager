@@ -20,27 +20,29 @@ export default function Navbar() {
 
           <Link
             href="/"
-            className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500"
+            className="text-lg font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500"
           >
             Home
           </Link>
 
           <Link
             href="/contests"
-            className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500"
+            className="text-lg font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500"
           >
             Contests
           </Link>
 
           <Link
             href="/bookmarks"
-            className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500"
+            className="text-lg font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500"
           >
             Bookmarks
           </Link>
 
-          <Link href="/reminders">
-            🔔 Reminders
+          <Link 
+            href="/reminders"
+            className="text-lg font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500">
+            Reminders
           </Link>
           
           <ThemeToggle />
