@@ -70,6 +70,7 @@ export default function ContestCard({
         !menuRef.current.contains(event.target as Node)
       ) {
         setMenuOpen(false);
+        setShowReminderOptions(false);
       }
     }
 
@@ -95,6 +96,8 @@ export default function ContestCard({
   };
 
   const logoUrl = platformLogos[contest.host] || `https://placehold.co/100x40/f0f0f0/333?text=${contest.host.split('.')[0]}`;
+
+  const [showReminderOptions, setShowReminderOptions] = useState(false);
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/10 hover:border-indigo-500/30 group min-h-[48px]">
@@ -126,82 +129,75 @@ export default function ContestCard({
                 ref={menuRef}
               >
                 <button
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                >
-                  <MoreVertical className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                    onClick={() => setMenuOpen(!menuOpen)}
+                    className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                    <MoreVertical className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                 </button>
 
                 {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-50">
 
                     <button
-                      onClick={() => {
+                    onClick={() => {
                         onBookmarkToggle(contest);
                         setMenuOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
+                        setShowReminderOptions(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
                     >
-                      <Bookmark
-                        className={`h-4 w-4 ${isBookmarked
-                            ? "fill-indigo-500 text-indigo-500"
-                            : ""
-                          }`}
-                      />
-
-                      {isBookmarked
-                        ? "Remove Bookmark"
-                        : "Bookmark"}
+                    <Bookmark className="h-4 w-4" />
+                    {isBookmarked ? "Remove Bookmark" : "Bookmark"}
                     </button>
 
                     <button
-                      onClick={() => {
-                        setMenuOpen(false);
-
-                        <div className="border-t border-gray-200 dark:border-zinc-800">
-
-                        <button
-                            onClick={() => {
-                            onReminderSet(contest, "1h");
-                            setMenuOpen(false);
-                            }}
-                            className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
-                        >
-                            <Bell className="h-4 w-4" />
-                            Remind 1h Before
-                        </button>
-
-                        <button
-                            onClick={() => {
-                            onReminderSet(contest, "6h");
-                            setMenuOpen(false);
-                            }}
-                            className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
-                        >
-                            <Bell className="h-4 w-4" />
-                            Remind 6h Before
-                        </button>
-
-                        <button
-                            onClick={() => {
-                            onReminderSet(contest, "24h");
-                            setMenuOpen(false);
-                            }}
-                            className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
-                        >
-                            <Bell className="h-4 w-4" />
-                            Remind 24h Before
-                        </button>
-
-                        </div>
-                      }}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
+                    onClick={() => {
+                        setShowReminderOptions(!showReminderOptions)
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
                     >
-                      <Bell className="h-4 w-4" />
-                      Set Reminder
+                    <Bell className="h-4 w-4" />
+                    Set Reminder
                     </button>
 
-                  </div>
+                    {showReminderOptions && (
+                    <>
+                        <button
+                        onClick={() => {
+                            onReminderSet(contest, "1h");
+                            setShowReminderOptions(false);
+                            setMenuOpen(false);
+                        }}
+                        className="w-full text-left px-8 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
+                        >
+                        1 hour before
+                        </button>
+
+                        <button
+                        onClick={() => {
+                            onReminderSet(contest, "6h");
+                            setShowReminderOptions(false);
+                            setMenuOpen(false);
+                        }}
+                        className="w-full text-left px-8 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
+                        >
+                        6 hours before
+                        </button>
+
+                        <button
+                        onClick={() => {
+                            onReminderSet(contest, "24h");
+                            setShowReminderOptions(false);
+                            setMenuOpen(false);
+                        }}
+                        className="w-full text-left px-8 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
+                        >
+                        24 hours before
+                        </button>
+                    </>
+                    )}
+
+                </div>
                 )}
               </div>
 
