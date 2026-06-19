@@ -6,17 +6,19 @@ import AuthButton from "./AuthButton";
 
 export default function Navbar() {
   return (
-    <header className="w-full border-b border-gray-200 dark:border-zinc-800 mb-8">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+  <header className="w-full border-b border-gray-200 dark:border-zinc-800 mb-8">
+    <div className="container mx-auto px-4 py-4 flex items-center justify-between">
 
-        <Link
-          href="/"
-          className="text-xl font-bold text-gray-800 dark:text-white"
-        >
-          Contest Manager
-        </Link>
+      <Link
+        href="/"
+        className="text-lg md:text-xl font-bold text-gray-800 dark:text-white leading-tight"
+      >
+        Contest Manager
+      </Link>
 
-        <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 md:gap-6">
+
+        <div className="hidden md:flex items-center gap-6">
 
           <Link
             href="/"
@@ -39,17 +41,19 @@ export default function Navbar() {
             Bookmarks
           </Link>
 
-          <Link 
+          <Link
             href="/reminders"
-            className="text-lg font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500">
+            className="text-lg font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-500"
+          >
             Reminders
           </Link>
-          
-          <ThemeToggle />
-          <AuthButton />
+
         </div>
+        <ThemeToggle />
+        <AuthButton />
 
       </div>
-    </header>
-  );
+    </div>
+  </header>
+);
 }

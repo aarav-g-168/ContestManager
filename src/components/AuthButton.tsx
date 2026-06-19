@@ -92,7 +92,7 @@ export default function AuthButton() {
                 </button>
 
                 {isOpen && (
-                    <div className="absolute right-0 mt-3 w-48 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-50">
+                    <div className="absolute right-0 mt-3 w-52 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-50">
 
                         <div className="px-4 py-3 border-b border-gray-200 dark:border-zinc-800">
                             <p className="text-sm font-semibold text-gray-800 dark:text-white">
@@ -104,12 +104,57 @@ export default function AuthButton() {
                             </p>
                         </div>
 
-                        <Link
-                            href="/bookmarks"
-                            className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                        >
-                            📌 Bookmarks
-                        </Link>
+                        {/* Mobile Navigation */}
+                        <div className="md:hidden border-b border-gray-200 dark:border-zinc-800">
+
+                            <Link
+                                href="/"
+                                className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                            >
+                                🏠 Home
+                            </Link>
+
+                            <Link
+                                href="/contests"
+                                className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                            >
+                                💻 Contests
+                            </Link>
+
+                            <Link
+                                href="/bookmarks"
+                                className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                            >
+                                📌 Bookmarks
+                            </Link>
+
+                            <Link
+                                href="/reminders"
+                                className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                            >
+                                🔔 Reminders
+                            </Link>
+
+                        </div>
+
+                        {/* Desktop Quick Links */}
+                        <div className="hidden md:block border-b border-gray-200 dark:border-zinc-800">
+
+                            <Link
+                                href="/bookmarks"
+                                className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                            >
+                                📌 Bookmarks
+                            </Link>
+
+                            <Link
+                                href="/reminders"
+                                className="block px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                            >
+                                🔔 Reminders
+                            </Link>
+
+                        </div>
 
                         <button
                             onClick={handleLogout}
