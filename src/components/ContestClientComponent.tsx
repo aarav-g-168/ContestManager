@@ -60,8 +60,8 @@ export default function ContestClientComponent({ initialContests, showFilters = 
     let result = contests;
 
     if (remindersOnly) {
-      result = result.filter(contest =>
-        reminders.includes(contest.id)
+      result = result.filter(
+        contest => contest.id in reminders
       );
     }
 
@@ -219,7 +219,8 @@ export default function ContestClientComponent({ initialContests, showFilters = 
             contest={contest}
             isBookmarked={bookmarkedContests.includes(contest.id)}
             onBookmarkToggle={toggleBookmark}
-            hasReminder={reminders.includes(contest.id)}
+            hasReminder={contest.id in reminders}
+            reminderType={reminders[contest.id]}
             onReminderSet={addReminder}
           />)
         ) : (

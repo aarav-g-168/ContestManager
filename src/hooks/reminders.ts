@@ -16,7 +16,9 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import type { Contest } from "@/types/contest";
 
 export function useReminders() {
-  const [reminders, setReminders] = useState<number[]>([]);
+  const [reminders, setReminders] = useState<
+    Record<number, "1h" | "6h" | "24h">
+  >({});
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -26,7 +28,7 @@ export function useReminders() {
         setUser(currentUser);
 
         if (!currentUser) {
-          setReminders([]);
+          setReminders({});
           return;
         }
 
@@ -39,11 +41,20 @@ export function useReminders() {
 
         const snapshot = await getDocs(remindersRef);
 
-        setReminders(
-          snapshot.docs.map((doc) =>
+        const loadedReminders: Record<
+          number,
+          "1h" | "6h" | "24h"
+        > = {};
+
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+
+          loadedReminders[
             Number(doc.id)
-          )
-        );
+          ] = data.reminderType;
+        });
+
+        setReminders(loadedReminders);
       }
     );
 
@@ -82,10 +93,10 @@ export function useReminders() {
       `Reminder set for ${reminderType} before contest`
     );
 
-    setReminders((prev) => [
+    setReminders(prev => ({
       ...prev,
-      contest.id,
-    ]);
+      [contest.id]: reminderType,
+    }));
   };
 
   const removeReminder = async (
@@ -103,9 +114,13 @@ export function useReminders() {
 
     await deleteDoc(reminderRef);
 
-    setReminders((prev) =>
-      prev.filter((id) => id !== contestId)
-    );
+    setReminders(prev => {
+      const updated = { ...prev };
+
+      delete updated[contestId];
+
+      return updated;
+    });
   };
 
   return {
