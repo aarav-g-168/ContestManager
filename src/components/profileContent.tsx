@@ -89,7 +89,7 @@ export default function ProfileContent() {
     return (
       <div className="min-h-screen bg-gray-300 dark:bg-black">
         <Navbar />
-        <p className="text-center mt-20 text-white">
+        <p className="text-center font-bold text-5xl mt-20 text-black dark:text-white">
           Please login first.
         </p>
       </div>
