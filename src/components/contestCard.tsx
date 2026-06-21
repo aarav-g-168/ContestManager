@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import type { Contest } from "@/types/contest";
 import { parseAsUTC } from "@/lib/date";
 import CountdownTimer from "./countdownTimer";
+import { getGoogleCalendarLink } from "@/lib/calendar";
+import { CalendarPlus } from "lucide-react";
 
 import {
   Bookmark,
@@ -102,6 +104,13 @@ export default function ContestCard({
   };
 
   const logoUrl = platformLogos[contest.host] || `https://placehold.co/100x40/f0f0f0/333?text=${contest.host.split('.')[0]}`;
+
+  const calendarUrl = getGoogleCalendarLink(
+    contest.event,
+    contest.start,
+    contest.duration,
+    contest.href
+  );
 
   const [showReminderOptions, setShowReminderOptions] = useState(false);
 
@@ -205,6 +214,16 @@ export default function ContestCard({
                       </button>
                     </>
                   )}
+                  <a
+                    href={calendarUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMenuOpen(false)}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    <CalendarPlus className="h-4 w-4" />
+                    Add to Calendar
+                  </a>
 
                 </div>
               )}
