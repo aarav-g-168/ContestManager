@@ -11,7 +11,6 @@ const firebaseAdminConfig = {
     ),
   }),
 };
-
 const app =
   getApps().length > 0
     ? getApps()[0]
