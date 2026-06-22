@@ -1,0 +1,16 @@
+name: Contest Reminder Scheduler
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+
+  workflow_dispatch:
+
+jobs:
+  trigger-reminders:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call Reminder API
+        run: |
+          curl https://contest-manager.vercel.app/api/reminders
