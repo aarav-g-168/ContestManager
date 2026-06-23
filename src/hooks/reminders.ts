@@ -85,8 +85,13 @@ export function useReminders() {
       href: contest.href,
       start: contest.start,
       duration: contest.duration,
+
       reminderType,
+
       email: user.email,
+
+      sent: false,
+
       createdAt: new Date(),
     });
 
