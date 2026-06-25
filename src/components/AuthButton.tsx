@@ -3,6 +3,8 @@
 import { auth } from "@/lib/firebase";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 import {
     GoogleAuthProvider,
@@ -29,7 +31,20 @@ export default function AuthButton() {
         try {
             const provider = new GoogleAuthProvider();
 
-            await signInWithPopup(auth, provider);
+            const result = await signInWithPopup(auth, provider);
+
+            const user = result.user;
+
+            await setDoc(
+                doc(db, "users", user.uid),
+                {
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                    createdAt: serverTimestamp(),
+                },
+                { merge: true }
+            );
         } catch (error) {
             console.error("Login Error:", error);
         }

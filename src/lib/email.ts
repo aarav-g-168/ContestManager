@@ -1,47 +1,48 @@
 import { Resend } from "resend";
 
 const resend = new Resend(
-    process.env.RESEND_API_KEY
+  process.env.RESEND_API_KEY
 );
 
 export async function sendContestReminderEmail(
-    email: string,
-    contestName: string,
-    contestLink: string,
-    reminderType: string
+  email: string,
+  contestName: string,
+  contestLink: string,
+  reminderType: string
 ) {
-    return resend.emails.send({
-        from: "Contest Manager <onboarding@resend.dev>",
-        to: email,
-        subject: `Reminder: ${contestName}`,
+  await resend.emails.send({
+    from:
+      "Contest Manager <onboarding@resend.dev>",
 
-        html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-            <h2>${contestName}</h2>
+    to: email,
 
-            <p>
-            Your contest starts soon.
-            </p>
+    subject: `Reminder: ${contestName}`,
 
-            <p>
-            Reminder Type:
-            <strong>${reminderType}</strong>
-            </p>
+    html: `
+      <h2>${contestName}</h2>
 
-            <p>
-            <a href="${contestLink}">
-                Open Contest
-            </a>
-            </p>
+      <p>
+        Your contest starts soon.
+      </p>
 
-            <hr />
+      <p>
+        Reminder Type:
+        <strong>${reminderType}</strong>
+      </p>
 
-            <p>
-            Regards,<br />
-            Aarav Gupta<br />
-            Founder, Contest Manager
-            </p>
-        </div>
-        `,
-    });
+      <p>
+        <a href="${contestLink}">
+          Open Contest
+        </a>
+      </p>
+
+      <hr />
+
+      <p>
+        Regards,<br/>
+        Aarav Gupta<br/>
+        Founder - Contest Manager
+      </p>
+    `,
+  });
 }
