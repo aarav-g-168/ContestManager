@@ -1,85 +1,446 @@
-Contest Aggregator - A Next.js Dashboard!
+# 🏆 Contest Manager
 
+A modern full-stack Competitive Programming Dashboard built with **Next.js**, **Firebase**, and **TypeScript** that helps programmers discover upcoming contests, bookmark them, receive automated email reminders, and add contests directly to Google Calendar.
 
-A sleek, fast, and responsive web application built with Next.js that fetches and displays upcoming programming contests from dozens of platforms. This project serves as a one-stop dashboard for competitive programmers to keep track of all important events in one place.
+> Never miss a coding contest again.
 
-The application leverages the power of Next.js Server Components for fast initial page loads and a dynamic, interactive client-side experience for filtering and real-time countdowns.
+---
 
-✨ Key Features
-Comprehensive Contest Data: Fetches data from dozens of platforms including Codeforces, LeetCode, AtCoder, HackerEarth, and more, powered by the CLIST.by API.
+## 🚀 Live Demo
 
-Server-Side Rendering (SSR): Built with the Next.js App Router. The initial contest list is rendered on the server for optimal performance and SEO.
+**🌐 Website:** `https://contest-manager.vercel.app`
 
-Dynamic Filtering: Instantly filter the contest list by platform with a clean, user-friendly interface.
+---
 
-Real-Time Countdowns: Every contest card features a live countdown timer that shows exactly when the event starts.
+# ✨ Features
 
-Responsive Design: A modern UI built with Tailwind CSS that looks great on all devices, from mobile phones to desktop monitors.
+### 📅 Upcoming Contests
 
-Automatic Time Zone Conversion: Contest start times are automatically displayed in the user's local time zone.
+* View upcoming coding contests from multiple platforms
+* Clean and responsive card-based UI
+* Contest countdown timer
+* Contest duration
+* Contest start time converted to IST
 
-🚀 Tech Stack
-Framework: Next.js 14+ (App Router)
+---
 
-Language: TypeScript
+### 🔍 Search, Filter & Sort
 
-UI Library: React
+* Search contests instantly
+* Filter by platform
+* Multi-select platform filtering
+* Sort contests by:
 
-Styling: Tailwind CSS
+  * Start Time
+  * Duration
+  * Platform
 
-Bundler: Turbopack (for development)
+---
 
-Linting: ESLint
+### 📌 Bookmark Contests
 
-Data Source: CLIST.by API
+* Save favorite contests
+* Stored securely in Firestore
+* Separate Bookmarks page
+* Accessible across devices after login
 
-🛠️ Getting Started
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+---
 
-Prerequisites
-Node.js (v18.17 or later)
+### 🔔 Contest Reminders
 
-npm or yarn
+Users can schedule reminders for:
 
-Installation & Setup
-Clone the repository:
+* 24 Hours Before
+* 6 Hours Before
+* 1 Hour Before
 
-git clone https://github.com/your-username/contest-aggregator-nextjs.git
-cd contest-aggregator-nextjs
+Reminders are stored in Firestore and processed automatically.
 
-Install dependencies:
+---
 
+### 📧 Automated Email Notifications
+
+The application automatically sends reminder emails before contests.
+
+Features:
+
+* GitHub Actions scheduler
+* Firebase Admin SDK
+* Resend Email API
+* Automatic reminder deletion after sending
+* Duplicate prevention
+
+---
+
+### 📅 Google Calendar Integration
+
+Add contests directly to Google Calendar with a single click.
+
+The calendar event automatically contains:
+
+* Contest Name
+* Start Time
+* End Time
+* Contest Link
+
+---
+
+### 🌙 Dark Mode
+
+* Light/Dark theme
+* Theme persistence
+* Smooth transitions
+
+---
+
+### 👤 Authentication
+
+Google Authentication using Firebase Authentication.
+
+Users can:
+
+* Sign In
+* Sign Out
+* Access personalized bookmarks
+* Access reminders
+* View profile page
+
+---
+
+### 👤 Profile Page
+
+Displays:
+
+* Profile Picture
+* Name
+* Email
+* Saved Contests Count
+* Active Reminders Count
+* Quick Navigation
+
+---
+
+### 📱 Responsive Design
+
+Optimized for:
+
+* Desktop
+* Tablet
+* Mobile
+
+Mobile navbar includes:
+
+* Contest Manager Logo
+* Theme Toggle
+* Profile Menu
+* Mobile Navigation Drawer
+
+---
+
+# 🛠 Tech Stack
+
+## Frontend
+
+* Next.js 16 (App Router)
+* React
+* TypeScript
+* Tailwind CSS
+
+---
+
+## Backend
+
+* Next.js API Routes
+* Firebase Admin SDK
+
+---
+
+## Database
+
+Firestore
+
+Collections:
+
+```text
+users
+ └── {userId}
+      ├── bookmarks
+      └── reminders
+```
+
+---
+
+## Authentication
+
+Firebase Authentication
+
+* Google Sign In
+
+---
+
+## APIs
+
+### CLIST API
+
+Used for fetching competitive programming contests.
+
+Supports platforms like:
+
+* Codeforces
+* CodeChef
+* LeetCode
+* AtCoder
+* HackerRank
+* HackerEarth
+* TopCoder
+* GeeksforGeeks
+
+---
+
+### Resend API
+
+Used for sending reminder emails.
+
+---
+
+## Scheduler
+
+GitHub Actions
+
+Runs automatically every 15 minutes and:
+
+1. Reads Firestore reminders
+2. Calculates reminder windows
+3. Sends emails
+4. Removes processed reminders
+
+---
+
+# 📂 Project Structure
+
+```text
+src
+│
+├── app
+│   ├── api
+│   │   └── reminders
+│   ├── bookmarks
+│   ├── contests
+│   ├── profile
+│   ├── reminders
+│   └── page.tsx
+│
+├── components
+│   ├── AuthButton.tsx
+│   ├── ContestCard.tsx
+│   ├── ContestClientComponent.tsx
+│   ├── Navbar.tsx
+│   └── ThemeToggle.tsx
+│
+├── hooks
+│   └── useReminders.ts
+│
+├── lib
+│   ├── firebase.ts
+│   ├── firebaseAdmin.ts
+│   ├── email.ts
+│   └── contestUtils.ts
+│
+└── types
+```
+
+---
+
+# ⚙️ Installation
+
+Clone the repository
+
+```bash
+git clone https://github.com/yourusername/contest-manager.git
+```
+
+Move inside the project
+
+```bash
+cd contest-manager
+```
+
+Install dependencies
+
+```bash
 npm install
+```
 
-Set up environment variables:
+Run locally
 
-Create a file named .env.local in the root of your project.
+```bash
+npm run dev
+```
 
-Get a free API key from clist.by.
+---
 
-Add your API key to the .env.local file:
+# 🔐 Environment Variables
 
-NEXT_PUBLIC_CLIST_API_KEY=your_username:your_api_key
+Create a `.env.local` file.
 
-Run the development server:
-This project is configured to use Turbopack for a faster development experience.
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=
 
-npm run dev -- --turbo
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
 
-Open the application:
-Open http://localhost:3000 in your browser to see the result.
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
 
-🧠 Project Highlights & Learnings
-This project is a practical demonstration of several modern web development concepts:
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 
-Next.js App Router: Structuring the application using the latest app directory paradigm, separating server and client logic.
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 
-Server Components: Using Server Components for efficient data fetching and rendering, reducing the amount of JavaScript sent to the client.
+NEXT_PUBLIC_FIREBASE_APP_ID=
 
-Client Components: Using the 'use client' directive for interactive components that require state and browser-side effects (e.g., filtering, countdowns).
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
 
-Hydration: Understanding and fixing common hydration errors by ensuring that server-rendered and client-rendered content matches, particularly for time-sensitive information.
+FIREBASE_CLIENT_EMAIL=
 
-API Integration: Fetching data from a third-party REST API on the server side.
+FIREBASE_PRIVATE_KEY=
 
-TypeScript Integration: Leveraging TypeScript for type safety in props, state, and API response handling.
+RESEND_API_KEY=
+
+CLIST_USERNAME=
+
+CLIST_API_KEY=
+```
+
+---
+
+# 📧 Email Reminder Workflow
+
+```text
+User Sets Reminder
+          │
+          ▼
+Firestore
+          │
+          ▼
+GitHub Actions
+(Every 15 Minutes)
+          │
+          ▼
+Next.js API Route
+          │
+          ▼
+Firebase Admin SDK
+          │
+          ▼
+Reminder Window Check
+          │
+          ▼
+Resend API
+          │
+          ▼
+Email Delivered
+          │
+          ▼
+Reminder Deleted
+```
+
+---
+
+# 🔒 Firestore Security
+
+Each user can only access their own data.
+
+Protected Collections:
+
+* Profile
+* Bookmarks
+* Reminders
+
+---
+
+# 🎯 Performance Optimizations
+
+* Server-side caching
+* Static data fetching
+* Optimized API calls
+* Responsive UI
+* Lazy client-side filtering
+* Firestore structured collections
+
+---
+
+# 🚀 Deployment
+
+Frontend:
+
+* Vercel
+
+Scheduler:
+
+* GitHub Actions
+
+Database:
+
+* Firebase Firestore
+
+Authentication:
+
+* Firebase Auth
+
+Email Service:
+
+* Resend
+
+---
+
+# 🧠 Challenges Solved
+
+* Firebase Authentication integration
+* Firestore Security Rules
+* Firebase Admin SDK setup
+* Automated scheduled jobs without Vercel Cron
+* GitHub Actions scheduling
+* Time-based reminder calculations
+* Responsive navbar
+* Google Calendar event generation
+* Email reminder workflow
+* Firestore data modeling
+
+---
+
+# 🔮 Future Improvements
+
+* Push Notifications
+* Contest Analytics Dashboard
+* User Preferences
+* Platform-wise Statistics
+* Calendar Sync
+* AI-based Contest Recommendations
+* PWA Support
+* Offline Mode
+
+---
+
+# 📸 Screenshots
+
+Add screenshots here:
+
+* Home Page
+* Contest Page
+* Bookmark Page
+* Reminder Page
+* Profile Page
+* Email Reminder
+* Mobile View
+
+---
+
+# 👨‍💻 Author
+
+**Aarav Gupta**
+
+GitHub: https://github.com/aarav-g-168
+
+LinkedIn: https://linkedin.com/in/aaravgupta168
+
+---
+
+## ⭐ If you like this project, consider giving it a star!
