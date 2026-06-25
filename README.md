@@ -419,19 +419,6 @@ Email Service:
 
 ---
 
-# 📸 Screenshots
-
-Add screenshots here:
-
-* Home Page
-* Contest Page
-* Bookmark Page
-* Reminder Page
-* Profile Page
-* Email Reminder
-* Mobile View
-
----
 
 # 👨‍💻 Author
 
