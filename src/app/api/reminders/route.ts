@@ -8,6 +8,8 @@ export async function GET() {
       .collection("users")
       .listDocuments();
 
+    const WINDOW = 15 / 60; // 15 minutes in hours
+    
     let emailsSent = 0;
 
     for (const userDoc of userDocs) {
@@ -32,7 +34,7 @@ export async function GET() {
         if (
           reminder.reminderType === "1h" &&
           hoursUntilContest <= 1 &&
-          hoursUntilContest > 0
+          hoursUntilContest > 1 - WINDOW
         ) {
           shouldSend = true;
         }
@@ -40,7 +42,7 @@ export async function GET() {
         if (
           reminder.reminderType === "6h" &&
           hoursUntilContest <= 6 &&
-          hoursUntilContest > 0
+          hoursUntilContest > 6 - WINDOW
         ) {
           shouldSend = true;
         }
@@ -48,7 +50,7 @@ export async function GET() {
         if (
           reminder.reminderType === "24h" &&
           hoursUntilContest <= 24 &&
-          hoursUntilContest > 0
+          hoursUntilContest > 24 - WINDOW
         ) {
           shouldSend = true;
         }
@@ -62,10 +64,7 @@ export async function GET() {
           reminder.reminderType
         );
 
-        await reminderDoc.ref.update({
-          sent: true,
-          sentAt: new Date(),
-        });
+        await reminderDoc.ref.delete();
 
         emailsSent++;
       }
