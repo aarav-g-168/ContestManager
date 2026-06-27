@@ -4,6 +4,7 @@ import type { Contest } from "../types/contest";
 import { parseAsUTC } from "@/lib/date";
 import Navbar from "@/components/Navbar";
 import { getContests } from "@/lib/getContests";
+import HeroSection from "@/components/hero";
 
 export const dynamic = "force-dynamic";
 
@@ -62,18 +63,23 @@ export default async function HomePage() {
 
   return (
   <div className="bg-gray-300 dark:bg-black min-h-screen font-sans">
-
     <Navbar />
 
-    <div className="container mx-auto p-4 md:p-8">
+    {/* Hero */}
+    <HeroSection />
 
+    {/* Contest Section */}
+    <section
+      id="contests"
+      className="container mx-auto p-4 md:p-8"
+    >
       <header className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-800 dark:text-white mb-3 mt-7">
+        <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-800 dark:text-white mb-3 mt-7">
           Upcoming Coding Contests
-        </h1>
+        </h2>
 
         <p className="text-lg text-gray-600 dark:text-gray-300 mb-10">
-          Your one-stop dashboard for competitive programming events.
+          Discover upcoming programming contests across multiple platforms.
         </p>
       </header>
 
@@ -95,22 +101,20 @@ export default async function HomePage() {
         </a>
       </div>
 
-      <footer className="text-center mt-12 text-gray-500 dark:text-gray-400">
+      <footer className="text-center mt-16 text-gray-500 dark:text-gray-400">
         <p>
           Made with ❤️ by{" "}
-
           <a
             href="https://aaravgupta.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-indigo-600 hover:underline mt-1 inline-block"
+            className="text-indigo-600 hover:underline"
           >
-            Aarav !!
+            Aarav!
           </a>
         </p>
       </footer>
-
-    </div>
+    </section>
   </div>
 );
 }
