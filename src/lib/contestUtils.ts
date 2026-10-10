@@ -1,4 +1,5 @@
 import { Contest } from "../types/contest";
+import { parseAsUTC } from "./date";
 
 export function filterContestsByDays(contests: Contest[], days: number) {
   const now = new Date();
@@ -7,16 +8,14 @@ export function filterContestsByDays(contests: Contest[], days: number) {
   future.setDate(now.getDate() + days);
 
   return contests.filter((contest) => {
-    const start = new Date(contest.start);
+    const start = parseAsUTC(contest.start);
     return start >= now && start <= future;
   });
 }
 
 export function sortContests(contests: Contest[]) {
   return contests.sort(
-    (a, b) =>
-      new Date(a.start).getTime() -
-      new Date(b.start).getTime()
+    (a, b) => parseAsUTC(a.start).getTime() - parseAsUTC(b.start).getTime(),
   );
 }
 
@@ -25,10 +24,5 @@ export function limitContests(contests: Contest[], limit: number) {
 }
 
 export function getHomePageContests(contests: Contest[]) {
-  return limitContests(
-    sortContests(
-      filterContestsByDays(contests, 7)
-    ),
-    8
-  );
+  return limitContests(sortContests(filterContestsByDays(contests, 7)), 8);
 }

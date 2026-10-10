@@ -1,120 +1,58 @@
+import Link from "next/link";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import HeroSection, { ProductFeatures } from "@/components/hero";
 import ContestClientComponent from "@/components/ContestClientComponent";
+import FeedError from "@/components/FeedError";
+import { getContestFeed } from "@/lib/contestFeed";
 import { getHomePageContests } from "@/lib/contestUtils";
-import type { Contest } from "../types/contest";
-import { parseAsUTC } from "@/lib/date";
-import Navbar from "@/components/Navbar";
-import { getContests } from "@/lib/getContests";
-import HeroSection from "@/components/hero";
-
 export const dynamic = "force-dynamic";
-
-const API_KEY = process.env.CLIST_API_KEY;
-
 export default async function HomePage() {
-  let contests: Contest[] = [];
-
-  try {
-    contests = await getContests();
-  } catch (error) {
-    const message = (error as Error).message;
-
-    // Rate limit handling
-    if (message === "RATE_LIMIT") {
-      return (
-        <div className="text-center p-10">
-          <h2 className="text-xl font-bold text-red-500">
-            Too many requests..
-          </h2>
-          <p className="text-white mt-2">
-            We are getting too many requests right now. Please try again in a few minutes.
-          </p>
-          <a
-            href="/contests"
-            className="mt-4 inline-block px-4 py-2 bg-indigo-600 text-white rounded"
-          >
-            Retry
-          </a>
-        </div>
-      );
-    }
-    return (
-      <div className="text-center text-red-600 p-10">
-        <h2 className="text-xl font-bold">Failed to load contests</h2>
-        <p>{message}</p>
-      </div>
-    );
-  }
-
-  const filteredContests = getHomePageContests(contests);
-
-  const contestsWithFormattedStart = filteredContests.map((c: Contest) => ({
-    ...c,
-    formattedStartIST:
-      parseAsUTC(c.start).toLocaleString("en-IN", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        timeZone: "Asia/Kolkata",
-      }) + " (IST)",
-  }));
-
+  const { contests, error } = await getContestFeed();
+  const upcoming = getHomePageContests(contests).slice(0, 6);
   return (
-  <div className="bg-gray-300 dark:bg-black min-h-screen font-sans">
-    <Navbar />
-
-    {/* Hero */}
-    <HeroSection />
-
-    {/* Contest Section */}
-    <section
-      id="contests"
-      className="container mx-auto p-4 md:p-8"
-    >
-      <header className="text-center mb-8">
-        <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-800 dark:text-white mb-3 mt-7">
-          Upcoming Coding Contests
-        </h2>
-
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-10">
-          Discover upcoming programming contests across multiple platforms.
-        </p>
-      </header>
-
-      <ContestClientComponent
-        initialContests={contestsWithFormattedStart}
-        showFilters={false}
-      />
-
-      <div className="flex justify-end mb-6 mt-4">
-        <a
-          href="/contests"
-          className="group text-black dark:text-white font-semibold flex items-center gap-1"
-        >
-          View All Upcoming Contests
-
-          <span className="transform transition-transform group-hover:translate-x-1">
-            →
-          </span>
-        </a>
-      </div>
-
-      <footer className="text-center mt-16 text-gray-500 dark:text-gray-400">
-        <p>
-          Made with ❤️ by{" "}
-          <a
-            href="https://aaravgupta.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-indigo-600 hover:underline"
-          >
-            Aarav!
-          </a>
-        </p>
-      </footer>
-    </section>
-  </div>
-);
+    <div className="site-container">
+      <HeroSection contests={contests.slice(0, 3)} />
+      <section id="contests" className="section-space">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow mb-3">Good things on the horizon</p>
+            <h2 className="section-title">
+              This week’s starting line<span className="text-primary">.</span>
+            </h2>
+            <p className="mt-3 text-[13px] text-muted-foreground">
+              Find your rhythm. Pick your next challenge.
+            </p>
+          </div>
+          <Link href="/contests" className="text-link">
+            Explore all contests <ArrowRight size={15} aria-hidden="true" />
+          </Link>
+        </div>
+        {error ? (
+          <FeedError message={error} />
+        ) : (
+          <ContestClientComponent initialContests={upcoming} />
+        )}
+      </section>
+      <ProductFeatures />
+      <section className="relative mb-5 overflow-hidden rounded-2xl border border-primary/20 bg-primary/5 px-7 py-9 sm:px-10 sm:py-11">
+        <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+          <div>
+            <p className="eyebrow mb-3 !text-primary">
+              Your next personal best is out there
+            </p>
+            <h2 className="text-[28px] font-medium leading-tight tracking-[-.045em]">
+              Show up. Solve. Repeat.
+            </h2>
+            <p className="mt-3 text-xs text-muted-foreground">
+              A great contest is a good place to start.
+            </p>
+          </div>
+          <Link href="/contests" className="btn-primary">
+            Let’s find your next one{" "}
+            <ArrowUpRight size={16} aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
 }

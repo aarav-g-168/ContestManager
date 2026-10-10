@@ -1,14 +1,14 @@
+import { parseAsUTC } from "./date";
+
 export function getGoogleCalendarLink(
   title: string,
   start: string,
   durationSeconds: number,
-  details: string
+  details: string,
 ) {
-  const startDate = new Date(start);
+  const startDate = parseAsUTC(start);
 
-  const endDate = new Date(
-    startDate.getTime() + durationSeconds * 1000
-  );
+  const endDate = new Date(startDate.getTime() + durationSeconds * 1000);
 
   const formatDate = (date: Date) =>
     date.toISOString().replace(/-|:|\.\d+/g, "");

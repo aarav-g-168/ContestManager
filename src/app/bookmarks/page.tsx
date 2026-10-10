@@ -1,29 +1,33 @@
-export const dynamic = "force-dynamic";
-
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import ContestClientComponent from "@/components/ContestClientComponent";
-import Navbar from "@/components/Navbar";
-import { getContests } from "@/lib/getContests";
-
+import PageHeading from "@/components/PageHeading";
+import { getContestFeed } from "@/lib/contestFeed";
+export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Your bookmarks" };
 export default async function BookmarksPage() {
-    const contests = await getContests();
-
-    return (
-        <div className="bg-gray-300 dark:bg-black min-h-screen font-sans">
-            <div className="container mx-auto p-4 md:p-8">
-                <Navbar />
-                <header className="text-center mb-8">
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-800 dark:text-white mb-3 mt-7">
-                        Bookmarked Contests
-                    </h1>
-                </header>
-
-                <ContestClientComponent
-                    initialContests={contests}
-                    showFilters={true}
-                    bookmarksOnly={true}
-                />
-
-            </div>
-        </div>
-    );
+  const { contests, error } = await getContestFeed();
+  return (
+    <div className="site-container pb-10">
+      <PageHeading
+        eyebrow="A little more intentional"
+        title="Your shortlist"
+        description="The challenges that caught your eye, all in one place. Make time for the ones that matter."
+      >
+        <Link href="/contests" className="btn-secondary !text-xs">
+          Discover more <ArrowUpRight size={14} aria-hidden="true" />
+        </Link>
+      </PageHeading>
+      <ContestClientComponent
+        initialContests={contests}
+        feedError={error}
+        showFilters
+        bookmarksOnly
+      />
+      <p className="mt-7 text-xs text-muted-foreground">
+        Your shortlist shows saved contests within the upcoming 30 days.
+      </p>
+    </div>
+  );
 }

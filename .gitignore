@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local AI agent skills (keep off GitHub)
+/.agents/skills/
+/.codex/skills/

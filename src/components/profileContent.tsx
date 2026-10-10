@@ -1,207 +1,298 @@
 "use client";
-
-import { useEffect, useState } from "react";
-
-import { auth, db } from "@/lib/firebase";
-
+import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
+import { useTheme } from "next-themes";
 import {
-  collection,
-  getDocs,
-} from "firebase/firestore";
-
-import {
-  onAuthStateChanged,
-  User,
-} from "firebase/auth";
-
-import Navbar from "./Navbar";
-
+  ArrowRight,
+  ArrowUpRight,
+  Bell,
+  Bookmark,
+  CalendarDays,
+  Check,
+  Code2,
+  Globe2,
+  Mail,
+  Moon,
+  ShieldCheck,
+  Sun,
+} from "lucide-react";
+import { useAuth } from "./AuthProvider";
+import { useBookmarks } from "@/hooks/bookmarks";
+import { useReminders } from "@/hooks/reminders";
+import AuthButton from "./AuthButton";
+import PageHeading from "./PageHeading";
+import { Reveal, SpotlightCard } from "./ui/interaction";
 export default function ProfileContent() {
-  const [user, setUser] = useState<User | null>(null);
-
-  const [bookmarkCount, setBookmarkCount] =
-    useState(0);
-
-  const [reminderCount, setReminderCount] =
-    useState(0);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      async (currentUser) => {
-        setUser(currentUser);
-
-        if (!currentUser) {
-          setLoading(false);
-          return;
-        }
-
-        const bookmarksSnapshot =
-          await getDocs(
-            collection(
-              db,
-              "users",
-              currentUser.uid,
-              "bookmarks"
-            )
-          );
-
-        const remindersSnapshot =
-          await getDocs(
-            collection(
-              db,
-              "users",
-              currentUser.uid,
-              "reminders"
-            )
-          );
-
-        setBookmarkCount(
-          bookmarksSnapshot.size
-        );
-
-        setReminderCount(
-          remindersSnapshot.size
-        );
-
-        setLoading(false);
-      }
-    );
-
-    return unsubscribe;
-  }, []);
-
-  if (loading) {
+  const { user, loading } = useAuth();
+  const bookmarks = useBookmarks();
+  const reminders = useReminders();
+  const { resolvedTheme, setTheme } = useTheme();
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  if (loading)
     return (
-      <div className="min-h-screen bg-gray-300 dark:bg-black">
-        <Navbar />
-        <p className="text-center mt-20 text-white">
-          Loading...
-        </p>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-300 dark:bg-black">
-        <Navbar />
-        <p className="text-center font-bold text-5xl mt-20 text-black dark:text-white">
-          Please login first.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-black">
-    <Navbar />
-    <div className="container mx-auto px-4 py-8">
-
-        {/* Profile Header */}
-        <div className="max-w-4xl mx-auto bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-800 p-8 shadow-xl">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-
-                <img
-                src={user.photoURL ?? "/default-avatar.png"}
-                alt="Profile"
-                className="h-28 w-28 rounded-full border-4 border-indigo-500 object-cover"
-                />
-
-                <div className="text-center md:text-left">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
-                    {user.displayName}
-                </h2>
-
-                <p className="text-gray-500 dark:text-gray-400 mt-1">
-                    {user.email}
-                </p>
-
-                <p className="text-sm text-indigo-500 mt-2">
-                    Competitive Programmer
-                </p>
-                </div>
-
-            </div>
-
-            {/* Divider */}
-            <div className="h-px bg-gray-200 dark:bg-zinc-800 my-8" />
-
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-                <a
-                href="/bookmarks"
-                className="group rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 p-6 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/20"
-                >
-                <p className="text-2xl mb-2">📌</p>
-
-                <p className="text-4xl font-bold">
-                    {bookmarkCount}
-                </p>
-
-                <p className="opacity-90">
-                    Saved Contests
-                </p>
-                </a>
-
-                <a
-                href="/reminders"
-                className="group rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 p-6 text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/20"
-                >
-                <p className="text-2xl mb-2">🔔</p>
-
-                <p className="text-4xl font-bold">
-                    {reminderCount}
-                </p>
-
-                <p className="opacity-90">
-                    Active Reminders
-                </p>
-                </a>
-
-            </div>
-
-            {/* Divider */}
-            <div className="h-px bg-gray-200 dark:bg-zinc-800 my-8" />
-
-            {/* Quick Actions */}
-            <div>
-
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                Quick Actions
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                <a
-                    href="/bookmarks"
-                    className="rounded-xl border border-gray-200 dark:border-zinc-800 p-4 hover:border-indigo-500 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
-                >
-                    📌 View Bookmarks
-                </a>
-
-                <a
-                    href="/reminders"
-                    className="rounded-xl border border-gray-200 dark:border-zinc-800 p-4 hover:border-purple-500 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
-                >
-                    🔔 View Reminders
-                </a>
-
-                <a
-                    href="/contests"
-                    className="rounded-xl border border-gray-200 dark:border-zinc-800 p-4 hover:border-green-500 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all"
-                >
-                    📅 Browse Contests
-                </a>
-
-                </div>
-                </div>
-            </div>
+      <div className="site-container">
+        <PageHeading
+          eyebrow="A space of your own"
+          title="Your workspace"
+          description="All your preparation, in one place."
+        />
+        <div className="surface p-8">
+          <div className="skeleton mb-6 size-20 !rounded-2xl" />
+          <div className="skeleton mb-4 h-6 w-52" />
+          <div className="skeleton h-4 w-72 max-w-full" />
         </div>
+      </div>
+    );
+  if (!user)
+    return (
+      <div className="site-container pb-10">
+        <PageHeading
+          eyebrow="A space of your own"
+          title="Make it personal"
+          description="A great routine starts with a little organization. Your own contest workspace is one sign-in away."
+        />
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+          <Reveal>
+            <div className="relative flex h-full min-h-[360px] flex-col justify-between overflow-hidden rounded-2xl border border-primary/20 bg-primary/5 p-8 sm:p-10">
+              <Code2
+                size={38}
+                strokeWidth={1.25}
+                className="text-primary"
+                aria-hidden="true"
+              />
+              <div className="mt-10">
+                <h2 className="text-[34px] font-medium leading-tight tracking-[-.05em]">
+                  Your challenges.
+                  <br />
+                  Your rhythm.
+                  <br />
+                  <span className="text-primary">Your next breakthrough.</span>
+                </h2>
+                <p className="mt-5 max-w-sm text-sm leading-7 text-muted-foreground">
+                  Save a contest today. Set a reminder for tomorrow. Build a
+                  routine that sticks.
+                </p>
+              </div>
+              <p className="eyebrow mt-8 !text-[9px]">
+                Show up. Solve. Repeat.
+              </p>
+            </div>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <div className="surface flex h-full flex-col items-start justify-center p-8 sm:p-10">
+              <span className="mb-6 flex size-12 items-center justify-center rounded-2xl border border-border bg-muted">
+                <ShieldCheck
+                  size={22}
+                  className="text-primary"
+                  aria-hidden="true"
+                />
+              </span>
+              <h2 className="text-2xl font-medium tracking-tight">
+                A little space for big goals.
+              </h2>
+              <p className="mb-6 mt-3 text-sm leading-7 text-muted-foreground">
+                Continue with your Google account to make Contest Manager yours.
+              </p>
+              <AuthButton expanded />
+              <div className="mt-8 space-y-3 border-t border-border pt-6 text-xs text-muted-foreground">
+                {[
+                  "Your saved contests, across every device",
+                  "Email reminders before the starting line",
+                  "One place to keep your preparation organized",
+                ].map((item) => (
+                  <p key={item} className="flex items-center gap-2">
+                    <Check
+                      size={13}
+                      className="text-primary"
+                      aria-hidden="true"
+                    />
+                    {item}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    );
+  return (
+    <div className="site-container pb-10">
+      <PageHeading
+        eyebrow="A space of your own"
+        title="Your workspace"
+        description={`Good to see you, ${user.displayName?.split(" ")[0] || "coder"}. Let’s get you ready for what’s next.`}
+      >
+        <Link href="/contests" className="btn-primary">
+          Find a challenge <ArrowUpRight size={15} aria-hidden="true" />
+        </Link>
+      </PageHeading>
+      <div className="grid items-start gap-6 lg:grid-cols-[.85fr_1.5fr]">
+        <Reveal>
+          <div className="surface overflow-hidden">
+            <div className="relative h-24 border-b border-border bg-primary/5">
+              <div
+                className="absolute inset-0 opacity-30"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(var(--primary) 1px, transparent 1px)",
+                  backgroundSize: "15px 15px",
+                }}
+              />
+            </div>
+            <div className="px-7 pb-7">
+              <div className="relative -mt-9 mb-5 flex size-[76px] items-center justify-center overflow-hidden rounded-2xl border-4 border-card bg-muted text-2xl text-primary">
+                {user.photoURL && !avatarFailed ? (
+                  <Image
+                    src={user.photoURL}
+                    alt={user.displayName || "Your profile"}
+                    width={76}
+                    height={76}
+                    unoptimized
+                    onError={() => setAvatarFailed(true)}
+                  />
+                ) : (
+                  user.displayName?.charAt(0) || "C"
+                )}
+              </div>
+              <h2 className="text-xl font-medium tracking-tight">
+                {user.displayName || "Competitive programmer"}
+              </h2>
+              <p className="mt-2 flex items-center gap-2 break-all text-xs text-muted-foreground">
+                <Mail size={13} aria-hidden="true" />
+                {user.email}
+              </p>
+              <span className="mt-5 inline-flex items-center gap-2 rounded-md border border-border bg-muted/60 px-2.5 py-1.5 font-mono text-[9px]">
+                <span className="status-dot !size-1" />
+                COMPETITIVE PROGRAMMER
+              </span>
+              <div className="mt-7 space-y-4 border-t border-border pt-6">
+                <p className="flex items-center justify-between text-xs">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <Globe2 size={14} aria-hidden="true" />
+                    Display timezone
+                  </span>
+                  <span>IST (UTC+5:30)</span>
+                </p>
+                <p className="flex items-center justify-between text-xs">
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <ShieldCheck size={14} aria-hidden="true" />
+                    Connected with
+                  </span>
+                  <span>Google</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+        <div className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[
+              {
+                href: "/bookmarks",
+                label: "Saved contests",
+                count: bookmarks.bookmarkedContests.length,
+                busy: bookmarks.loading,
+                error: bookmarks.error,
+                icon: Bookmark,
+                copy: "Your personal shortlist",
+              },
+              {
+                href: "/reminders",
+                label: "Active reminders",
+                count: Object.keys(reminders.reminders).length,
+                busy: reminders.loading,
+                error: reminders.error,
+                icon: Bell,
+                copy: "A heads-up before the start",
+              },
+            ].map(({ href, label, count, busy, error, icon: Icon, copy }) => (
+              <Reveal key={href}>
+                <SpotlightCard className="p-6">
+                  <Link href={href} className="group block">
+                    <div className="flex justify-between">
+                      <Icon
+                        size={20}
+                        className="text-primary"
+                        aria-hidden="true"
+                      />
+                      <ArrowUpRight
+                        size={16}
+                        className="text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <p className="my-6 font-mono text-4xl tracking-tighter">
+                      {busy
+                        ? "…"
+                        : error
+                          ? "—"
+                          : String(count).padStart(2, "0")}
+                    </p>
+                    <h2 className="text-sm font-medium">{label}</h2>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {error ? "Couldn't load. Open to retry." : copy}
+                    </p>
+                  </Link>
+                </SpotlightCard>
+              </Reveal>
+            ))}
+          </div>
+          <Reveal>
+            <div className="surface p-6 sm:p-7">
+              <div className="flex items-center justify-between gap-5">
+                <div>
+                  <h2 className="text-sm font-medium">
+                    Make yourself comfortable.
+                  </h2>
+                  <p className="mt-2 text-xs leading-6 text-muted-foreground">
+                    Early mornings or late-night solves. Pick your view.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 inline-flex gap-2 rounded-xl border border-border bg-background p-1.5">
+                {[
+                  { value: "light", label: "Light", icon: Sun },
+                  { value: "dark", label: "Dark", icon: Moon },
+                ].map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    className={`flex min-h-11 items-center gap-2 rounded-lg px-5 text-xs transition-colors ${resolvedTheme === value ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                    onClick={() => setTheme(value)}
+                    aria-pressed={resolvedTheme === value}
+                  >
+                    <Icon size={14} aria-hidden="true" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+          <Reveal>
+            <Link
+              href="/contests"
+              className="group flex items-center gap-4 rounded-xl border border-border p-5 transition-colors hover:border-primary/40 hover:bg-primary/5"
+            >
+              <span className="flex size-10 items-center justify-center rounded-xl bg-muted text-primary">
+                <CalendarDays size={18} aria-hidden="true" />
+              </span>
+              <span className="flex-1">
+                <span className="block text-sm font-medium">
+                  Make your next move.
+                </span>
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  Explore what’s coming up on the calendar.
+                </span>
+              </span>
+              <ArrowRight
+                size={17}
+                className="text-primary transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
+              />
+            </Link>
+          </Reveal>
+        </div>
+      </div>
     </div>
   );
 }

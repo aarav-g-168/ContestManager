@@ -1,59 +1,45 @@
 "use client";
-
-import { useState, useEffect, useRef } from "react";
-import type { Contest } from "@/types/contest";
-import { parseAsUTC } from "@/lib/date";
-import CountdownTimer from "./countdownTimer";
-import { getGoogleCalendarLink } from "@/lib/calendar";
-import { CalendarPlus } from "lucide-react";
-
+import { useState, type CSSProperties } from "react";
+import { DropdownMenu } from "radix-ui";
 import {
-  Bookmark,
-  MoreVertical,
+  ArrowUpRight,
   Bell,
+  BellOff,
+  Bookmark,
+  CalendarDays,
+  CalendarPlus,
+  Check,
+  Clock3,
+  LoaderCircle,
 } from "lucide-react";
-
-// formatDuration
-const formatDuration = (seconds: number): string => {
-  if (seconds <= 0) return "bhenchod";
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  let result = '';
-  if (hours > 0) result += `${hours} hour${hours > 1 ? 's' : ''} `;
-  if (minutes > 0) result += `${minutes} minute${minutes > 1 ? 's' : ''}`;
-  return result.trim() || "Less than a minute";
-};
-
-// formatStartTime
-const formatStartTime = (utcDateString: string): string => {
-  const date = parseAsUTC(utcDateString);
-  return date.toLocaleString('en-IN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-    timeZone: 'Asia/Kolkata',
-  }) + ' IST';
-};
-
-interface ContestCardProps {
+import type { Contest } from "@/types/contest";
+import type { ReminderType } from "@/hooks/reminders";
+import { parseAsUTC } from "@/lib/date";
+import { getPlatform } from "@/lib/platforms";
+import { getGoogleCalendarLink } from "@/lib/calendar";
+import CountdownTimer from "./countdownTimer";
+import { SpotlightCard } from "./ui/interaction";
+interface Props {
   contest: Contest;
-
   isBookmarked: boolean;
-  onBookmarkToggle: (contest: Contest) => void;
-
+  onBookmarkToggle: (contest: Contest) => Promise<void>;
   hasReminder: boolean;
-
-  reminderType?: "1h" | "6h" | "24h";
-
-  onReminderSet: (
-    contest: Contest,
-    reminderType: "1h" | "6h" | "24h"
-  ) => void;
+  reminderType?: ReminderType;
+  onReminderSet: (contest: Contest, type: ReminderType) => Promise<void>;
+  onReminderRemove: (id: number) => Promise<void>;
 }
-
+export function PlatformBadge({ host }: { host: string }) {
+  const platform = getPlatform(host);
+  return (
+    <span
+      className="platform-badge shrink-0"
+      style={{ "--platform-color": platform.color } as CSSProperties}
+      aria-hidden="true"
+    >
+      {platform.mark}
+    </span>
+  );
+}
 export default function ContestCard({
   contest,
   isBookmarked,
@@ -61,198 +47,182 @@ export default function ContestCard({
   hasReminder,
   reminderType,
   onReminderSet,
-}: ContestCardProps) {
-  const [hasMounted, setHasMounted] = useState(false);
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  // three dots menu state
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
-        setMenuOpen(false);
-        setShowReminderOptions(false);
-      }
+  onReminderRemove,
+}: Props) {
+  const [busy, setBusy] = useState(false);
+  const platform = getPlatform(contest.host);
+  const start = parseAsUTC(contest.start);
+  const validDate = Number.isFinite(start.getTime());
+  const duration =
+    contest.duration > 0
+      ? `${Math.floor(contest.duration / 3600) ? Math.floor(contest.duration / 3600) + "h " : ""}${Math.floor((contest.duration % 3600) / 60) ? Math.floor((contest.duration % 3600) / 60) + "m" : ""}`.trim() ||
+        "< 1m"
+      : "Not specified";
+  async function run(action: () => Promise<void>) {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await action();
+    } finally {
+      setBusy(false);
     }
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
-    };
-  }, []);
-
-  const platformLogos: { [key: string]: string } = {
-    'codeforces.com': 'https://sta.codeforces.com/s/94338/images/codeforces-logo-with-text.png',
-    'leetcode.com': 'https://leetcode.com/static/images/LeetCode_logo_rvs.png',
-    'atcoder.jp': 'https://img.atcoder.jp/assets/atcoder.png',
-    'topcoder.com': 'https://images.ctfassets.net/b5f1djy59z3a/4Fk4Ie7L62lhw52mKnA007/a9582587597c366432a233b62f5f9999/Topcoder_Logo_2021.svg',
-    'codingninjas.com/codestudio': 'https://files.codingninjas.in/cn-logo-dark-9826.svg',
-    'hackerearth.com': 'https://static-fastly.hackerearth.com/static/he-logo-new.svg',
-    'geeksforgeeks.org': 'https://media.geeksforgeeks.org/wp-content/cdn-uploads/20210420155809/gfg-new-logo.png',
-    'codechef.com': 'https://cdn.codechef.com/images/cc-logo.svg',
-  };
-
-  const logoUrl = platformLogos[contest.host] || `https://placehold.co/100x40/f0f0f0/333?text=${contest.host.split('.')[0]}`;
-
-  const calendarUrl = getGoogleCalendarLink(
-    contest.event,
-    contest.start,
-    contest.duration,
-    contest.href
-  );
-
-  const [showReminderOptions, setShowReminderOptions] = useState(false);
-
+  }
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl p-5 shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/10 hover:border-indigo-500/30 group min-h-[48px]">
-      <div className="p-2 flex-grow">
-        <div className="flex items-start justify-between mb-4">
-          <img
-            src={logoUrl}
-            alt={`${contest.host} logo`}
-            className="h-8 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).onerror = null;
-              (e.target as HTMLImageElement).src =
-                `https://placehold.co/100x40/f0f0f0/333?text=${contest.host.split(".")[0]}`;
-            }}
-          />
-
-          <div className="flex items-center gap-2">
-
-            {hasMounted ? (
-              <CountdownTimer startTime={contest.start} />
-            ) : (
-              <span className="text-sm font-semibold text-indigo-600">
-                Loading...
-              </span>
-            )}
-
-            <div
-              className="relative"
-              ref={menuRef}
-            >
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <MoreVertical className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-              </button>
-
-              {menuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-50">
-
-                  <button
-                    onClick={() => {
-                      onBookmarkToggle(contest);
-                      setMenuOpen(false);
-                      setShowReminderOptions(false);
-                    }}
-                    className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
-                  >
-                    <Bookmark className="h-4 w-4" />
-                    {isBookmarked ? "Remove Bookmark" : "Bookmark"}
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setShowReminderOptions(!showReminderOptions)
-                    }}
-                    className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
-                  >
-                    <Bell className="h-4 w-4" />
-
-                    {hasReminder
-                      ? `🔔 ${reminderType} Reminder Active`
-                      : "Set Reminder"}
-                  </button>
-
-                  {showReminderOptions && (
-                    <>
-                      <button
-                        onClick={() => {
-                          onReminderSet(contest, "1h");
-                          setShowReminderOptions(false);
-                          setMenuOpen(false);
-                        }}
-                        className="w-full text-left px-8 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
-                      >
-                        1 hour before
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          onReminderSet(contest, "6h");
-                          setShowReminderOptions(false);
-                          setMenuOpen(false);
-                        }}
-                        className="w-full text-left px-8 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
-                      >
-                        6 hours before
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          onReminderSet(contest, "24h");
-                          setShowReminderOptions(false);
-                          setMenuOpen(false);
-                        }}
-                        className="w-full text-left px-8 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800"
-                      >
-                        24 hours before
-                      </button>
-                    </>
-                  )}
-                  <a
-                    href={calendarUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setMenuOpen(false)}
-                    className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                  >
-                    <CalendarPlus className="h-4 w-4" />
-                    Add to Calendar
-                  </a>
-
-                </div>
-              )}
-            </div>
-
-          </div>
-        </div>
-        <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2 leading-tight min-h-[48px]">{contest.event}</h3>
-        <div className="text-sm text-gray-700 dark:text-gray-400 space-y-1">
-          <p><strong>Starts : </strong>
-            {/*HYDRATION FIX....HTML rendered on the server != React renders on the client*/}
-            {hasMounted
-              ? formatStartTime(contest.start)
-              : (contest.formattedStartIST ?? '...')
-            }
-          </p>
-          <p><strong>Duration : </strong> {formatDuration(contest.duration)}</p>
-        </div>
+    <SpotlightCard className="contest-card group h-full">
+      <div className="flex items-center gap-2.5">
+        <PlatformBadge host={contest.host} />
+        <span className="min-w-0 truncate text-xs font-medium">
+          {platform.name}
+        </span>
+        <span className="contest-countdown ml-auto shrink-0 rounded-md bg-primary/8 px-2 py-1">
+          <CountdownTimer startTime={contest.start} />
+        </span>
       </div>
-      <div className="bg-gray-50 dark:bg-zinc-900 p-4">
+      <h3 className="contest-title">{contest.event}</h3>
+      <div className="contest-details mt-auto space-y-2.5 text-xs text-muted-foreground">
+        <p className="flex items-center gap-2">
+          <CalendarDays size={13} aria-hidden="true" />
+          <time dateTime={validDate ? start.toISOString() : undefined}>
+            {validDate
+              ? start.toLocaleString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  timeZone: "Asia/Kolkata",
+                  hour12: true,
+                })
+              : "To be announced"}
+            <span className="ml-1.5 text-[10px] opacity-75">IST</span>
+          </time>
+        </p>
+        <p className="flex items-center gap-2">
+          <Clock3 size={13} aria-hidden="true" />
+          {duration}
+          <span className="mx-1 opacity-40">/</span>
+          <span>
+            {hasReminder
+              ? `${reminderType} reminder set`
+              : "Ready when you are"}
+          </span>
+        </p>
+      </div>
+      <div className="contest-footer">
+        <div className="-ml-2 flex">
+          <button
+            className={`icon-button ${isBookmarked ? "!text-primary" : ""}`}
+            disabled={busy}
+            aria-pressed={isBookmarked}
+            aria-label={`${isBookmarked ? "Remove bookmark for" : "Bookmark"} ${contest.event}`}
+            title={isBookmarked ? "Remove bookmark" : "Save contest"}
+            onClick={() => run(() => onBookmarkToggle(contest))}
+          >
+            {busy ? (
+              <LoaderCircle
+                size={16}
+                className="animate-spin"
+                aria-hidden="true"
+              />
+            ) : (
+              <Bookmark
+                size={16}
+                fill={isBookmarked ? "currentColor" : "none"}
+                aria-hidden="true"
+              />
+            )}
+          </button>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button
+                disabled={busy}
+                className={`icon-button ${hasReminder ? "!text-primary" : ""}`}
+                aria-label={`Reminder options for ${contest.event}`}
+                title="Set a reminder"
+              >
+                <Bell
+                  size={16}
+                  fill={hasReminder ? "currentColor" : "none"}
+                  aria-hidden="true"
+                />
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                align="start"
+                sideOffset={8}
+                className="z-50 w-56 rounded-xl border border-border bg-card p-1.5 shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+              >
+                <DropdownMenu.Label className="eyebrow px-3 py-2">
+                  Remind me before
+                </DropdownMenu.Label>
+                {(["1h", "6h", "24h"] as const).map((type) => (
+                  <DropdownMenu.Item
+                    key={type}
+                    className="menu-item justify-between"
+                    disabled={
+                      busy ||
+                      !validDate ||
+                      start.getTime() -
+                        Number(type.replace("h", "")) * 3600000 <=
+                        Date.now()
+                    }
+                    onSelect={() => run(() => onReminderSet(contest, type))}
+                  >
+                    {type.replace("h", "")} hour{type === "1h" ? "" : "s"}{" "}
+                    before{" "}
+                    {reminderType === type && (
+                      <Check
+                        size={14}
+                        className="text-primary"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </DropdownMenu.Item>
+                ))}
+                {hasReminder && (
+                  <>
+                    <DropdownMenu.Separator className="my-1 h-px bg-border" />
+                    <DropdownMenu.Item
+                      className="menu-item text-destructive"
+                      onSelect={() => run(() => onReminderRemove(contest.id))}
+                    >
+                      <BellOff size={14} aria-hidden="true" />
+                      Remove reminder
+                    </DropdownMenu.Item>
+                  </>
+                )}
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
+          {validDate && (
+            <a
+              className="icon-button contest-calendar"
+              href={getGoogleCalendarLink(
+                contest.event,
+                contest.start,
+                contest.duration,
+                contest.href,
+              )}
+              target="_blank"
+              rel="noreferrer"
+              title="Add to Google Calendar"
+              aria-label={`Add ${contest.event} to Google Calendar (opens in a new tab)`}
+            >
+              <CalendarPlus size={16} aria-hidden="true" />
+            </a>
+          )}
+        </div>
         <a
           href={contest.href}
           target="_blank"
-          rel="noopener noreferrer"
-          className="w-full block text-center bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-[0.98]"
+          rel="noreferrer"
+          className="text-link !text-xs"
+          aria-label={`Open ${contest.event} (opens in a new tab)`}
         >
-          Go to Contest
+          View contest{" "}
+          <ArrowUpRight size={15} className="text-primary" aria-hidden="true" />
         </a>
       </div>
-    </div>
+    </SpotlightCard>
   );
-};
+}

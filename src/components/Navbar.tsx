@@ -1,64 +1,123 @@
 "use client";
-
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LayoutGroup, motion, useReducedMotion } from "motion/react";
+import {
+  Bell,
+  Bookmark,
+  Compass,
+  Home,
+  Menu,
+  UserRound,
+  X,
+} from "lucide-react";
+import { Dialog } from "radix-ui";
+import { useState } from "react";
 import ThemeToggle from "./theme-toggle";
 import AuthButton from "./AuthButton";
-
+import Brand from "./Brand";
+const links = [
+  { href: "/", label: "Overview", icon: Home },
+  { href: "/contests", label: "Contests", icon: Compass },
+  { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
+  { href: "/reminders", label: "Reminders", icon: Bell },
+];
 export default function Navbar() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const reduced = useReducedMotion();
   return (
-    <header className="w-full border-b border-gray-200 dark:border-zinc-800 mb-8">
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-
-        <Link
-          href="/"
-          className="text-lg md:text-xl font-bold text-gray-800 dark:text-white leading-tight"
-        >
-          Contest Manager
-        </Link>
-
-        <div className="flex items-center gap-3 md:gap-6">
-
-          <div className="hidden md:flex items-center gap-6">
-
-            <Link
-              href="/"
-              className="relative text-lg font-medium text-gray-600 dark:text-gray-300 transition-all duration-300 hover:text-indigo-500 hover:-translate-y-0.5 after:absolute after:left-1/2 after:bottom-[-4px] after:h-[2px] after:w-0 after:rounded-full after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-full hover:after:left-0"
-            >
-              Home
-            </Link>
-
-            <Link
-              href="/contests"
-              className="relative text-lg font-medium text-gray-600 dark:text-gray-300 transition-all duration-300 hover:text-indigo-500 hover:-translate-y-0.5 after:absolute after:left-1/2 after:bottom-[-4px] after:h-[2px] after:w-0 after:rounded-full after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-full hover:after:left-0"
-            >
-              Contests
-            </Link>
-
-            <Link
-              href="/bookmarks"
-              className="relative text-lg font-medium text-gray-600 dark:text-gray-300 transition-all duration-300 hover:text-indigo-500 hover:-translate-y-0.5 after:absolute after:left-1/2 after:bottom-[-4px] after:h-[2px] after:w-0 after:rounded-full after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-full hover:after:left-0"
-            >
-              Bookmarks
-            </Link>
-
-            <Link
-              href="/reminders"
-              className="relative text-lg font-medium text-gray-600 dark:text-gray-300 transition-all duration-300 hover:text-indigo-500 hover:-translate-y-0.5 after:absolute after:left-1/2 after:bottom-[-4px] after:h-[2px] after:w-0 after:rounded-full after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-full hover:after:left-0"
-            >
-              Reminders
-            </Link>
-
-            <Link
-              href="/profile"
-              className="relative text-lg font-medium text-gray-600 dark:text-gray-300 transition-all duration-300 hover:text-indigo-500 hover:-translate-y-0.5 after:absolute after:left-1/2 after:bottom-[-4px] after:h-[2px] after:w-0 after:rounded-full after:bg-indigo-500 after:transition-all after:duration-300 hover:after:w-full hover:after:left-0"
-            >
-              Profile
-            </Link>
-
+    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-xl">
+      <div className="site-container flex h-[76px] items-center justify-between gap-2 sm:gap-4">
+        <Brand />
+        <LayoutGroup id="main-navigation">
+          <nav
+            aria-label="Main navigation"
+            className="hidden items-center gap-1 lg:flex"
+          >
+            {links.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                aria-current={pathname === href ? "page" : undefined}
+                className={`relative rounded-md px-4 py-2.5 text-[12px] transition-colors ${pathname === href ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {pathname === href && (
+                  <motion.span
+                    layoutId="active-nav"
+                    className="absolute inset-0 rounded-md border border-border bg-muted"
+                    transition={{
+                      type: "spring",
+                      bounce: 0,
+                      duration: reduced ? 0 : 0.35,
+                    }}
+                  />
+                )}
+                <span className="relative">{label}</span>
+              </Link>
+            ))}
+          </nav>
+        </LayoutGroup>
+        <div className="flex items-center gap-1 sm:gap-3">
+          <div className="hidden sm:block">
+            <ThemeToggle />
           </div>
-          <ThemeToggle />
           <AuthButton />
-
+          <Dialog.Root open={open} onOpenChange={setOpen}>
+            <Dialog.Trigger asChild>
+              <button
+                className="icon-button lg:hidden"
+                aria-label="Open navigation"
+              >
+                <Menu size={20} />
+              </button>
+            </Dialog.Trigger>
+            <Dialog.Portal>
+              <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=open]:fade-in-0" />
+              <Dialog.Content className="fixed inset-y-0 right-0 z-50 w-[min(340px,90vw)] overflow-y-auto border-l border-border bg-background p-6 shadow-2xl data-[state=open]:animate-in data-[state=open]:slide-in-from-right-6">
+                <div className="mb-10 flex items-center justify-between">
+                  <Dialog.Title className="text-sm font-medium">
+                    Your workspace
+                  </Dialog.Title>
+                  <Dialog.Close asChild>
+                    <button
+                      className="icon-button"
+                      aria-label="Close navigation"
+                    >
+                      <X size={20} />
+                    </button>
+                  </Dialog.Close>
+                </div>
+                <Dialog.Description className="sr-only">
+                  Navigate Contest Manager
+                </Dialog.Description>
+                <nav aria-label="Mobile navigation" className="space-y-2">
+                  {[
+                    ...links,
+                    { href: "/profile", label: "Profile", icon: UserRound },
+                  ].map(({ href, label, icon: Icon }) => (
+                    <Link
+                      onClick={() => setOpen(false)}
+                      key={href}
+                      href={href}
+                      aria-current={pathname === href ? "page" : undefined}
+                      className={`flex items-center gap-3 rounded-xl p-4 text-sm ${pathname === href ? "bg-muted text-primary" : "text-muted-foreground hover:bg-muted"}`}
+                    >
+                      <Icon size={18} aria-hidden="true" />
+                      {label}
+                    </Link>
+                  ))}
+                </nav>
+                <div className="mt-6 flex items-center justify-between border-t border-border pt-5 text-sm text-muted-foreground">
+                  Appearance
+                  <ThemeToggle />
+                </div>
+                <p className="eyebrow mt-10 pb-2">
+                  Show up. Solve. Repeat.
+                </p>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
         </div>
       </div>
     </header>

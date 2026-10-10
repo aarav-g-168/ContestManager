@@ -1,137 +1,107 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { toast } from "sonner";
-
 import {
   collection,
-  getDocs,
+  onSnapshot,
   doc,
   setDoc,
   deleteDoc,
 } from "firebase/firestore";
-
-import { onAuthStateChanged, User } from "firebase/auth";
+import { useAuth } from "@/components/AuthProvider";
 import type { Contest } from "@/types/contest";
-
+import { parseAsUTC } from "@/lib/date";
+export type ReminderType = "1h" | "6h" | "24h";
 export function useReminders() {
-  const [reminders, setReminders] = useState<
-    Record<number, "1h" | "6h" | "24h">
-  >({});
-  const [user, setUser] = useState<User | null>(null);
-
+  const { user, loading: authLoading, login } = useAuth();
+  const [saved, setSaved] = useState<{
+    uid: string;
+    values: Record<number, ReminderType>;
+  } | null>(null);
+  const [error, setError] = useState(false);
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      async (currentUser) => {
-        setUser(currentUser);
-
-        if (!currentUser) {
-          setReminders({});
-          return;
-        }
-
-        const remindersRef = collection(
-          db,
-          "users",
-          currentUser.uid,
-          "reminders"
-        );
-
-        const snapshot = await getDocs(remindersRef);
-
-        const loadedReminders: Record<
-          number,
-          "1h" | "6h" | "24h"
-        > = {};
-
-        snapshot.docs.forEach((doc) => {
-          const data = doc.data();
-
-          loadedReminders[
-            Number(doc.id)
-          ] = data.reminderType;
-        });
-
-        setReminders(loadedReminders);
-      }
-    );
-
-    return unsubscribe;
-  }, []);
-
-  const addReminder = async (
-    contest: Contest,
-    reminderType: "1h" | "6h" | "24h"
-  ) => {
+    setError(false);
     if (!user) {
-      alert("Please login first.");
+      setSaved(null);
       return;
     }
-
-    const reminderRef = doc(
-      db,
-      "users",
-      user.uid,
-      "reminders",
-      contest.id.toString()
+    return onSnapshot(
+      collection(db, "users", user.uid, "reminders"),
+      (snapshot) => {
+        const values: Record<number, ReminderType> = {};
+        snapshot.docs.forEach((item) => {
+          values[Number(item.id)] = item.data().reminderType;
+        });
+        setSaved({ uid: user.uid, values });
+      },
+      () => {
+        setError(true);
+        setSaved({ uid: user.uid, values: {} });
+      },
     );
-
-    await setDoc(reminderRef, {
-      contestId: contest.id,
-      event: contest.event,
-      host: contest.host,
-      href: contest.href,
-      start: contest.start,
-      duration: contest.duration,
-
-      reminderType,
-
-      email: user.email,
-
-      sent: false,
-
-      createdAt: new Date(),
-    });
-
-    toast.success(
-      `Reminder set for ${reminderType} before contest`
-    );
-
-    setReminders(prev => ({
-      ...prev,
-      [contest.id]: reminderType,
-    }));
-  };
-
-  const removeReminder = async (
-    contestId: number
-  ) => {
+  }, [user]);
+  const reminders = saved?.uid === user?.uid ? (saved?.values ?? {}) : {};
+  async function addReminder(contest: Contest, reminderType: ReminderType) {
+    if (!user) {
+      toast("Sign in to get contest reminders.", {
+        action: { label: "Sign in", onClick: login },
+      });
+      return;
+    }
+    if (!user.email) {
+      toast.error("Your account needs an email address to receive reminders.");
+      return;
+    }
+    if (
+      parseAsUTC(contest.start).getTime() -
+        Number(reminderType.replace("h", "")) * 3600000 <=
+      Date.now()
+    ) {
+      toast.error(
+        "That reminder time has already passed. Choose a shorter reminder.",
+      );
+      return;
+    }
+    try {
+      await setDoc(
+        doc(db, "users", user.uid, "reminders", String(contest.id)),
+        {
+          contestId: contest.id,
+          event: contest.event,
+          host: contest.host,
+          href: contest.href,
+          start: parseAsUTC(contest.start).toISOString(),
+          duration: contest.duration,
+          reminderType,
+          email: user.email,
+          sent: false,
+          createdAt: new Date(),
+        },
+      );
+      toast.success(
+        `We'll email you ${reminderType.replace("h", "")} hour${reminderType === "1h" ? "" : "s"} before the contest.`,
+      );
+    } catch {
+      toast.error("Couldn't set your reminder. Please try again.");
+    }
+  }
+  async function removeReminder(contestId: number) {
     if (!user) return;
-
-    const reminderRef = doc(
-      db,
-      "users",
-      user.uid,
-      "reminders",
-      contestId.toString()
-    );
-
-    await deleteDoc(reminderRef);
-
-    setReminders(prev => {
-      const updated = { ...prev };
-
-      delete updated[contestId];
-
-      return updated;
-    });
-  };
-
+    try {
+      await deleteDoc(
+        doc(db, "users", user.uid, "reminders", String(contestId)),
+      );
+      toast.success("Reminder removed.");
+    } catch {
+      toast.error("Couldn't remove your reminder. Please try again.");
+    }
+  }
   return {
     reminders,
     addReminder,
     removeReminder,
+    loading: authLoading || (!!user && saved?.uid !== user.uid),
+    error,
   };
 }

@@ -1,85 +1,63 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import { auth, db } from "@/lib/firebase";
-import type { Contest } from "@/types/contest";
-
+import { db } from "@/lib/firebase";
 import {
   doc,
   setDoc,
   deleteDoc,
   collection,
-  getDocs,
+  onSnapshot,
 } from "firebase/firestore";
-
-import { onAuthStateChanged, User } from "firebase/auth";
-
+import { useAuth } from "@/components/AuthProvider";
+import type { Contest } from "@/types/contest";
+import { toast } from "sonner";
 export function useBookmarks() {
-  const [bookmarkedContests, setBookmarkedContests] = useState<number[]>([]);
-  const [user, setUser] = useState<User | null>(null);
-
-  const [loading, setLoading] = useState(true);
-
+  const { user, loading: authLoading, login } = useAuth();
+  const [saved, setSaved] = useState<{ uid: string; ids: number[] } | null>(
+    null,
+  );
+  const [error, setError] = useState(false);
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-
-      if (!currentUser) {
-        setBookmarkedContests([]);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const bookmarksRef = collection(
-          db,
-          "users",
-          currentUser.uid,
-          "bookmarks"
-        );
-
-        const snapshot = await getDocs(bookmarksRef);
-
-        const bookmarks = snapshot.docs.map(doc =>
-          Number(doc.id)
-        );
-
-        setBookmarkedContests(bookmarks);
-
-      } catch (error) {
-        console.error("Error fetching bookmarks:", error);
-      }
-
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Toggle bookmark
-  const toggleBookmark = async (contest: Contest) => {
-    const contestId = contest.id;
+    setError(false);
     if (!user) {
-      alert("Please login to bookmark contests.");
+      setSaved(null);
       return;
     }
-
-    const bookmarkRef = doc(
+    return onSnapshot(
+      collection(db, "users", user.uid, "bookmarks"),
+      (snapshot) => {
+        setSaved({
+          uid: user.uid,
+          ids: snapshot.docs.map((item) => Number(item.id)),
+        });
+      },
+      () => {
+        setError(true);
+        setSaved({ uid: user.uid, ids: [] });
+      },
+    );
+  }, [user]);
+  const bookmarkedContests = saved?.uid === user?.uid ? (saved?.ids ?? []) : [];
+  async function toggleBookmark(contest: Contest) {
+    if (!user) {
+      toast("Sign in to save your shortlist.", {
+        action: { label: "Sign in", onClick: login },
+      });
+      return;
+    }
+    const reference = doc(
       db,
       "users",
       user.uid,
       "bookmarks",
-      contestId.toString()
+      String(contest.id),
     );
-
     try {
-      if (bookmarkedContests.includes(contestId)) {
-        await deleteDoc(bookmarkRef);
-        setBookmarkedContests(prev =>
-          prev.filter(id => id !== contestId)
-        );
+      if (bookmarkedContests.includes(contest.id)) {
+        await deleteDoc(reference);
+        toast.success("Removed from your shortlist.");
       } else {
-        await setDoc(bookmarkRef, {
+        await setDoc(reference, {
           contestId: contest.id,
           event: contest.event,
           host: contest.host,
@@ -87,21 +65,17 @@ export function useBookmarks() {
           start: contest.start,
           duration: contest.duration,
           createdAt: new Date(),
-        });;
-
-        setBookmarkedContests(prev => [
-          ...prev,
-          contestId,
-        ]);
+        });
+        toast.success("Saved to your shortlist.");
       }
-    } catch (error) {
-      console.error("Bookmark Error:", error);
+    } catch {
+      toast.error("Couldn't update your bookmark. Please try again.");
     }
-  };
-
+  }
   return {
     bookmarkedContests,
     toggleBookmark,
-    loading,
+    loading: authLoading || (!!user && saved?.uid !== user.uid),
+    error,
   };
 }
