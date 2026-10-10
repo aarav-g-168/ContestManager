@@ -29,9 +29,9 @@ export default async function ContestsPage({
   return (
     <div className="site-container contests-page pb-7">
       <PageHeading
-        eyebrow="Calendar"
+        eyebrow="The contest calendar"
         title="Upcoming contests"
-        description="Browse by day or platform, compare start times, and save a round for later."
+        description="Find a round that fits your week. Pick a platform or start with a day."
       >
         <span className="flex items-center gap-2 whitespace-nowrap text-xs text-muted-foreground">
           <Clock3 size={13} aria-hidden="true" />

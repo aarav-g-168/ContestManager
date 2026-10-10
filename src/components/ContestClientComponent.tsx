@@ -29,7 +29,7 @@ import { useBookmarks } from "@/hooks/bookmarks";
 import { useAuth } from "./AuthProvider";
 import { getPlatform, getPlatformKey } from "@/lib/platforms";
 import { parseAsUTC } from "@/lib/date";
-import AuthButton from "./AuthButton";
+import AccountWelcome from "./AccountWelcome";
 import SkeletonGrid from "./SkeletonGrid";
 import FeedError from "./FeedError";
 import ContestSort from "./ContestSort";
@@ -143,29 +143,7 @@ export default function ContestClientComponent({
   )
     return <SkeletonGrid />;
   if (personal && !user) {
-    const Icon = bookmarksOnly ? Bookmark : Bell;
-    return (
-      <div className="empty-state reveal">
-        <div className="empty-state-icon">
-          <Icon size={24} aria-hidden="true" />
-        </div>
-        <h2 className="text-xl font-medium tracking-tight">
-          {bookmarksOnly
-            ? "Sign in to view your bookmarks"
-            : "Sign in to manage reminders"}
-        </h2>
-        <p className="mx-auto mb-6 mt-3 max-w-sm text-sm leading-7 text-muted-foreground">
-          Sign in with Google to{" "}
-          {bookmarksOnly
-            ? "save contests and access them on your other devices."
-            : "receive an email 1, 6, or 24 hours before a contest starts."}
-        </p>
-        <AuthButton expanded />
-        <p className="mt-5 text-xs text-muted-foreground">
-          Your bookmarks and reminders are linked to your Google account.
-        </p>
-      </div>
-    );
+    return <AccountWelcome type={bookmarksOnly ? "bookmarks" : "reminders"} />;
   }
   if (personal && (bookmarksOnly ? bookmarks.error : reminder.error))
     return (
@@ -206,6 +184,45 @@ export default function ContestClientComponent({
       {showFilters && <h2 className="sr-only">Browse upcoming contests</h2>}
       {showFilters && (
         <div id="contest-results" className="browse-toolbar">
+          {!personal && (
+            <div
+              className="platform-switcher"
+              role="group"
+              aria-label="Quick platform filters"
+            >
+              <span>Jump to</span>
+              <button
+                aria-pressed={platforms.length === 0}
+                onClick={() => {
+                  setPlatforms([]);
+                  setLimit(12);
+                }}
+              >
+                All platforms
+              </button>
+              {["codeforces.com", "leetcode.com", "atcoder.jp", "codechef.com"]
+                .filter((host) => allPlatforms.includes(host))
+                .map((host) => (
+                  <button
+                    key={host}
+                    aria-pressed={platforms.includes(host)}
+                    onClick={() => {
+                      setPlatforms([host]);
+                      setLimit(12);
+                    }}
+                  >
+                    {getPlatform(host).name}
+                    <span>
+                      {
+                        initialContests.filter(
+                          (contest) => getPlatformKey(contest.host) === host,
+                        ).length
+                      }
+                    </span>
+                  </button>
+                ))}
+            </div>
+          )}
           <div className="browse-search-row">
             <label className="input-shell flex-1">
               <Search

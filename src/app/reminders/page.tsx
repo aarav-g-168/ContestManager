@@ -19,14 +19,6 @@ export default async function RemindersPage() {
           Sent to your account email
         </span>
       </PageHeading>
-      <div className="mb-7 flex items-start gap-3 rounded-xl border border-primary/15 bg-primary/5 p-4 text-xs leading-6 text-muted-foreground">
-        <Mail className="mt-1 text-primary" size={15} aria-hidden="true" />
-        <p>
-          Choose a reminder from any contest’s bell menu. We’ll email you 1, 6,
-          or 24 hours before it starts. Change or remove a reminder from that
-          same menu.
-        </p>
-      </div>
       <ContestClientComponent
         initialContests={contests}
         feedError={error}

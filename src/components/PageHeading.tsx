@@ -13,8 +13,8 @@ export default function PageHeading({
   return (
     <header className="page-heading reveal flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
       <div>
-        <p className="eyebrow mb-3 flex items-center gap-2">
-          <span className="size-1.5 rounded-full bg-primary" />
+        <p className="eyebrow page-label">
+          <span aria-hidden="true">/</span>
           {eyebrow}
         </p>
         <h1 className="page-title">{title}</h1>

@@ -6,7 +6,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { ProfileProvider } from "@/components/ProfileProvider";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/SiteFooter";
-import { Toaster } from "sonner";
+import Notifications from "@/components/Notifications";
 const plexSans = IBM_Plex_Sans({
   variable: "--font-ui",
   subsets: ["latin"],
@@ -44,7 +44,7 @@ export default function RootLayout({
                 {children}
               </main>
               <SiteFooter />
-              <Toaster richColors position="bottom-right" closeButton />
+              <Notifications />
             </ProfileProvider>
           </AuthProvider>
         </ThemeProvider>

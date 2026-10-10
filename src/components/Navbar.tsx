@@ -21,14 +21,15 @@ const links = [
   { href: "/contests", label: "Contests", icon: Compass },
   { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
   { href: "/reminders", label: "Reminders", icon: Bell },
+  { href: "/profile", label: "Profile", icon: UserRound },
 ];
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const reduced = useReducedMotion();
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-xl">
-      <div className="site-container flex h-[76px] items-center justify-between gap-2 sm:gap-4">
+    <header className="site-header">
+      <div className="site-container nav-container">
         <Brand />
         <LayoutGroup id="main-navigation">
           <nav
@@ -40,12 +41,12 @@ export default function Navbar() {
                 key={href}
                 href={href}
                 aria-current={pathname === href ? "page" : undefined}
-                className={`relative rounded-md px-4 py-2.5 text-sm transition-colors ${pathname === href ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                className={`nav-link ${pathname === href ? "nav-link-active" : ""}`}
               >
                 {pathname === href && (
                   <motion.span
                     layoutId="active-nav"
-                    className="absolute inset-0 rounded-md border border-border bg-muted"
+                    className="nav-active-indicator"
                     transition={{
                       type: "spring",
                       bounce: 0,
@@ -92,10 +93,7 @@ export default function Navbar() {
                   Navigate Contest Manager
                 </Dialog.Description>
                 <nav aria-label="Mobile navigation" className="space-y-2">
-                  {[
-                    ...links,
-                    { href: "/profile", label: "Profile", icon: UserRound },
-                  ].map(({ href, label, icon: Icon }) => (
+                  {links.map(({ href, label, icon: Icon }) => (
                     <Link
                       onClick={() => setOpen(false)}
                       key={href}

@@ -44,7 +44,9 @@ export default function ProfileContent() {
           <div className="profile-signin-feature">
             <Code2 size={34} strokeWidth={1.5} aria-hidden="true" />
             <div>
-              <p className="week-kicker">Your space in Contest Manager</p>
+              <p className="profile-signin-kicker">
+                Your space in Contest Manager
+              </p>
               <h2>
                 Your contests.
                 <br />

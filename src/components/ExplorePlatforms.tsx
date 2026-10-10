@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import type { Contest } from "@/types/contest";
+import type { CSSProperties } from "react";
 import { getPlatform, getPlatformKey } from "@/lib/platforms";
 import { parseAsUTC } from "@/lib/date";
 import { PlatformBadge } from "./contestCard";
@@ -31,9 +32,11 @@ export default function ExplorePlatforms({
     >
       <div className="section-heading">
         <div>
-          <p className="eyebrow mb-2">Find your next round</p>
+          <p className="eyebrow section-label">
+            <span>01 /</span> THE PLATFORM INDEX
+          </p>
           <h2 id="platform-explore-title" className="section-title">
-            Start with a platform
+            Find your kind of challenge.
           </h2>
         </div>
         <Link href="/contests" className="text-link">
@@ -41,7 +44,7 @@ export default function ExplorePlatforms({
         </Link>
       </div>
       <div className="platform-tiles">
-        {platforms.map((host) => {
+        {platforms.map((host, index) => {
           const events = contests.filter(
             (contest) => getPlatformKey(contest.host) === host,
           );
@@ -51,13 +54,22 @@ export default function ExplorePlatforms({
               key={host}
               href={`/contests?platform=${encodeURIComponent(host)}`}
               className="platform-tile"
+              style={
+                { "--tile-color": getPlatform(host).color } as CSSProperties
+              }
             >
+              <span className="platform-watermark" aria-hidden="true">
+                {getPlatform(host).mark}
+              </span>
               <div className="platform-tile-top">
                 <PlatformBadge host={host} />
-                <span>{events.length} upcoming</span>
+                <span className="platform-tile-index">0{index + 1}</span>
                 <ArrowUpRight size={17} aria-hidden="true" />
               </div>
               <h3>{getPlatform(host).name}</h3>
+              <span className="platform-event-count">
+                {events.length} upcoming contest{events.length === 1 ? "" : "s"}
+              </span>
               <p>{next.event}</p>
               <time dateTime={parseAsUTC(next.start).toISOString()}>
                 {parseAsUTC(next.start).toLocaleDateString("en-GB", {

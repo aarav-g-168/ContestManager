@@ -4,31 +4,48 @@ import Brand from "./Brand";
 export default function SiteFooter() {
   return (
     <footer className="footer">
-      <div className="site-container flex flex-col gap-7 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <Brand />
-          <p className="mt-3 text-xs text-muted-foreground">
-            A calendar for competitive programming.
-          </p>
+      <div className="site-container">
+        <div className="footer-main">
+          <div>
+            <Brand />
+            <p className="footer-description">
+              Good problems are worth making time for. Find your next round
+              here.
+            </p>
+          </div>
+          <nav className="footer-nav" aria-label="Footer navigation">
+            <div>
+              <p>EXPLORE</p>
+              <Link href="/contests">
+                Contest calendar <ArrowUpRight size={12} aria-hidden="true" />
+              </Link>
+              <Link href="/bookmarks">Your bookmarks</Link>
+              <Link href="/reminders">Email reminders</Link>
+            </div>
+            <div>
+              <p>MAKE IT YOURS</p>
+              <Link href="/profile">Your profile</Link>
+              <a
+                href="https://github.com/aarav-g-168"
+                target="_blank"
+                rel="noreferrer"
+                className="text-muted-foreground"
+                aria-label="Aarav Gupta on GitHub (opens in a new tab)"
+              >
+                <Code2 size={14} aria-hidden="true" /> GitHub
+              </a>
+            </div>
+          </nav>
         </div>
-        <div className="flex flex-wrap items-center gap-6 text-xs text-muted-foreground">
-          <Link href="/contests" className="hover:text-foreground">
-            Contest calendar
-          </Link>
-          <a
-            href="https://github.com/aarav-g-168"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex min-h-11 items-center gap-1.5 hover:text-foreground"
-            aria-label="Aarav Gupta on GitHub (opens in a new tab)"
-          >
-            <Code2 size={14} aria-hidden="true" /> GitHub
-          </a>
+        <div className="footer-bottom">
+          <span>
+            <Code2 size={13} aria-hidden="true" /> Made for people who like a
+            good problem.
+          </span>
           <a
             href="https://aarav.site"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex min-h-11 items-center gap-1.5 hover:text-foreground"
             aria-label="Aarav Gupta’s portfolio (opens in a new tab)"
           >
             Built by Aarav Gupta <ArrowUpRight size={13} aria-hidden="true" />

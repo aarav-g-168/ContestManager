@@ -1,12 +1,8 @@
 import Link from "next/link";
 export default function Brand() {
   return (
-    <Link
-      href="/"
-      className="inline-flex shrink-0 items-center gap-2.5"
-      aria-label="Contest Manager home"
-    >
-      <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+    <Link href="/" className="brand" aria-label="Contest Manager home">
+      <span className="brand-mark">
         <svg
           width="20"
           height="20"
@@ -23,7 +19,7 @@ export default function Brand() {
           />
         </svg>
       </span>
-      <span className="text-[15px] font-semibold tracking-[-.02em] max-[360px]:text-[13px]">
+      <span className="brand-wordmark">
         contest
         <span className="font-normal text-muted-foreground">manager</span>
         <span className="text-primary">.</span>

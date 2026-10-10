@@ -91,32 +91,51 @@ export default function ContestCard({
           {contest.event}
         </a>
       </h3>
-      <div className="contest-details mt-auto space-y-2.5 text-[13px] text-muted-foreground">
-        <p className="flex items-center gap-2">
-          <CalendarDays size={13} aria-hidden="true" />
-          <time dateTime={validDate ? start.toISOString() : undefined}>
+      <div className="contest-details contest-schedule">
+        <div className="contest-date-stamp" aria-hidden="true">
+          <strong>
             {validDate
-              ? start.toLocaleString("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
+              ? start.toLocaleDateString("en-GB", {
+                  day: "2-digit",
                   timeZone: "Asia/Kolkata",
-                  hour12: true,
                 })
-              : "To be announced"}
-            <span className="ml-1.5 text-[10px] opacity-75">IST</span>
-          </time>
-        </p>
-        <p className="flex items-center gap-2">
-          <Clock3 size={13} aria-hidden="true" />
-          {duration}
-          {hasReminder && (
-            <span className="ml-1 text-primary">
-              · {reminderType} reminder set
-            </span>
-          )}
-        </p>
+              : "—"}
+          </strong>
+          <span>
+            {validDate
+              ? start.toLocaleDateString("en-GB", {
+                  month: "short",
+                  timeZone: "Asia/Kolkata",
+                })
+              : "TBA"}
+          </span>
+        </div>
+        <div className="contest-time-details">
+          <p>
+            <CalendarDays size={13} aria-hidden="true" />
+            <time dateTime={validDate ? start.toISOString() : undefined}>
+              {validDate
+                ? start.toLocaleString("en-GB", {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    timeZone: "Asia/Kolkata",
+                    hour12: true,
+                  })
+                : "To be announced"}
+              <span className="contest-timezone"> IST</span>
+            </time>
+          </p>
+          <p>
+            <Clock3 size={13} aria-hidden="true" />
+            {duration}
+            {hasReminder && (
+              <span className="text-primary">· {reminderType} reminder</span>
+            )}
+          </p>
+        </div>
       </div>
       <div className="contest-footer">
         <div className="-ml-2 flex">
