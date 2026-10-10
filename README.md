@@ -109,14 +109,50 @@ Users can:
 
 ### 👤 Profile Page
 
-Displays:
+* Edit your display name, headline, short bio, location, and school or company
+* Add a portfolio, GitHub, LinkedIn, and X profile
+* Keep Codeforces, LeetCode, AtCoder, and CodeChef handles together
+* Upload, crop, replace, or remove a profile photo
+* See a live preview, inline validation, and clear save/discard states
+* Get a warning before leaving with unsaved edits
+* Access saved contests, reminders, and appearance settings
 
-* Profile Picture
-* Name
-* Email
-* Saved Contests Count
-* Active Reminders Count
-* Quick Navigation
+Profiles are personal account settings; they are not published as public pages.
+The Google sign-in email remains read-only. Custom details are stored separately
+from Google account metadata, so signing in again does not overwrite them.
+
+Profile API requests verify a Firebase ID token and use its UID. A transaction
+checks the saved revision to prevent another tab's changes from being overwritten.
+Photos are validated on the server, stripped of metadata, and converted to small
+WebP avatars. Private Cloud Storage is used when the configured bucket exists;
+otherwise avatars are stored in separate `users/{uid}/profilePhotos` documents
+(up to 192 KB each). Photo reads require authentication and responses are not
+publicly cached. Replaced or removed images are cleaned up.
+
+### Profile development checks
+
+The profile integration suite uses the **demo-contest-manager** Firebase project
+and local emulators. It does not modify production accounts or data. Install the
+Firebase CLI and Java runtime, then run these in separate PowerShell terminals:
+
+```powershell
+firebase emulators:start --config firebase.test.json --project demo-contest-manager --only auth,firestore,storage
+```
+
+```powershell
+$env:NEXT_PUBLIC_FIREBASE_EMULATORS='true'
+npm run dev -- --port 3001 --hostname 127.0.0.1
+```
+
+```powershell
+npm run test:profile
+```
+
+The suite checks authentication, persistence, field validation, photo processing,
+account isolation, image cleanup, and competing saves. Test rules under
+`tests/fixtures` are for these emulators only and should not be deployed as
+production rules. The profile form is separate from its Firebase connection so
+its layout and interactions can also be checked with local fixtures.
 
 ---
 

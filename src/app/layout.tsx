@@ -36,15 +36,15 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <ProfileProvider>
-            <a className="skip-link" href="#main-content">
-              Skip to content
-            </a>
-            <Navbar />
-            <main id="main-content" className="site-main" tabIndex={-1}>
-              {children}
-            </main>
-            <SiteFooter />
-            <Toaster richColors position="bottom-right" closeButton />
+              <a className="skip-link" href="#main-content">
+                Skip to content
+              </a>
+              <Navbar />
+              <main id="main-content" className="site-main" tabIndex={-1}>
+                {children}
+              </main>
+              <SiteFooter />
+              <Toaster richColors position="bottom-right" closeButton />
             </ProfileProvider>
           </AuthProvider>
         </ThemeProvider>

@@ -189,7 +189,11 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       uid: user.uid,
       profile,
       photoURL,
-      photoError: false,
+      photoError:
+        !avatar &&
+        avatarAction === "keep" &&
+        profile.avatarMode === "custom" &&
+        !!state?.photoError,
       error: null,
     });
     return profile;

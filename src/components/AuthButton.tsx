@@ -20,7 +20,8 @@ export default function AuthButton({
 }) {
   const { user, loading, busy, login, logout } = useAuth();
   const { profile, photoURL } = useProfile();
-  const name = profile?.values.displayName || user?.displayName || "Your account";
+  const name =
+    profile?.values.displayName || user?.displayName || "Your account";
   if (loading)
     return (
       <div
@@ -55,7 +56,11 @@ export default function AuthButton({
           className="flex min-h-11 items-center gap-2 rounded-lg px-1.5 hover:bg-muted"
           aria-label="Open account menu"
         >
-          <ProfileAvatar src={profile ? photoURL : user.photoURL} name={name} size={32} />
+          <ProfileAvatar
+            src={profile ? photoURL : user.photoURL}
+            name={name}
+            size={32}
+          />
           <ChevronDown
             size={13}
             className="text-muted-foreground"
@@ -70,9 +75,7 @@ export default function AuthButton({
           className="z-50 w-64 rounded-xl border border-border bg-card p-1.5 shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
         >
           <div className="px-3 py-3">
-            <p className="truncate text-sm font-medium">
-              {name}
-            </p>
+            <p className="truncate text-sm font-medium">{name}</p>
             <p className="mt-1 truncate text-xs text-muted-foreground">
               {user.email}
             </p>

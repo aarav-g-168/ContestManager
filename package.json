@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "test:profile": "node scripts/test-profile.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

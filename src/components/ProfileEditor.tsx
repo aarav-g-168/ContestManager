@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type FocusEvent,
   type FormEvent,
 } from "react";
 import { useTheme } from "next-themes";
@@ -92,12 +93,53 @@ const codingFields = [
 ] as const;
 
 export default function ProfileEditor({ initial }: { initial: SavedProfile }) {
-  const router = useRouter();
   const { user } = useAuth();
   const account = useProfile();
   const bookmarks = useBookmarks();
   const reminders = useReminders();
+  if (!user) return null;
+  return (
+    <ProfileForm
+      initial={initial}
+      user={user}
+      account={account}
+      counts={{
+        bookmarks: bookmarks.loading
+          ? "…"
+          : bookmarks.error
+            ? "—"
+            : bookmarks.bookmarkedContests.length,
+        reminders: reminders.loading
+          ? "…"
+          : reminders.error
+            ? "—"
+            : Object.keys(reminders.reminders).length,
+      }}
+    />
+  );
+}
+
+interface ProfileFormProps {
+  initial: SavedProfile;
+  user: { email: string | null; photoURL: string | null };
+  account: Pick<
+    ReturnType<typeof useProfile>,
+    "save" | "reload" | "photoURL" | "photoError"
+  >;
+  counts: { bookmarks: number | string; reminders: number | string };
+}
+
+// The form is independent of Firebase so its interactions can be checked in isolation.
+export function ProfileForm({
+  initial,
+  user,
+  account,
+  counts,
+}: ProfileFormProps) {
+  const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [draft, setDraft] = useState(initial.values);
   const [baseline, setBaseline] = useState(initial);
   const [avatar, setAvatar] = useState<File | null>(null);
@@ -110,6 +152,7 @@ export default function ProfileEditor({ initial }: { initial: SavedProfile }) {
   const [saved, setSaved] = useState(false);
   const [leaveTo, setLeaveTo] = useState<string | null>(null);
   const errorSummary = useRef<HTMLDivElement>(null);
+  const saveBar = useRef<HTMLDivElement>(null);
   const dirty =
     JSON.stringify(draft) !== JSON.stringify(baseline.values) ||
     !!avatar ||
@@ -198,6 +241,17 @@ export default function ProfileEditor({ initial }: { initial: SavedProfile }) {
       "aria-describedby": errors[key] ? `error-${key}` : undefined,
       onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
         update(key, event.target.value),
+      onFocus: (event: FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const barTop = saveBar.current?.getBoundingClientRect().top;
+        if (
+          barTop &&
+          event.currentTarget.getBoundingClientRect().bottom > barTop - 16
+        )
+          event.currentTarget.scrollIntoView({
+            block: "center",
+            behavior: "auto",
+          });
+      },
       onBlur: () =>
         setErrors((current) => ({
           ...current,
@@ -263,7 +317,6 @@ export default function ProfileEditor({ initial }: { initial: SavedProfile }) {
       setSaving(false);
     }
   }
-  if (!user) return null;
   return (
     <div className="profile-layout">
       <aside className="profile-sidebar" aria-label="Your profile preview">
@@ -343,21 +396,13 @@ export default function ProfileEditor({ initial }: { initial: SavedProfile }) {
             {
               href: "/bookmarks",
               label: "Saved contests",
-              value: bookmarks.loading
-                ? "…"
-                : bookmarks.error
-                  ? "—"
-                  : bookmarks.bookmarkedContests.length,
+              value: counts.bookmarks,
               icon: Bookmark,
             },
             {
               href: "/reminders",
               label: "Email reminders",
-              value: reminders.loading
-                ? "…"
-                : reminders.error
-                  ? "—"
-                  : Object.keys(reminders.reminders).length,
+              value: counts.reminders,
               icon: Bell,
             },
           ].map(({ href, label, value, icon: Icon }) => (
@@ -638,7 +683,7 @@ export default function ProfileEditor({ initial }: { initial: SavedProfile }) {
                   key={value}
                   type="button"
                   onClick={() => setTheme(value)}
-                  aria-pressed={resolvedTheme === value}
+                  aria-pressed={mounted && resolvedTheme === value}
                 >
                   <Icon size={15} aria-hidden="true" />
                   {label}
@@ -652,7 +697,7 @@ export default function ProfileEditor({ initial }: { initial: SavedProfile }) {
             <strong>IST · UTC+5:30</strong>
           </div>
         </section>
-        <div className="profile-save-bar">
+        <div ref={saveBar} className="profile-save-bar">
           <p role="status">
             {saving ? (
               <>
