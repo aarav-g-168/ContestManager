@@ -11,12 +11,12 @@ export default async function BookmarksPage() {
   return (
     <div className="site-container pb-10">
       <PageHeading
-        eyebrow="A little more intentional"
-        title="Your shortlist"
-        description="The challenges that caught your eye, all in one place. Make time for the ones that matter."
+        eyebrow="Your account"
+        title="Bookmarks"
+        description="Contests you’ve saved for later."
       >
         <Link href="/contests" className="btn-secondary !text-xs">
-          Discover more <ArrowUpRight size={14} aria-hidden="true" />
+          Browse contests <ArrowUpRight size={14} aria-hidden="true" />
         </Link>
       </PageHeading>
       <ContestClientComponent
@@ -26,7 +26,7 @@ export default async function BookmarksPage() {
         bookmarksOnly
       />
       <p className="mt-7 text-xs text-muted-foreground">
-        Your shortlist shows saved contests within the upcoming 30 days.
+        Showing saved contests scheduled in the next 30 days.
       </p>
     </div>
   );

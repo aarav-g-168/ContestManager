@@ -8,12 +8,12 @@ export default function SiteFooter() {
         <div>
           <Brand />
           <p className="mt-3 text-xs text-muted-foreground">
-            Less searching. More competing.
+            A calendar for competitive programming.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-6 text-xs text-muted-foreground">
           <Link href="/contests" className="hover:text-foreground">
-            Explore contests
+            Contest calendar
           </Link>
           <a
             href="https://github.com/aarav-g-168"
@@ -25,10 +25,11 @@ export default function SiteFooter() {
             <Code2 size={14} aria-hidden="true" /> GitHub
           </a>
           <a
-            href="https://aaravgupta.vercel.app/"
+            href="https://aarav.site"
             target="_blank"
             rel="noreferrer"
             className="inline-flex min-h-11 items-center gap-1.5 hover:text-foreground"
+            aria-label="Aarav Gupta’s portfolio (opens in a new tab)"
           >
             Built by Aarav Gupta <ArrowUpRight size={13} aria-hidden="true" />
           </a>

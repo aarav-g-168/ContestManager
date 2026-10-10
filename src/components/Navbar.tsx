@@ -40,7 +40,7 @@ export default function Navbar() {
                 key={href}
                 href={href}
                 aria-current={pathname === href ? "page" : undefined}
-                className={`relative rounded-md px-4 py-2.5 text-[12px] transition-colors ${pathname === href ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                className={`relative rounded-md px-4 py-2.5 text-sm transition-colors ${pathname === href ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
               >
                 {pathname === href && (
                   <motion.span
@@ -112,9 +112,7 @@ export default function Navbar() {
                   Appearance
                   <ThemeToggle />
                 </div>
-                <p className="eyebrow mt-10 pb-2">
-                  Show up. Solve. Repeat.
-                </p>
+                <p className="eyebrow mt-10 pb-2">Contest Manager</p>
               </Dialog.Content>
             </Dialog.Portal>
           </Dialog.Root>

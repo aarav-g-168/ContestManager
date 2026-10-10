@@ -99,12 +99,11 @@ export default function ContestCard({
         <p className="flex items-center gap-2">
           <Clock3 size={13} aria-hidden="true" />
           {duration}
-          <span className="mx-1 opacity-40">/</span>
-          <span>
-            {hasReminder
-              ? `${reminderType} reminder set`
-              : "Ready when you are"}
-          </span>
+          {hasReminder && (
+            <span className="ml-1 text-primary">
+              · {reminderType} reminder set
+            </span>
+          )}
         </p>
       </div>
       <div className="contest-footer">

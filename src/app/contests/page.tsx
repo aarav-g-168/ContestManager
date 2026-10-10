@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArrowUpRight, Clock3 } from "lucide-react";
+import { Clock3 } from "lucide-react";
 import ContestClientComponent from "@/components/ContestClientComponent";
 import PageHeading from "@/components/PageHeading";
 import FeedError from "@/components/FeedError";
@@ -11,13 +11,13 @@ export default async function ContestsPage() {
   return (
     <div className="site-container pb-7">
       <PageHeading
-        eyebrow="Find your starting line"
-        title="The contest calendar"
-        description="Big challenges. Fresh problems. Explore upcoming contests across the platforms you love."
+        eyebrow="Calendar"
+        title="Upcoming contests"
+        description="Search by name or platform, filter by date, and save the contests you want to enter."
       >
         <span className="flex items-center gap-2 whitespace-nowrap font-mono text-[10px] text-muted-foreground">
           <Clock3 size={13} aria-hidden="true" />
-          ALL TIMES IN IST <ArrowUpRight size={12} aria-hidden="true" />
+          Times in IST (UTC+5:30)
         </span>
       </PageHeading>
       {error ? (

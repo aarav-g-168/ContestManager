@@ -40,7 +40,7 @@ export function useBookmarks() {
   const bookmarkedContests = saved?.uid === user?.uid ? (saved?.ids ?? []) : [];
   async function toggleBookmark(contest: Contest) {
     if (!user) {
-      toast("Sign in to save your shortlist.", {
+      toast("Sign in to bookmark contests.", {
         action: { label: "Sign in", onClick: login },
       });
       return;
@@ -55,7 +55,7 @@ export function useBookmarks() {
     try {
       if (bookmarkedContests.includes(contest.id)) {
         await deleteDoc(reference);
-        toast.success("Removed from your shortlist.");
+        toast.success("Bookmark removed.");
       } else {
         await setDoc(reference, {
           contestId: contest.id,
@@ -66,7 +66,7 @@ export function useBookmarks() {
           duration: contest.duration,
           createdAt: new Date(),
         });
-        toast.success("Saved to your shortlist.");
+        toast.success("Contest bookmarked.");
       }
     } catch {
       toast.error("Couldn't update your bookmark. Please try again.");

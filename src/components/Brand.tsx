@@ -23,7 +23,7 @@ export default function Brand() {
           />
         </svg>
       </span>
-      <span className="text-[15px] font-semibold tracking-[-.055em] max-[360px]:text-[14px]">
+      <span className="text-[15px] font-semibold tracking-[-.02em] max-[360px]:text-[13px]">
         contest
         <span className="font-normal text-muted-foreground">manager</span>
         <span className="text-primary">.</span>

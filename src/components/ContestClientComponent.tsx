@@ -136,18 +136,18 @@ export default function ContestClientComponent({
         </div>
         <h2 className="text-xl font-medium tracking-tight">
           {bookmarksOnly
-            ? "Your next challenge deserves a spot."
-            : "A little nudge. Right on time."}
+            ? "Sign in to view your bookmarks"
+            : "Sign in to manage reminders"}
         </h2>
         <p className="mx-auto mb-6 mt-3 max-w-sm text-sm leading-7 text-muted-foreground">
           Sign in with Google to{" "}
           {bookmarksOnly
-            ? "build a personal shortlist and keep it with you across devices."
-            : "set email reminders and never lose track of a contest."}
+            ? "save contests and access them on your other devices."
+            : "receive an email 1, 6, or 24 hours before a contest starts."}
         </p>
         <AuthButton expanded />
-        <p className="mt-5 font-mono text-[10px] text-muted-foreground">
-          One account. Your own contest calendar.
+        <p className="mt-5 text-xs text-muted-foreground">
+          Your bookmarks and reminders are linked to your Google account.
         </p>
       </div>
     );
@@ -189,7 +189,7 @@ export default function ContestClientComponent({
                   setQuery(event.target.value);
                   setLimit(12);
                 }}
-                placeholder="Find your next challenge..."
+                placeholder="Search contests or platforms"
               />
               {query && (
                 <button
@@ -392,20 +392,20 @@ export default function ContestClientComponent({
           </div>
           <h2 className="text-xl font-medium tracking-tight">
             {filtered
-              ? "No contests match just yet."
+              ? "No matching contests"
               : bookmarksOnly
-                ? "Make room for your next challenge."
+                ? "No bookmarks yet"
                 : remindersOnly
-                  ? "Your calendar is quiet. For now."
-                  : "The next challenge is on its way."}
+                  ? "No reminders set"
+                  : "No upcoming contests"}
           </h2>
           <p className="mx-auto mt-3 max-w-sm text-sm leading-7 text-muted-foreground">
             {filtered
-              ? "Try another search or loosen your filters."
+              ? "Try a different search or clear your filters."
               : bookmarksOnly
-                ? "Tap the bookmark on any contest to start building your shortlist."
+                ? "Use the bookmark icon on a contest to save it here."
                 : remindersOnly
-                  ? "Choose a contest and tap the bell. We'll take care of the nudge."
+                  ? "Open a contest’s bell menu to choose when you’d like an email reminder."
                   : "Check back soon for newly announced contests."}
           </p>
           {filtered ? (

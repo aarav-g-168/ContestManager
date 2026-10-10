@@ -15,11 +15,10 @@ export default function ErrorPage({
   return (
     <div className="site-container py-16">
       <div className="empty-state">
-        <p className="eyebrow mb-5 !text-primary">A small interruption</p>
-        <h1 className="page-title !text-4xl">Let’s try that again.</h1>
+        <p className="eyebrow mb-5 !text-primary">Page error</p>
+        <h1 className="page-title !text-4xl">Unable to load this page</h1>
         <p className="mx-auto mt-4 max-w-sm text-sm leading-7 text-muted-foreground">
-          Something interrupted this page. Give it another go, or head back to
-          the contest calendar.
+          Try again, or return to the contest calendar.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
           <button onClick={reset} className="btn-primary">

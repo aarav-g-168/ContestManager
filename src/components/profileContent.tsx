@@ -33,9 +33,9 @@ export default function ProfileContent() {
     return (
       <div className="site-container">
         <PageHeading
-          eyebrow="A space of your own"
-          title="Your workspace"
-          description="All your preparation, in one place."
+          eyebrow="Your account"
+          title="Profile & preferences"
+          description="Manage your bookmarks, reminders, and theme."
         />
         <div className="surface p-8">
           <div className="skeleton mb-6 size-20 !rounded-2xl" />
@@ -48,13 +48,13 @@ export default function ProfileContent() {
     return (
       <div className="site-container pb-10">
         <PageHeading
-          eyebrow="A space of your own"
-          title="Make it personal"
-          description="A great routine starts with a little organization. Your own contest workspace is one sign-in away."
+          eyebrow="Your account"
+          title="Profile & preferences"
+          description="Sign in to access your saved contests and email reminders."
         />
         <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
           <Reveal>
-            <div className="relative flex h-full min-h-[360px] flex-col justify-between overflow-hidden rounded-2xl border border-primary/20 bg-primary/5 p-8 sm:p-10">
+            <div className="relative flex h-full min-h-[320px] flex-col justify-between overflow-hidden rounded-xl border border-border bg-muted/40 p-8 sm:p-10">
               <Code2
                 size={38}
                 strokeWidth={1.25}
@@ -62,20 +62,18 @@ export default function ProfileContent() {
                 aria-hidden="true"
               />
               <div className="mt-10">
-                <h2 className="text-[34px] font-medium leading-tight tracking-[-.05em]">
-                  Your challenges.
+                <h2 className="text-[30px] font-medium leading-tight tracking-[-.02em]">
+                  Keep your contests
                   <br />
-                  Your rhythm.
-                  <br />
-                  <span className="text-primary">Your next breakthrough.</span>
+                  in one account
                 </h2>
                 <p className="mt-5 max-w-sm text-sm leading-7 text-muted-foreground">
-                  Save a contest today. Set a reminder for tomorrow. Build a
-                  routine that sticks.
+                  Bookmarks and reminders are saved to your Google account, so
+                  you can access them on your other devices.
                 </p>
               </div>
               <p className="eyebrow mt-8 !text-[9px]">
-                Show up. Solve. Repeat.
+                Google account required
               </p>
             </div>
           </Reveal>
@@ -89,17 +87,17 @@ export default function ProfileContent() {
                 />
               </span>
               <h2 className="text-2xl font-medium tracking-tight">
-                A little space for big goals.
+                Sign in to Contest Manager
               </h2>
               <p className="mb-6 mt-3 text-sm leading-7 text-muted-foreground">
-                Continue with your Google account to make Contest Manager yours.
+                Use your Google account to save contests and manage reminders.
               </p>
               <AuthButton expanded />
               <div className="mt-8 space-y-3 border-t border-border pt-6 text-xs text-muted-foreground">
                 {[
-                  "Your saved contests, across every device",
-                  "Email reminders before the starting line",
-                  "One place to keep your preparation organized",
+                  "Save contests for later",
+                  "Get reminders by email",
+                  "Access your bookmarks on any device",
                 ].map((item) => (
                   <p key={item} className="flex items-center gap-2">
                     <Check
@@ -119,12 +117,12 @@ export default function ProfileContent() {
   return (
     <div className="site-container pb-10">
       <PageHeading
-        eyebrow="A space of your own"
-        title="Your workspace"
-        description={`Good to see you, ${user.displayName?.split(" ")[0] || "coder"}. Let’s get you ready for what’s next.`}
+        eyebrow="Your account"
+        title="Profile & preferences"
+        description="Manage your bookmarks, email reminders, and theme."
       >
         <Link href="/contests" className="btn-primary">
-          Find a challenge <ArrowUpRight size={15} aria-hidden="true" />
+          Browse contests <ArrowUpRight size={15} aria-hidden="true" />
         </Link>
       </PageHeading>
       <div className="grid items-start gap-6 lg:grid-cols-[.85fr_1.5fr]">
@@ -195,7 +193,7 @@ export default function ProfileContent() {
                 busy: bookmarks.loading,
                 error: bookmarks.error,
                 icon: Bookmark,
-                copy: "Your personal shortlist",
+                copy: "View your bookmarks",
               },
               {
                 href: "/reminders",
@@ -204,7 +202,7 @@ export default function ProfileContent() {
                 busy: reminders.loading,
                 error: reminders.error,
                 icon: Bell,
-                copy: "A heads-up before the start",
+                copy: "Manage email reminders",
               },
             ].map(({ href, label, count, busy, error, icon: Icon, copy }) => (
               <Reveal key={href}>
@@ -242,11 +240,9 @@ export default function ProfileContent() {
             <div className="surface p-6 sm:p-7">
               <div className="flex items-center justify-between gap-5">
                 <div>
-                  <h2 className="text-sm font-medium">
-                    Make yourself comfortable.
-                  </h2>
+                  <h2 className="text-sm font-medium">Appearance</h2>
                   <p className="mt-2 text-xs leading-6 text-muted-foreground">
-                    Early mornings or late-night solves. Pick your view.
+                    Choose a light or dark theme.
                   </p>
                 </div>
               </div>
@@ -278,10 +274,10 @@ export default function ProfileContent() {
               </span>
               <span className="flex-1">
                 <span className="block text-sm font-medium">
-                  Make your next move.
+                  Contest calendar
                 </span>
                 <span className="mt-1 block text-xs text-muted-foreground">
-                  Explore what’s coming up on the calendar.
+                  View upcoming programming contests.
                 </span>
               </span>
               <ArrowRight

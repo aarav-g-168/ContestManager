@@ -10,13 +10,13 @@ export default async function RemindersPage() {
   return (
     <div className="site-container pb-10">
       <PageHeading
-        eyebrow="Right place. Right time."
-        title="Never miss the start"
-        description="A heads-up for the contests you care about. Your reminders, neatly lined up."
+        eyebrow="Your account"
+        title="Email reminders"
+        description="Manage the reminders you’ve set for upcoming contests."
       >
         <span className="flex items-center gap-2 rounded-lg border border-border px-4 py-3 text-xs text-muted-foreground">
           <Mail size={14} className="text-primary" aria-hidden="true" />
-          Delivered to your inbox
+          Sent to your account email
         </span>
       </PageHeading>
       <div className="mb-7 flex items-start gap-3 rounded-xl border border-primary/15 bg-primary/5 p-4 text-xs leading-6 text-muted-foreground">
