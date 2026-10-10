@@ -3,6 +3,7 @@ import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "../globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/components/AuthProvider";
+import { ProfileProvider } from "@/components/ProfileProvider";
 import Navbar from "@/components/Navbar";
 import SiteFooter from "@/components/SiteFooter";
 import { Toaster } from "sonner";
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body className={`${plexSans.variable} ${plexMono.variable}`}>
         <ThemeProvider>
           <AuthProvider>
+            <ProfileProvider>
             <a className="skip-link" href="#main-content">
               Skip to content
             </a>
@@ -43,6 +45,7 @@ export default function RootLayout({
             </main>
             <SiteFooter />
             <Toaster richColors position="bottom-right" closeButton />
+            </ProfileProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -11,12 +11,16 @@ import {
   UserRound,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
+import { useProfile } from "./ProfileProvider";
+import ProfileAvatar from "./ProfileAvatar";
 export default function AuthButton({
   expanded = false,
 }: {
   expanded?: boolean;
 }) {
   const { user, loading, busy, login, logout } = useAuth();
+  const { profile, photoURL } = useProfile();
+  const name = profile?.values.displayName || user?.displayName || "Your account";
   if (loading)
     return (
       <div
@@ -51,9 +55,7 @@ export default function AuthButton({
           className="flex min-h-11 items-center gap-2 rounded-lg px-1.5 hover:bg-muted"
           aria-label="Open account menu"
         >
-          <span className="flex size-8 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-xs font-medium text-primary">
-            {user.displayName?.slice(0, 1) || "C"}
-          </span>
+          <ProfileAvatar src={profile ? photoURL : user.photoURL} name={name} size={32} />
           <ChevronDown
             size={13}
             className="text-muted-foreground"
@@ -69,7 +71,7 @@ export default function AuthButton({
         >
           <div className="px-3 py-3">
             <p className="truncate text-sm font-medium">
-              {user.displayName || "Your account"}
+              {name}
             </p>
             <p className="mt-1 truncate text-xs text-muted-foreground">
               {user.email}
