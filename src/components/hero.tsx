@@ -8,15 +8,19 @@ import {
   Bookmark,
   CalendarDays,
   CalendarPlus,
-  Clock3,
 } from "lucide-react";
 import type { Contest } from "@/types/contest";
-import { getPlatform, getPlatformKey } from "@/lib/platforms";
-import { parseAsUTC } from "@/lib/date";
-import CountdownTimer from "./countdownTimer";
+import { getPlatformKey } from "@/lib/platforms";
 import { Magnet, Reveal } from "./ui/interaction";
+import ContestWeek from "./ContestWeek";
 
-export default function HeroSection({ contests }: { contests: Contest[] }) {
+export default function HeroSection({
+  contests,
+  today,
+}: {
+  contests: Contest[];
+  today: string;
+}) {
   const platformCount = new Set(
     contests.map((contest) => getPlatformKey(contest.host)),
   ).size;
@@ -44,8 +48,8 @@ export default function HeroSection({ contests }: { contests: Contest[] }) {
                   Browse contests <ArrowRight size={16} aria-hidden="true" />
                 </Link>
               </Magnet>
-              <a href="#how-it-works" className="text-link">
-                How it works <ArrowUpRight size={15} aria-hidden="true" />
+              <a href="#explore-platforms" className="text-link">
+                Explore platforms <ArrowUpRight size={15} aria-hidden="true" />
               </a>
             </div>
             <dl className="hero-facts">
@@ -77,111 +81,10 @@ export default function HeroSection({ contests }: { contests: Contest[] }) {
             </dl>
           </div>
           <div className="hero-art reveal" style={{ animationDelay: ".1s" }}>
-            <div className="agenda surface">
-              <div className="agenda-header">
-                <div className="flex items-center gap-3">
-                  <span className="agenda-icon">
-                    <CalendarDays size={18} aria-hidden="true" />
-                  </span>
-                  <h2 id="agenda-title">Next up</h2>
-                </div>
-                <span className="agenda-label">
-                  <span className="status-dot" />{" "}
-                  {contests.length ? "Upcoming" : "Calendar"}
-                </span>
-              </div>
-              <div aria-labelledby="agenda-title">
-                {contests.slice(0, 3).map((contest) => {
-                  const start = parseAsUTC(contest.start);
-                  return (
-                    <a
-                      key={contest.id}
-                      className="agenda-entry group"
-                      href={contest.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={`${contest.event} on ${getPlatform(contest.host).name} (opens in a new tab)`}
-                    >
-                      <time
-                        className="agenda-date"
-                        dateTime={start.toISOString()}
-                      >
-                        <span>
-                          {start.toLocaleDateString("en-GB", {
-                            day: "2-digit",
-                            timeZone: "Asia/Kolkata",
-                          })}
-                        </span>
-                        {start.toLocaleDateString("en-GB", {
-                          month: "short",
-                          timeZone: "Asia/Kolkata",
-                        })}
-                      </time>
-                      <div className="min-w-0">
-                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-                          <span>{getPlatform(contest.host).name}</span>
-                          <CountdownTimer startTime={contest.start} />
-                        </div>
-                        <h3 className="agenda-event">{contest.event}</h3>
-                        <p className="mt-2.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-                          <Clock3 size={12} aria-hidden="true" />
-                          {start.toLocaleTimeString("en-GB", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                            timeZone: "Asia/Kolkata",
-                          })}{" "}
-                          IST{" "}
-                          <ArrowUpRight
-                            size={14}
-                            className="ml-auto text-primary transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                            aria-hidden="true"
-                          />
-                        </p>
-                      </div>
-                    </a>
-                  );
-                })}
-                {!contests.length && (
-                  <div className="px-6 py-10">
-                    <h3 className="text-lg font-medium">
-                      No contest data available
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      Open the calendar to retry the contest feed.
-                    </p>
-                  </div>
-                )}
-              </div>
-              <Link href="/contests" className="agenda-footer">
-                View full calendar <ArrowRight size={15} aria-hidden="true" />
-              </Link>
-            </div>
+            <ContestWeek contests={contests} today={today} />
           </div>
         </div>
       </section>
-      <div className="platform-strip">
-        <p className="platform-strip-label">Contests from</p>
-        {[
-          { name: "Codeforces", host: "codeforces.com" },
-          { name: "LeetCode", host: "leetcode.com" },
-          { name: "AtCoder", host: "atcoder.jp" },
-          { name: "CodeChef", host: "codechef.com" },
-          { name: "HackerRank", host: "hackerrank.com" },
-        ].map((item) => (
-          <a
-            key={item.host}
-            href={`https://${item.host}`}
-            target="_blank"
-            rel="noreferrer"
-            className="platform-wordmark"
-            aria-label={`${item.name} (opens in a new tab)`}
-          >
-            {item.name}
-            <ArrowUpRight size={13} aria-hidden="true" />
-          </a>
-        ))}
-      </div>
     </>
   );
 }

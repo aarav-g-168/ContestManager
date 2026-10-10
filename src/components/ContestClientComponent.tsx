@@ -32,6 +32,9 @@ import { parseAsUTC } from "@/lib/date";
 import AuthButton from "./AuthButton";
 import SkeletonGrid from "./SkeletonGrid";
 import FeedError from "./FeedError";
+import ContestSort from "./ContestSort";
+import ContestWeek from "./ContestWeek";
+import { getContestDay } from "@/lib/contestCalendar";
 import type { Contest } from "@/types/contest";
 interface Props {
   feedError?: string | null;
@@ -39,6 +42,9 @@ interface Props {
   showFilters?: boolean;
   bookmarksOnly?: boolean;
   remindersOnly?: boolean;
+  today?: string;
+  initialPlatform?: string;
+  initialDate?: string;
 }
 export default function ContestClientComponent({
   feedError,
@@ -46,8 +52,14 @@ export default function ContestClientComponent({
   showFilters = false,
   bookmarksOnly = false,
   remindersOnly = false,
+  today,
+  initialPlatform = "",
+  initialDate = "",
 }: Props) {
-  const [platforms, setPlatforms] = useState<string[]>([]);
+  const [platforms, setPlatforms] = useState<string[]>(
+    initialPlatform ? [initialPlatform] : [],
+  );
+  const [date, setDate] = useState(initialDate);
   const [query, setQuery] = useState("");
   const [range, setRange] = useState("all");
   const [sort, setSort] = useState("soonest");
@@ -71,6 +83,7 @@ export default function ContestClientComponent({
       if (bookmarksOnly && !bookmarks.bookmarkedContests.includes(contest.id))
         return false;
       if (remindersOnly && !(contest.id in reminder.reminders)) return false;
+      if (date && getContestDay(contest.start) !== date) return false;
       if (platforms.length && !platforms.includes(getPlatformKey(contest.host)))
         return false;
       if (
@@ -106,6 +119,7 @@ export default function ContestClientComponent({
     query,
     range,
     sort,
+    date,
   ]);
   function togglePlatform(host: string) {
     setPlatforms((current) =>
@@ -119,9 +133,10 @@ export default function ContestClientComponent({
     setPlatforms([]);
     setQuery("");
     setRange("all");
+    setDate("");
     setLimit(12);
   }
-  const filtered = !!(query || platforms.length || range !== "all");
+  const filtered = !!(query || platforms.length || range !== "all" || date);
   if (
     personal &&
     (authLoading || (bookmarksOnly ? bookmarks.loading : reminder.loading))
@@ -172,10 +187,26 @@ export default function ContestClientComponent({
   if (feedError) return <FeedError message={feedError} />;
   return (
     <div>
+      {showFilters && !personal && today && (
+        <ContestWeek
+          contests={initialContests.filter(
+            (contest) =>
+              !platforms.length ||
+              platforms.includes(getPlatformKey(contest.host)),
+          )}
+          today={today}
+          selectedDate={date}
+          onSelectDate={(nextDate) => {
+            setDate(nextDate);
+            setRange("all");
+            setLimit(12);
+          }}
+        />
+      )}
       {showFilters && <h2 className="sr-only">Browse upcoming contests</h2>}
       {showFilters && (
-        <div className="mb-7">
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row">
+        <div id="contest-results" className="browse-toolbar">
+          <div className="browse-search-row">
             <label className="input-shell flex-1">
               <Search
                 size={16}
@@ -250,20 +281,7 @@ export default function ContestClientComponent({
                 )}
               </PopoverContent>
             </Popover>
-            <label className="input-shell">
-              <span className="sr-only">Sort contests</span>
-              <select
-                className="min-h-11 w-full bg-transparent text-xs outline-none"
-                value={sort}
-                onChange={(event) => setSort(event.target.value)}
-              >
-                <option value="soonest">Soonest first</option>
-                <option value="latest">Latest first</option>
-                <option value="duration-short">Shortest duration</option>
-                <option value="duration-long">Longest duration</option>
-                <option value="platform">Platform A–Z</option>
-              </select>
-            </label>
+            <ContestSort value={sort} onValueChange={setSort} />
           </div>
           <div className="flex flex-col justify-between gap-3 border-b border-border pb-4 sm:flex-row sm:items-center">
             <div
@@ -279,10 +297,11 @@ export default function ContestClientComponent({
                 <button
                   key={item.id}
                   className="filter-chip"
-                  data-active={range === item.id}
-                  aria-pressed={range === item.id}
+                  data-active={range === item.id && !date}
+                  aria-pressed={range === item.id && !date}
                   onClick={() => {
                     setRange(item.id);
+                    setDate("");
                     setLimit(12);
                   }}
                 >
@@ -292,7 +311,7 @@ export default function ContestClientComponent({
             </div>
             <div className="flex items-center gap-4">
               <p
-                className="font-mono text-[10px] text-muted-foreground"
+                className="text-[13px] text-muted-foreground"
                 role="status"
                 aria-live="polite"
               >
@@ -322,8 +341,22 @@ export default function ContestClientComponent({
               </div>
             </div>
           </div>
-          {platforms.length > 0 && (
+          {(platforms.length > 0 || date) && (
             <div className="mt-3 flex flex-wrap gap-2">
+              {date && (
+                <button
+                  className="filter-chip !border-primary/25 !bg-primary/5 !text-primary"
+                  onClick={() => setDate("")}
+                  aria-label="Remove date filter"
+                >
+                  {new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    timeZone: "UTC",
+                  })}
+                  <X size={12} aria-hidden="true" />
+                </button>
+              )}
               {platforms.map((host) => (
                 <button
                   key={host}

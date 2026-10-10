@@ -68,7 +68,10 @@ export default function ContestCard({
     }
   }
   return (
-    <SpotlightCard className="contest-card group h-full">
+    <SpotlightCard
+      className="contest-card group h-full"
+      style={{ "--contest-color": platform.color } as CSSProperties}
+    >
       <div className="flex items-center gap-2.5">
         <PlatformBadge host={contest.host} />
         <span className="min-w-0 truncate text-xs font-medium">
@@ -78,8 +81,17 @@ export default function ContestCard({
           <CountdownTimer startTime={contest.start} />
         </span>
       </div>
-      <h3 className="contest-title">{contest.event}</h3>
-      <div className="contest-details mt-auto space-y-2.5 text-xs text-muted-foreground">
+      <h3 className="contest-title">
+        <a
+          href={contest.href}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`${contest.event} (opens in a new tab)`}
+        >
+          {contest.event}
+        </a>
+      </h3>
+      <div className="contest-details mt-auto space-y-2.5 text-[13px] text-muted-foreground">
         <p className="flex items-center gap-2">
           <CalendarDays size={13} aria-hidden="true" />
           <time dateTime={validDate ? start.toISOString() : undefined}>
