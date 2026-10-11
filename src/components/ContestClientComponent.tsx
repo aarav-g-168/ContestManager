@@ -45,6 +45,8 @@ interface Props {
   today?: string;
   initialPlatform?: string;
   initialDate?: string;
+  initialQuery?: string;
+  initialRange?: string;
 }
 export default function ContestClientComponent({
   feedError,
@@ -55,13 +57,15 @@ export default function ContestClientComponent({
   today,
   initialPlatform = "",
   initialDate = "",
+  initialQuery = "",
+  initialRange = "all",
 }: Props) {
   const [platforms, setPlatforms] = useState<string[]>(
     initialPlatform ? [initialPlatform] : [],
   );
   const [date, setDate] = useState(initialDate);
-  const [query, setQuery] = useState("");
-  const [range, setRange] = useState("all");
+  const [query, setQuery] = useState(initialQuery);
+  const [range, setRange] = useState(initialRange);
   const [sort, setSort] = useState("soonest");
   const [view, setView] = useState("grid");
   const [limit, setLimit] = useState(12);
@@ -165,64 +169,9 @@ export default function ContestClientComponent({
   if (feedError) return <FeedError message={feedError} />;
   return (
     <div>
-      {showFilters && !personal && today && (
-        <ContestWeek
-          contests={initialContests.filter(
-            (contest) =>
-              !platforms.length ||
-              platforms.includes(getPlatformKey(contest.host)),
-          )}
-          today={today}
-          selectedDate={date}
-          onSelectDate={(nextDate) => {
-            setDate(nextDate);
-            setRange("all");
-            setLimit(12);
-          }}
-        />
-      )}
       {showFilters && <h2 className="sr-only">Browse upcoming contests</h2>}
       {showFilters && (
         <div id="contest-results" className="browse-toolbar">
-          {!personal && (
-            <div
-              className="platform-switcher"
-              role="group"
-              aria-label="Quick platform filters"
-            >
-              <span>Jump to</span>
-              <button
-                aria-pressed={platforms.length === 0}
-                onClick={() => {
-                  setPlatforms([]);
-                  setLimit(12);
-                }}
-              >
-                All platforms
-              </button>
-              {["codeforces.com", "leetcode.com", "atcoder.jp", "codechef.com"]
-                .filter((host) => allPlatforms.includes(host))
-                .map((host) => (
-                  <button
-                    key={host}
-                    aria-pressed={platforms.includes(host)}
-                    onClick={() => {
-                      setPlatforms([host]);
-                      setLimit(12);
-                    }}
-                  >
-                    {getPlatform(host).name}
-                    <span>
-                      {
-                        initialContests.filter(
-                          (contest) => getPlatformKey(contest.host) === host,
-                        ).length
-                      }
-                    </span>
-                  </button>
-                ))}
-            </div>
-          )}
           <div className="browse-search-row">
             <label className="input-shell flex-1">
               <Search
@@ -300,6 +249,45 @@ export default function ContestClientComponent({
             </Popover>
             <ContestSort value={sort} onValueChange={setSort} />
           </div>
+          {!personal && (
+            <div
+              className="platform-switcher"
+              role="group"
+              aria-label="Quick platform filters"
+            >
+              <span>Jump to</span>
+              <button
+                aria-pressed={platforms.length === 0}
+                onClick={() => {
+                  setPlatforms([]);
+                  setLimit(12);
+                }}
+              >
+                All platforms
+              </button>
+              {["codeforces.com", "leetcode.com", "atcoder.jp", "codechef.com"]
+                .filter((host) => allPlatforms.includes(host))
+                .map((host) => (
+                  <button
+                    key={host}
+                    aria-pressed={platforms.includes(host)}
+                    onClick={() => {
+                      setPlatforms([host]);
+                      setLimit(12);
+                    }}
+                  >
+                    {getPlatform(host).name}
+                    <span>
+                      {
+                        initialContests.filter(
+                          (contest) => getPlatformKey(contest.host) === host,
+                        ).length
+                      }
+                    </span>
+                  </button>
+                ))}
+            </div>
+          )}
           <div className="flex flex-col justify-between gap-3 border-b border-border pb-4 sm:flex-row sm:items-center">
             <div
               className="flex flex-wrap gap-1"
@@ -394,6 +382,31 @@ export default function ContestClientComponent({
             </div>
           )}
         </div>
+      )}
+      {showFilters && !personal && today && (
+        <details className="calendar-disclosure" open={date ? true : undefined}>
+          <summary>
+            Browse by date <ChevronDown size={16} aria-hidden="true" />
+          </summary>
+          <ContestWeek
+            contests={initialContests.filter(
+              (contest) =>
+                (!platforms.length ||
+                  platforms.includes(getPlatformKey(contest.host))) &&
+                (!query ||
+                  `${contest.event} ${getPlatform(contest.host).name}`
+                    .toLowerCase()
+                    .includes(query.toLowerCase())),
+            )}
+            today={today}
+            selectedDate={date}
+            onSelectDate={(nextDate) => {
+              setDate(nextDate);
+              setRange("all");
+              setLimit(12);
+            }}
+          />
+        </details>
       )}
       {contests.length ? (
         <div

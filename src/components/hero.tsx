@@ -1,171 +1,207 @@
 "use client";
-
 import Link from "next/link";
 import {
-  ArrowDown,
   ArrowRight,
   ArrowUpRight,
   Bell,
   Bookmark,
-  Code2,
+  Search,
   UserRound,
 } from "lucide-react";
 import type { Contest } from "@/types/contest";
-import { getPlatformKey } from "@/lib/platforms";
-import { Magnet, Reveal } from "./ui/interaction";
-import FeaturedRound from "./FeaturedRound";
+import { getPlatform } from "@/lib/platforms";
+import { parseAsUTC } from "@/lib/date";
+import { sortContests } from "@/lib/contestUtils";
+import { PlatformBadge } from "./contestCard";
+import CountdownTimer from "./countdownTimer";
+import { Reveal } from "./ui/interaction";
 
 export default function HeroSection({ contests }: { contests: Contest[] }) {
-  const platformCount = new Set(
-    contests.map((contest) => getPlatformKey(contest.host)),
-  ).size;
+  const next = sortContests([...contests]).slice(0, 2);
   return (
-    <section className="hero" aria-labelledby="hero-title">
-      <div className="hero-grid">
-        <div className="hero-copy reveal">
-          <p className="hero-kicker">
-            <span aria-hidden="true">{"//"}</span> THE COMPETITIVE PROGRAMMING
-            CALENDAR
-          </p>
-          <h1 id="hero-title" className="hero-title">
-            Your next round
-            <br />
-            <em>starts here.</em>
-            <span className="hero-period" aria-hidden="true">
-              _
-            </span>
-          </h1>
-          <p className="hero-description">
-            Find contests across Codeforces, LeetCode, AtCoder and more. Save
-            the rounds you want to enter and get an email before they start.
-          </p>
-          <div className="hero-actions">
-            <Magnet>
-              <Link href="/contests" className="btn-primary">
-                Explore contests <ArrowUpRight size={18} aria-hidden="true" />
-              </Link>
-            </Magnet>
-            <a href="#explore-platforms" className="text-link">
-              Find your platform <ArrowDown size={15} aria-hidden="true" />
-            </a>
-          </div>
-          <div className="hero-note">
-            <span className="hero-note-line" aria-hidden="true" />
-            Free to browse. Sign in to save your rounds.
-          </div>
-        </div>
-        <div className="hero-art reveal" style={{ animationDelay: ".1s" }}>
-          <FeaturedRound contests={contests} />
+    <section className="discovery-hero" aria-labelledby="hero-title">
+      <div className="discovery-intro">
+        <p className="discovery-kicker">
+          <span aria-hidden="true" /> THE CODING CONTEST CALENDAR
+        </p>
+        <h1 id="hero-title">
+          Less searching.
+          <br />
+          <span>More competing.</span>
+        </h1>
+        <p className="discovery-description">
+          Your next Codeforces round. This weekend’s LeetCode contest. Find them
+          all here, and make a plan.
+        </p>
+        <form action="/contests" className="landing-search" role="search">
+          <Search size={20} aria-hidden="true" />
+          <label className="sr-only" htmlFor="landing-query">
+            Search contests or platforms
+          </label>
+          <input
+            id="landing-query"
+            name="q"
+            placeholder="Find a contest or platform…"
+            maxLength={200}
+          />
+          <button type="submit" aria-label="Search contests">
+            <ArrowRight size={22} aria-hidden="true" />
+          </button>
+        </form>
+        <div className="discovery-shortcuts">
+          <span>Start with</span>
+          <Link href="/contests?range=1">
+            Next 24 hours <ArrowUpRight size={13} aria-hidden="true" />
+          </Link>
+          <Link href="/contests?platform=leetcode.com">
+            LeetCode <ArrowUpRight size={13} aria-hidden="true" />
+          </Link>
+          <Link href="/contests?platform=codeforces.com">
+            Codeforces <ArrowUpRight size={13} aria-hidden="true" />
+          </Link>
         </div>
       </div>
-      <div className="hero-ledger">
-        <div className="hero-ledger-label">
-          <Code2 size={22} strokeWidth={1.5} aria-hidden="true" />
-          <span>
-            The calendar
-            <br />
-            <strong>At a glance.</strong>
-          </span>
+      <div className="schedule-board">
+        <div className="schedule-board-heading">
+          <span>ON THE SCHEDULE</span>
+          <span>IST · UTC+5:30</span>
         </div>
-        <dl className="hero-facts">
-          <div>
-            <dt>Next 30 days</dt>
-            <dd>
-              {contests.length}
-              <span>contests ahead</span>
-            </dd>
-          </div>
-          <div>
-            <dt>One calendar</dt>
-            <dd>
-              {platformCount}
-              <span>platforms</span>
-            </dd>
-          </div>
-          <div>
-            <dt>Every start time, local</dt>
-            <dd>
-              IST<span>UTC +5:30</span>
-            </dd>
-          </div>
-        </dl>
-        <a
-          href="#contests"
-          className="ledger-explore"
-          aria-label="See this week’s contests"
-        >
-          <ArrowDown size={19} aria-hidden="true" />
-        </a>
+        {next.length ? (
+          next.map((contest, index) => {
+            const start = parseAsUTC(contest.start);
+            return (
+              <a
+                className={`schedule-entry ${index === 0 ? "schedule-entry-featured" : ""}`}
+                key={contest.id}
+                href={contest.href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`${contest.event} (opens in a new tab)`}
+              >
+                <div className="schedule-entry-date">
+                  <strong>
+                    {start.toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      timeZone: "Asia/Kolkata",
+                    })}
+                  </strong>
+                  <span>
+                    {start.toLocaleDateString("en-GB", {
+                      month: "short",
+                      timeZone: "Asia/Kolkata",
+                    })}
+                  </span>
+                </div>
+                <div className="schedule-entry-copy">
+                  <span className="schedule-platform">
+                    <PlatformBadge host={contest.host} />
+                    {getPlatform(contest.host).name}
+                    {index === 0 && <span className="next-label">NEXT UP</span>}
+                  </span>
+                  <h2>{contest.event}</h2>
+                  <time dateTime={start.toISOString()}>
+                    {start.toLocaleTimeString("en-GB", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                      timeZone: "Asia/Kolkata",
+                    })}{" "}
+                    IST
+                  </time>
+                  {index === 0 && (
+                    <div className="schedule-countdown">
+                      <CountdownTimer startTime={contest.start} />
+                    </div>
+                  )}
+                </div>
+                <ArrowUpRight
+                  className="schedule-entry-arrow"
+                  size={19}
+                  aria-hidden="true"
+                />
+              </a>
+            );
+          })
+        ) : (
+          <p className="schedule-unavailable">
+            The schedule is being updated. Check the calendar for the latest
+            rounds.
+          </p>
+        )}
+        <Link href="/contests" className="schedule-all">
+          Open the full calendar <ArrowRight size={16} aria-hidden="true" />
+        </Link>
       </div>
     </section>
   );
 }
-
 export function ProductFeatures() {
   const features = [
     {
-      title: "Keep a shortlist.",
-      description:
-        "Save the rounds you want to enter. Find them here, on any device.",
+      title: "Save it for later",
+      description: "Build a shortlist of contests you want to enter.",
       icon: Bookmark,
       href: "/bookmarks",
-      label: "Your bookmarks",
-      style: "saved",
+      label: "Open bookmarks",
+      preview: "Your next rounds, together",
+      detail: "A shortlist that stays with you",
     },
     {
-      title: "Be there at the start.",
-      description:
-        "Get an email 1, 6, or 24 hours before a contest. You choose when.",
+      title: "Get a heads-up",
+      description: "Email reminders, 1, 6, or 24 hours before the start.",
       icon: Bell,
       href: "/reminders",
-      label: "Your reminders",
-      style: "reminder",
+      label: "Manage reminders",
+      preview: "One less thing to remember",
+      detail: "Choose when we remind you",
     },
     {
-      title: "Make it your space.",
-      description:
-        "Your coding handles, bio, and links. A familiar place to come back to.",
+      title: "Put a face to your handle",
+      description: "Add your photo, coding handles, and social links.",
       icon: UserRound,
       href: "/profile",
-      label: "Your profile",
-      style: "profile",
+      label: "Edit your profile",
+      preview: "The person behind the code",
+      detail: "Your profiles, in one place",
     },
   ];
   return (
-    <section id="your-workspace" className="section-space workspace-section">
+    <section className="personal-section" aria-labelledby="personal-title">
       <div className="section-heading">
         <div>
-          <p className="eyebrow section-label">
-            <span>03 /</span> YOUR WORKSPACE
-          </p>
-          <h2 className="section-title">A calendar that’s yours.</h2>
+          <p className="discovery-kicker">MAKE IT YOURS</p>
+          <h2 id="personal-title" className="section-title">
+            Found a round? Keep it close.
+          </h2>
         </div>
-        <p className="section-aside">
-          Sign in once. Keep your contests,
-          <br className="hidden sm:block" /> reminders, and profile together.
+        <p className="personal-note">
+          Sign in to save contests and set reminders.
         </p>
       </div>
-      <div className="workspace-grid">
+      <div className="personal-grid">
         {features.map(
-          ({ title, description, icon: Icon, href, label, style }, index) => (
+          (
+            { title, description, icon: Icon, href, label, preview, detail },
+            index,
+          ) => (
             <Reveal key={href} delay={index * 0.06}>
-              <Link className={"workspace-card workspace-" + style} href={href}>
-                <div className="workspace-visual" aria-hidden="true">
-                  <span className="workspace-orbit" />
-                  <span className="workspace-orbit" />
-                  <span className="workspace-symbol">
-                    <Icon size={30} strokeWidth={1.35} />
-                  </span>
-                  <span className="workspace-mini-mark">0{index + 1}</span>
+              <Link href={href} className="personal-card">
+                <div className="personal-preview" aria-hidden="true">
+                  <div className="personal-preview-icon">
+                    <Icon size={23} />
+                  </div>
+                  <div>
+                    <strong>{preview}</strong>
+                    <span>{detail}</span>
+                  </div>
+                  <span className="personal-preview-dot" />
                 </div>
-                <div className="workspace-card-copy">
-                  <h3>{title}</h3>
-                  <p>{description}</p>
-                  <span className="text-link">
-                    {label}
-                    <ArrowRight size={15} aria-hidden="true" />
-                  </span>
-                </div>
+                <h3>{title}</h3>
+                <p>{description}</p>
+                <span className="text-link">
+                  {label}
+                  <ArrowRight size={15} aria-hidden="true" />
+                </span>
               </Link>
             </Reveal>
           ),

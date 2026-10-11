@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "./discovery.css";
+@import "./experience.css";
 @custom-variant dark (&:is(.dark *));
 @theme inline {
   --color-background: var(--background);
@@ -33,47 +34,47 @@
 }
 :root {
   color-scheme: light;
-  --background: #f6f6f0;
-  --foreground: #20271d;
+  --background: #f7f4ef;
+  --foreground: #25211e;
   --card: #ffffff;
-  --muted: #e9ede3;
-  --muted-foreground: #626b59;
-  --primary: #426319;
+  --muted: #eee8e1;
+  --muted-foreground: #6c625a;
+  --primary: #b83d16;
   --primary-foreground: #ffffff;
-  --border: #d9dfd1;
+  --border: #ded5cc;
   --destructive: #bc3030;
-  --success: #426319;
-  --spotlight: rgba(115, 151, 51, 0.08);
-  --shadow: 0 18px 45px -25px rgba(39, 55, 22, 0.2);
-  --grid-line: rgba(71, 89, 48, 0.06);
-  --feature-background: #eaf0e0;
-  --feature-foreground: #20291a;
-  --feature-muted: #59664c;
-  --feature-accent: #426319;
+  --success: #b83d16;
+  --spotlight: rgba(205, 87, 38, 0.08);
+  --shadow: 0 18px 45px -25px rgba(67, 38, 20, 0.16);
+  --grid-line: rgba(91, 69, 48, 0.06);
+  --feature-background: #f1e6db;
+  --feature-foreground: #25211e;
+  --feature-muted: #6c625a;
+  --feature-accent: #b83d16;
   --feature-on-accent: #ffffff;
-  --feature-border: #cdd9bf;
+  --feature-border: #dfcaba;
 }
 .dark {
   color-scheme: dark;
-  --background: #11140f;
-  --foreground: #eff2e9;
-  --card: #191e16;
-  --muted: #242c1f;
-  --muted-foreground: #a4ae9a;
-  --primary: #ceef79;
-  --primary-foreground: #202b10;
-  --border: #323b2b;
+  --background: #151413;
+  --foreground: #f5f1ea;
+  --card: #1e1c1a;
+  --muted: #292623;
+  --muted-foreground: #b3aaa1;
+  --primary: #ff936c;
+  --primary-foreground: #29170f;
+  --border: #3a342f;
   --destructive: #ff9393;
-  --success: #ceef79;
-  --spotlight: rgba(206, 239, 121, 0.06);
+  --success: #ff936c;
+  --spotlight: rgba(255, 147, 108, 0.07);
   --shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.4);
-  --grid-line: rgba(192, 213, 167, 0.055);
-  --feature-background: #1b2416;
-  --feature-foreground: #eff2e9;
-  --feature-muted: #acb99e;
-  --feature-accent: #ceef79;
-  --feature-on-accent: #202b10;
-  --feature-border: #3b4a2e;
+  --grid-line: rgba(213, 185, 167, 0.055);
+  --feature-background: #28201b;
+  --feature-foreground: #f5f1ea;
+  --feature-muted: #c2afa1;
+  --feature-accent: #ff936c;
+  --feature-on-accent: #29170f;
+  --feature-border: #4b382d;
 }
 @layer base {
   * {

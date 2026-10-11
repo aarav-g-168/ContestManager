@@ -11,7 +11,12 @@ export const metadata: Metadata = { title: "Explore contests" };
 export default async function ContestsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ platform?: string; date?: string }>;
+  searchParams: Promise<{
+    platform?: string;
+    date?: string;
+    q?: string;
+    range?: string;
+  }>;
 }) {
   const { contests, error } = await getContestFeed();
   const params = await searchParams;
@@ -26,12 +31,17 @@ export default async function ContestsPage({
     contests.some((contest) => getContestDay(contest.start) === params.date)
       ? params.date
       : "";
+  const query =
+    typeof params.q === "string" ? params.q.trim().slice(0, 200) : "";
+  const range = ["1", "7", "30"].includes(params.range ?? "")
+    ? params.range!
+    : "all";
   return (
     <div className="site-container contests-page pb-7">
       <PageHeading
         eyebrow="The contest calendar"
         title="Upcoming contests"
-        description="Find a round that fits your week. Pick a platform or start with a day."
+        description="Search, pick a platform, or narrow it down to your next free day."
       >
         <span className="flex items-center gap-2 whitespace-nowrap text-xs text-muted-foreground">
           <Clock3 size={13} aria-hidden="true" />
@@ -42,12 +52,14 @@ export default async function ContestsPage({
         <FeedError message={error} />
       ) : (
         <ContestClientComponent
-          key={`${platform}-${date}`}
+          key={`${platform}-${date}-${query}-${range}`}
           initialContests={contests}
           showFilters
           today={getContestDay(new Date())}
           initialPlatform={platform}
           initialDate={date}
+          initialQuery={query}
+          initialRange={range}
         />
       )}
       <p className="mt-8 text-center font-mono text-[10px] leading-6 text-muted-foreground">

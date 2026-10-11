@@ -32,11 +32,9 @@ export default function ExplorePlatforms({
     >
       <div className="section-heading">
         <div>
-          <p className="eyebrow section-label">
-            <span>01 /</span> THE PLATFORM INDEX
-          </p>
+          <p className="eyebrow section-label">FIND YOUR PLATFORM</p>
           <h2 id="platform-explore-title" className="section-title">
-            Find your kind of challenge.
+            Same calendar. Different challenges.
           </h2>
         </div>
         <Link href="/contests" className="text-link">
@@ -48,7 +46,10 @@ export default function ExplorePlatforms({
           const events = contests.filter(
             (contest) => getPlatformKey(contest.host) === host,
           );
-          const next = events[0];
+          const next = [...events].sort(
+            (a, b) =>
+              parseAsUTC(a.start).getTime() - parseAsUTC(b.start).getTime(),
+          )[0];
           return (
             <Link
               key={host}

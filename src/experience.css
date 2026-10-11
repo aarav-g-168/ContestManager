@@ -1,0 +1,598 @@
+/* Discovery-first layouts. Shared colors come from the application theme. */
+.discovery-hero {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: clamp(36px, 6vw, 90px);
+  align-items: center;
+  padding: 28px 0 32px;
+}
+.discovery-kicker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-code), monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground);
+  margin-bottom: 13px;
+}
+.discovery-kicker > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 5px var(--spotlight);
+}
+.discovery-intro h1 {
+  font-size: clamp(44px, 4.5vw, 60px);
+  font-weight: 600;
+  letter-spacing: -0.065em;
+  line-height: 1.08;
+}
+.discovery-intro h1 > span {
+  color: var(--primary);
+}
+.discovery-description {
+  max-width: 440px;
+  margin: 17px 0 21px;
+  color: var(--muted-foreground);
+  font-size: 16px;
+  line-height: 1.65;
+}
+.landing-search {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 7px 7px 7px 18px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--card);
+  box-shadow: 0 8px 25px -18px var(--primary);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.landing-search:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--spotlight);
+}
+.landing-search > svg {
+  color: var(--muted-foreground);
+}
+.landing-search input {
+  min-width: 0;
+  width: 100%;
+  font-size: 14px;
+  background: transparent;
+  outline: none;
+  height: 44px;
+}
+.landing-search input::placeholder {
+  color: var(--muted-foreground);
+}
+.landing-search button {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  transition: filter 0.2s;
+}
+.landing-search button:hover {
+  filter: brightness(1.1);
+}
+.discovery-shortcuts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 13px;
+  margin-top: 12px;
+  font-size: 12px;
+}
+.discovery-shortcuts > span {
+  color: var(--muted-foreground);
+}
+.discovery-shortcuts a {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+.discovery-shortcuts a:hover {
+  color: var(--primary);
+}
+.schedule-board {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.schedule-board-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 22px;
+  font-family: var(--font-code), monospace;
+  font-size: 10px;
+  color: var(--muted-foreground);
+  letter-spacing: 0.04em;
+}
+.schedule-entry {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 13px 22px;
+  border-top: 1px solid var(--border);
+  transition: background 0.2s;
+}
+.schedule-entry:hover {
+  background: var(--muted);
+}
+.schedule-entry-featured {
+  background: var(--feature-background);
+  border-top-color: var(--feature-border);
+  border-left: 3px solid var(--primary);
+  padding-left: 19px;
+}
+.schedule-entry-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: center;
+  width: 42px;
+  flex-shrink: 0;
+}
+.schedule-entry-date strong {
+  font-size: 35px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+.schedule-entry-date > span {
+  margin-top: 4px;
+  font-family: var(--font-code), monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.schedule-entry-featured .schedule-entry-date strong {
+  color: var(--primary);
+}
+.schedule-entry-copy {
+  min-width: 0;
+  flex: 1;
+}
+.schedule-platform {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+.schedule-platform .platform-badge {
+  width: 22px;
+  height: 22px;
+  font-size: 9px;
+  border-radius: 5px;
+}
+.next-label {
+  font-family: var(--font-code), monospace;
+  font-size: 9px;
+  color: var(--primary);
+  margin-left: auto;
+  letter-spacing: 0.03em;
+}
+.schedule-entry h2 {
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 7px 0 4px;
+  overflow-wrap: anywhere;
+}
+.schedule-entry time {
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+.schedule-entry-arrow {
+  color: var(--muted-foreground);
+  transition:
+    transform 0.2s,
+    color 0.2s;
+}
+.schedule-entry:hover .schedule-entry-arrow {
+  transform: translate(2px, -2px);
+  color: var(--primary);
+}
+.schedule-countdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary);
+  font-size: 11px;
+  margin-top: 10px;
+}
+.schedule-all {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  min-height: 49px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  transition: color 0.2s;
+}
+.schedule-all:hover {
+  color: var(--primary);
+}
+.schedule-unavailable {
+  padding: 25px;
+  color: var(--muted-foreground);
+  line-height: 1.8;
+}
+.home-contests {
+  padding: 32px 0 10px;
+  border-top: 1px solid var(--border);
+}
+.home-contests .section-heading {
+  margin-bottom: 22px;
+}
+.home-contests .discovery-kicker {
+  margin-bottom: 9px;
+}
+.home-browse-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 23px;
+}
+.home-platform-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 11px;
+}
+.home-platform-tabs button {
+  position: relative;
+  padding: 12px 17px;
+  min-height: 44px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+  border-radius: 7px;
+  isolation: isolate;
+}
+.home-platform-tabs button[aria-pressed="true"] {
+  color: var(--primary-foreground);
+}
+.home-platform-tabs button > span:last-child {
+  position: relative;
+}
+.home-tab-active {
+  position: absolute;
+  inset: 0;
+  background: var(--primary);
+  border-radius: inherit;
+  z-index: -1;
+}
+.home-result-count {
+  font-family: var(--font-code), monospace;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.discovery-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 17px;
+  margin-top: 20px;
+  font-size: 13px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.discovery-more:hover {
+  background: var(--muted);
+  color: var(--primary);
+}
+.discovery-home .platform-explore {
+  padding-top: 60px;
+}
+.discovery-home .section-label {
+  font-family: var(--font-code), monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+.personal-section {
+  padding: 65px 0 60px;
+}
+.personal-section .discovery-kicker {
+  margin-bottom: 10px;
+}
+.personal-note {
+  max-width: 230px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.personal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.personal-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  background: var(--card);
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+.personal-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px);
+}
+.personal-preview {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 100px;
+  padding: 14px;
+  border-radius: 9px;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  margin-bottom: 22px;
+  transition: transform 0.25s;
+}
+.personal-card:hover .personal-preview {
+  transform: translateY(-3px) rotate(-1deg);
+}
+.personal-preview-icon {
+  display: grid;
+  place-items: center;
+  color: var(--primary);
+}
+.personal-preview strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+}
+.personal-preview span {
+  display: block;
+  font-size: 10px;
+  color: var(--muted-foreground);
+  margin-top: 5px;
+}
+.personal-preview-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.personal-card h3 {
+  font-size: 20px;
+  letter-spacing: -0.035em;
+  font-weight: 500;
+}
+.personal-card > p {
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 10px 0 22px;
+  color: var(--muted-foreground);
+}
+.personal-card > .text-link {
+  margin-top: auto;
+  font-size: 12px;
+}
+.calendar-disclosure {
+  margin: -5px 0 24px;
+  border-bottom: 1px solid var(--border);
+}
+.calendar-disclosure > summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  padding: 14px 2px;
+  min-height: 48px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+  list-style: none;
+}
+.calendar-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.calendar-disclosure[open] > summary svg {
+  transform: rotate(180deg);
+}
+.calendar-disclosure .week-strip {
+  margin: 0 0 18px;
+}
+/* Search leads; familiar platform shortcuts follow it. */
+.contests-page .browse-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin-top: 0;
+}
+.contests-page .browse-search-row {
+  margin: 0;
+}
+.contests-page .platform-switcher {
+  margin: 0;
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+.contests-page .platform-switcher > span {
+  display: none;
+}
+.contests-page .browse-search-row .input-shell {
+  background: var(--card);
+  min-height: 52px;
+}
+.contests-page .page-heading {
+  border-bottom: 0;
+  margin-bottom: 0;
+}
+@media (min-width: 1100px) {
+  .discovery-home .contest-title {
+    font-size: 20px;
+  }
+}
+@media (max-width: 1000px) {
+  .discovery-hero {
+    gap: 32px;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 40px;
+  }
+  .discovery-intro h1 {
+    font-size: 47px;
+  }
+  .schedule-entry {
+    padding: 16px;
+    gap: 12px;
+  }
+  .schedule-entry-featured {
+    padding-left: 13px;
+  }
+  .schedule-board-heading {
+    padding-inline: 16px;
+    font-size: 9px;
+  }
+  .home-result-count {
+    display: none;
+  }
+  .personal-grid {
+    gap: 12px;
+  }
+  .personal-preview {
+    padding: 10px;
+  }
+  .personal-preview-dot {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .contests-page .browse-search-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .contests-page .browse-search-row > .input-shell {
+    grid-column: 1 / -1;
+  }
+  .contests-page .browse-search-row > button {
+    min-width: 0;
+    padding-inline: 10px;
+    justify-content: center;
+    font-size: 12px;
+  }
+  .discovery-hero {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 34px 0;
+  }
+  .discovery-intro h1 {
+    font-size: clamp(40px, 8vw, 58px);
+  }
+  .discovery-description {
+    font-size: 15px;
+    margin: 18px 0 20px;
+    max-width: 100%;
+  }
+  .schedule-entry:not(.schedule-entry-featured) {
+    display: none;
+  }
+  .schedule-entry-featured {
+    padding-block: 20px;
+  }
+  .schedule-board-heading {
+    font-size: 10px;
+  }
+  .home-platform-tabs {
+    width: 100%;
+  }
+  .home-platform-tabs button {
+    flex: 1 0 auto;
+    padding: 10px 12px;
+  }
+  .home-contests {
+    padding-top: 28px;
+  }
+  .home-contests .section-heading {
+    gap: 12px;
+    align-items: center;
+  }
+  .home-contests .section-title {
+    font-size: 27px;
+  }
+  .home-contests .section-heading > .text-link {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .personal-grid {
+    grid-template-columns: 1fr;
+  }
+  .personal-card {
+    padding: 20px;
+  }
+  .personal-preview {
+    min-height: 70px;
+    margin-bottom: 18px;
+  }
+  .personal-preview strong {
+    font-size: 13px;
+  }
+  .personal-preview span {
+    font-size: 11px;
+  }
+  .personal-section .section-heading {
+    flex-direction: column;
+    align-items: start;
+  }
+  .personal-note {
+    max-width: none;
+  }
+  .personal-section {
+    padding-block: 42px;
+  }
+  .discovery-home .platform-explore {
+    padding-top: 42px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .discovery-home *,
+  .discovery-home *::before {
+    animation: none !important;
+    transition: none !important;
+  }
+  .personal-card:hover,
+  .personal-card:hover .personal-preview,
+  .schedule-entry:hover .schedule-entry-arrow {
+    transform: none;
+  }
+}
