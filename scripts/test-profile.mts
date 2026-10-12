@@ -1,41 +1,61 @@
-// Integration checks against isolated Firebase emulators. Never targets live Firebase.
+// HTTP integration tests require an isolated local PostgreSQL test database,
+// Firebase Auth/Storage emulators, and a test app at PROFILE_TEST_ORIGIN.
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { eq, inArray } from "drizzle-orm";
 import sharp from "sharp";
 import { initializeApp, deleteApp } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
+import { users } from "../src/lib/db/schema";
 
 const origin = process.env.PROFILE_TEST_ORIGIN || "http://127.0.0.1:3001";
-assert.equal(
-  new URL(origin).hostname,
-  "127.0.0.1",
-  "Use the local test preview.",
+assert.equal(new URL(origin).hostname, "127.0.0.1");
+const databaseUrl = process.env.PROFILE_TEST_DATABASE_URL;
+assert.ok(
+  databaseUrl,
+  "Set PROFILE_TEST_DATABASE_URL to an isolated local test database.",
 );
-process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
+assert.equal(new URL(databaseUrl).hostname, "127.0.0.1");
+assert.match(
+  new URL(databaseUrl).pathname,
+  /test/i,
+  "Never run against production data.",
+);
 process.env.FIREBASE_STORAGE_EMULATOR_HOST = "127.0.0.1:9199";
-const app = initializeApp({
-  projectId: "demo-contest-manager",
-  storageBucket: "demo-contest-manager.appspot.com",
-});
-const db = getFirestore(app);
+const app = initializeApp(
+  {
+    projectId: "demo-contest-manager",
+    storageBucket: "demo-contest-manager.appspot.com",
+  },
+  "profile-integration-test",
+);
 const bucket = getStorage(app).bucket();
+const pool = new Pool({ connectionString: databaseUrl });
+const db = drizzle(pool);
+const created: string[] = [];
+const paths = new Set<string>();
 const values = {
   displayName: "Profile Tester",
-  headline: "Computer science student",
-  bio: "I enjoy graph problems and building small tools.",
-  location: "Pune, India",
+  headline: "Student",
+  bio: "Graph problems and small tools.",
+  location: "Pune",
   organization: "Example University",
   website: "example.com",
   github: "github.com/profile-tester",
   linkedin: "linkedin.com/in/profile-tester",
   x: "x.com/profile_tester",
-  codeforces: "profile_tester",
-  leetcode: "profile_tester",
-  atcoder: "profile_tester",
+  codeforces: "tester",
+  leetcode: "tester",
+  atcoder: "tester",
   codechef: "",
 };
-async function newUser() {
+interface TestUser {
+  idToken: string;
+  localId: string;
+}
+async function newUser(): Promise<TestUser> {
   const response = await fetch(
     "http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-api-key",
     {
@@ -44,15 +64,22 @@ async function newUser() {
       body: JSON.stringify({ returnSecureToken: true }),
     },
   );
-  assert.equal(response.status, 200, "Auth emulator must be running.");
-  return response.json();
+  assert.equal(response.status, 200, "Start the Auth emulator.");
+  const user = await response.json();
+  created.push(user.localId);
+  return user;
 }
-function get(user, path = "/api/profile") {
-  return fetch(`${origin}${path}`, {
+const get = (user: TestUser, path = "/api/profile") =>
+  fetch(`${origin}${path}`, {
     headers: { Authorization: `Bearer ${user.idToken}` },
   });
-}
-function save(user, revision, edits = {}, photo = null, action = "keep") {
+async function save(
+  user: TestUser,
+  revision: number,
+  edits = {},
+  photo: Blob | null = null,
+  action = "keep",
+) {
   const body = new FormData();
   body.set("profile", JSON.stringify({ ...values, ...edits }));
   body.set("revision", String(revision));
@@ -64,48 +91,41 @@ function save(user, revision, edits = {}, photo = null, action = "keep") {
     body,
   });
 }
+const account = async (user: TestUser) =>
+  (await db.select().from(users).where(eq(users.id, user.localId)))[0];
 try {
   assert.equal((await fetch(`${origin}/api/profile`)).status, 401);
-  assert.equal((await get({ idToken: "invalid" })).status, 401);
+  assert.equal((await get({ idToken: "invalid", localId: "" })).status, 401);
   const [user, other] = await Promise.all([newUser(), newUser()]);
-  const reference = db.collection("users").doc(user.localId);
-  await reference.set({
-    displayName: "Google Name",
-    email: "fixture@example.test",
-  });
   assert.equal((await get(user, "/api/profile/photo")).status, 404);
   let response = await save(user, 0);
   assert.equal(response.status, 200, await response.clone().text());
-  let result = await response.json();
-  assert.equal(result.profile.revision, 1);
-  assert.equal(result.profile.values.website, "https://example.com/");
-  assert.equal((await (await get(user)).json()).profile.values.bio, values.bio);
-  assert.equal((await reference.get()).data().displayName, "Google Name");
+  assert.equal((await response.json()).profile.revision, 1);
+  assert.equal((await account(user)).profile?.website, "https://example.com/");
   for (const edits of [
     { displayName: "" },
     { bio: "x".repeat(301) },
     { website: "javascript:alert(1)" },
     { github: "https://github.com.evil.test/user" },
-  ]) {
+  ])
     assert.equal((await save(user, 1, edits)).status, 400);
-  }
   assert.equal((await save(user, 0)).status, 409);
   assert.equal(
-    (await save(user, 1, {}, new Blob(["not an image"], { type: "image/png" })))
+    (await save(user, 1, {}, new Blob(["bad image"], { type: "image/png" })))
       .status,
     400,
   );
   const image = new Blob(
-    [await readFile(new URL("../public/coding.png", import.meta.url))],
+    [new Uint8Array(await readFile("public/coding.png"))],
     { type: "image/png" },
   );
   response = await save(user, 1, {}, image);
   assert.equal(response.status, 200, await response.clone().text());
   assert.equal((await response.json()).profile.avatarMode, "custom");
-  const previous = (await reference.get()).data().profile;
+  const previous = (await account(user)).photoPath!;
+  paths.add(previous);
   response = await get(user, "/api/profile/photo");
-  assert.equal(response.status, 200, await response.clone().text());
-  assert.equal(response.headers.get("content-type"), "image/webp");
+  assert.equal(response.status, 200);
   const metadata = await sharp(
     Buffer.from(await response.arrayBuffer()),
   ).metadata();
@@ -122,38 +142,27 @@ try {
     "",
   );
   response = await save(user, 2, {}, image);
-  assert.equal(response.status, 200, await response.clone().text());
-  const current = (await reference.get()).data().profile;
-  assert.notEqual(previous.photoPath, current.photoPath);
-  if (previous.photoStore === "firestore") {
-    assert.equal(
-      (
-        await reference
-          .collection("profilePhotos")
-          .doc(
-            previous.photoPath
-              .split("/")
-              .at(-1)
-              .replace(/\.webp$/, ""),
-          )
-          .get()
-      ).exists,
-      false,
-    );
-  } else {
-    assert.equal((await bucket.file(previous.photoPath).exists())[0], false);
-  }
+  assert.equal(response.status, 200);
+  const current = (await account(user)).photoPath!;
+  paths.add(current);
+  assert.notEqual(current, previous);
+  assert.equal((await bucket.file(previous).exists())[0], false);
   assert.equal((await save(user, 3, { bio: "" }, null, "remove")).status, 200);
+  assert.equal((await bucket.file(current).exists())[0], false);
   assert.equal((await get(user, "/api/profile/photo")).status, 404);
   const simultaneous = await Promise.all([
-    save(user, 4, { headline: "First edit" }),
-    save(user, 4, { headline: "Second edit" }),
+    save(user, 4, { headline: "First" }),
+    save(user, 4, { headline: "Second" }),
   ]);
   assert.deepEqual(simultaneous.map((item) => item.status).sort(), [200, 409]);
-  assert.equal((await (await get(user)).json()).profile.revision, 5);
+  assert.equal((await account(user)).profileRevision, 5);
   console.log(
-    `Profile integration checks passed (${current.photoStore} photos): authentication, persistence, validation, image conversion, isolation, replacement/removal, and concurrent saves.`,
+    "Profile HTTP integration passed: auth, validation, SQL persistence, ownership, photo conversion/replacement/removal, and concurrent saves.",
   );
 } finally {
+  if (created.length) await db.delete(users).where(inArray(users.id, created));
+  for (const path of paths)
+    await bucket.file(path).delete({ ignoreNotFound: true });
+  await pool.end();
   await deleteApp(app);
 }

@@ -61,7 +61,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const currentUid = useRef(user?.uid);
-  currentUid.current = user?.uid;
+  useEffect(() => {
+    currentUid.current = user?.uid;
+  }, [user?.uid]);
   const blobURL = useRef<string | null>(null);
   const requestController = useRef<AbortController | null>(null);
   const replaceBlob = useCallback((next: string | null) => {

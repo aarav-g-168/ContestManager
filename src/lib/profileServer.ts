@@ -3,20 +3,14 @@ import { NextResponse } from "next/server";
 import { adminAuth } from "./firebaseAdmin";
 import { normalizeProfile, type SavedProfile } from "./profile";
 
-export class ProfileRequestError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-  ) {
-    super(message);
-  }
-}
+import { ProfileRequestError } from "./requestError";
+export { ProfileRequestError } from "./requestError";
 export async function authenticateProfile(request: Request) {
   const token = request.headers
     .get("authorization")
     ?.match(/^Bearer (.+)$/)?.[1];
   if (!token)
-    throw new ProfileRequestError("Sign in to manage your profile.", 401);
+    throw new ProfileRequestError("Sign in to manage your account.", 401);
   try {
     return await adminAuth.verifyIdToken(token, true);
   } catch {
@@ -65,7 +59,7 @@ export function profileErrorResponse(error: unknown) {
     error instanceof Error ? error.name : "UnknownError",
   );
   return NextResponse.json(
-    { error: "We couldn’t save or load your profile. Please try again." },
+    { error: "Your account data is unavailable. Please try again shortly." },
     { status: 503, headers: { "Cache-Control": "no-store" } },
   );
 }

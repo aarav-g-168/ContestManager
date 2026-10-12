@@ -1,93 +1,98 @@
-import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebaseAdmin";
-import { sendContestReminderEmail } from "@/lib/email";
-
-export async function GET() {
-  try {
-    const userDocs = await adminDb
-      .collection("users")
-      .listDocuments();
-
-    const WINDOW = 15 / 60; // 15 minutes in hours
-    
-    let emailsSent = 0;
-
-    for (const userDoc of userDocs) {
-      const remindersSnapshot = await userDoc
-        .collection("reminders")
-        .get();
-
-      for (const reminderDoc of remindersSnapshot.docs) {
-        const reminder = reminderDoc.data();
-
-        if (reminder.sent) continue;
-
-        const contestStart = new Date(reminder.start);
-        const now = new Date();
-
-        const hoursUntilContest =
-          (contestStart.getTime() - now.getTime()) /
-          (1000 * 60 * 60);
-
-        let shouldSend = false;
-
-        if (
-          reminder.reminderType === "1h" &&
-          hoursUntilContest <= 1 &&
-          hoursUntilContest > 1 - WINDOW
-        ) {
-          shouldSend = true;
-        }
-
-        if (
-          reminder.reminderType === "6h" &&
-          hoursUntilContest <= 6 &&
-          hoursUntilContest > 6 - WINDOW
-        ) {
-          shouldSend = true;
-        }
-
-        if (
-          reminder.reminderType === "24h" &&
-          hoursUntilContest <= 24 &&
-          hoursUntilContest > 24 - WINDOW
-        ) {
-          shouldSend = true;
-        }
-
-        if (!shouldSend) continue;
-
-        await sendContestReminderEmail(
-          reminder.email,
-          reminder.event,
-          reminder.href,
-          reminder.reminderType
-        );
-
-        await reminderDoc.ref.delete();
-
-        emailsSent++;
-      }
+import { eq } from "drizzle-orm";
+import { after, NextResponse } from "next/server";
+import { getDatabase } from "@/lib/db";
+import { deliveries, reminders } from "@/lib/db/schema";
+import { ensureAccount, verifiedContest } from "@/lib/accountServer";
+import {
+  authenticateProfile,
+  profileErrorResponse,
+  ProfileRequestError,
+} from "@/lib/profileServer";
+import { assertMailConfigured } from "@/lib/email";
+import { processReminderQueue } from "@/lib/reminderQueue";
+import { cancelReminder, saveReminder } from "@/lib/reminderService";
+import { readAccountJson } from "@/lib/requestBody";
+export const runtime = "nodejs";
+export const maxDuration = 60;
+function dispatch(ids: string[]) {
+  after(async () => {
+    try {
+      await processReminderQueue({ ids, limit: 5 });
+    } catch {
+      console.error("Reminder outbox processing failed; scheduler will retry");
     }
-
-    return NextResponse.json({
-      success: true,
-      emailsSent,
-    });
-  } catch (error) {
-    console.error(error);
-
+  });
+}
+export async function GET(request: Request) {
+  try {
+    const user = await authenticateProfile(request);
+    const rows = await getDatabase()
+      .select({
+        contestId: reminders.contestId,
+        reminderType: deliveries.reminderType,
+        status: deliveries.status,
+      })
+      .from(reminders)
+      .innerJoin(deliveries, eq(reminders.deliveryId, deliveries.id))
+      .where(eq(reminders.userId, user.uid));
     return NextResponse.json(
-      {
-        success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unknown error",
-      },
-      {
-        status: 500,
-      }
+      { reminders: rows },
+      { headers: { "Cache-Control": "no-store" } },
     );
+  } catch (error) {
+    return profileErrorResponse(error);
+  }
+}
+export async function PUT(request: Request) {
+  try {
+    const user = await authenticateProfile(request);
+    if (!user.email || !user.email_verified)
+      throw new ProfileRequestError(
+        "Verify your account email to receive reminders.",
+        400,
+      );
+    try {
+      assertMailConfigured();
+    } catch {
+      throw new ProfileRequestError(
+        "Email reminders are not configured yet. Please try again later.",
+        503,
+      );
+    }
+    const input = await readAccountJson(request);
+    if (typeof input.reminderType !== "string")
+      throw new ProfileRequestError("Choose a valid reminder time.", 400);
+    const contest = await verifiedContest(input.contestId);
+    await ensureAccount(user);
+    const job = await saveReminder(
+      getDatabase(),
+      user.uid,
+      user.email,
+      contest,
+      input.reminderType,
+    );
+    dispatch([job.id, ...(job.previous ? [job.previous] : [])]);
+    return NextResponse.json(
+      { success: true, status: "pending" },
+      { status: 202 },
+    );
+  } catch (error) {
+    return profileErrorResponse(error);
+  }
+}
+export async function DELETE(request: Request) {
+  try {
+    const user = await authenticateProfile(request);
+    const id = Number(new URL(request.url).searchParams.get("contestId"));
+    if (!Number.isSafeInteger(id) || id <= 0)
+      throw new ProfileRequestError("Choose a valid contest.", 400);
+    const job = await cancelReminder(getDatabase(), user.uid, id);
+    if (job) dispatch([job]);
+    return NextResponse.json(
+      { success: true, status: "cancellation_requested" },
+      { status: 202 },
+    );
+  } catch (error) {
+    return profileErrorResponse(error);
   }
 }

@@ -20,6 +20,7 @@ export default async function ContestsPage({
 }) {
   const { contests, error } = await getContestFeed();
   const params = await searchParams;
+  const requestTime = new Date();
   const platform =
     typeof params.platform === "string" &&
     contests.some((contest) => getPlatformKey(contest.host) === params.platform)
@@ -55,11 +56,12 @@ export default async function ContestsPage({
           key={`${platform}-${date}-${query}-${range}`}
           initialContests={contests}
           showFilters
-          today={getContestDay(new Date())}
+          today={getContestDay(requestTime)}
           initialPlatform={platform}
           initialDate={date}
           initialQuery={query}
           initialRange={range}
+          initialNow={requestTime.getTime()}
         />
       )}
       <p className="mt-8 text-center font-mono text-[10px] leading-6 text-muted-foreground">

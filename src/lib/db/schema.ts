@@ -1,0 +1,163 @@
+import {
+  bigint,
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
+import type { ProfileValues } from "../profile";
+
+const time = (name: string) =>
+  timestamp(name, { withTimezone: true, mode: "date" });
+export const users = pgTable("users", {
+  id: text("id").primaryKey(), // Firebase Auth UID remains the identity boundary.
+  email: text("email"),
+  name: text("name"),
+  googlePhotoUrl: text("google_photo_url"),
+  profile: jsonb("profile").$type<ProfileValues>(),
+  avatarMode: text("avatar_mode").notNull().default("google"),
+  photoPath: text("photo_path"),
+  profileRevision: integer("profile_revision").notNull().default(0),
+  profileUpdatedAt: time("profile_updated_at"),
+  createdAt: time("created_at").notNull().defaultNow(),
+});
+export const contests = pgTable(
+  "contests",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey(),
+    event: text("event").notNull(),
+    host: text("host").notNull(),
+    href: text("href").notNull(),
+    start: time("start").notNull(),
+    duration: integer("duration").notNull(),
+    updatedAt: time("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    index("contests_start_idx").on(t.start),
+    index("contests_host_idx").on(t.host),
+  ],
+);
+export const bookmarks = pgTable(
+  "bookmarks",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    contestId: bigint("contest_id", { mode: "number" })
+      .notNull()
+      .references(() => contests.id),
+    createdAt: time("created_at").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.contestId] })],
+);
+// Immutable delivery snapshots form the durable email outbox. Removing a reminder
+// requests cancellation here; history is retained rather than silently deleted.
+export const deliveries = pgTable(
+  "reminder_deliveries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    contestId: bigint("contest_id", { mode: "number" })
+      .notNull()
+      .references(() => contests.id),
+    reminderType: text("reminder_type").notNull(),
+    email: text("email").notNull(),
+    event: text("event").notNull(),
+    href: text("href").notNull(),
+    contestStart: time("contest_start").notNull(),
+    dueAt: time("due_at").notNull(),
+    status: text("status").notNull().default("pending"),
+    cancelRequested: boolean("cancel_requested").notNull().default(false),
+    replacesDeliveryId: uuid("replaces_delivery_id"),
+    providerId: text("provider_id"),
+    // Fixed on the first claim so retries use the identical provider request.
+    requestScheduledAt: time("request_scheduled_at"),
+    firstAttemptAt: time("first_attempt_at"),
+    providerPayload: jsonb("provider_payload").$type<Record<string, unknown>>(),
+    attempts: integer("attempts").notNull().default(0),
+    nextAttemptAt: time("next_attempt_at").notNull().defaultNow(),
+    leaseToken: uuid("lease_token"),
+    leaseUntil: time("lease_until"),
+    lastError: text("last_error"),
+    createdAt: time("created_at").notNull().defaultNow(),
+    updatedAt: time("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    index("deliveries_work_idx").on(t.status, t.nextAttemptAt),
+    uniqueIndex("deliveries_provider_idx").on(t.providerId),
+  ],
+);
+export const reminders = pgTable(
+  "reminders",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    contestId: bigint("contest_id", { mode: "number" })
+      .notNull()
+      .references(() => contests.id),
+    deliveryId: uuid("delivery_id")
+      .notNull()
+      .references(() => deliveries.id),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.contestId] })],
+);
+export const mailEvents = pgTable(
+  "mail_events",
+  {
+    id: text("id").primaryKey(),
+    providerId: text("provider_id").notNull(),
+    type: text("type").notNull(),
+    createdAt: time("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("mail_events_provider_idx").on(t.providerId)],
+);
+// Relational foundations for future features; no speculative product flows.
+export const teams = pgTable("teams", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  ownerId: text("owner_id")
+    .notNull()
+    .references(() => users.id),
+  createdAt: time("created_at").notNull().defaultNow(),
+});
+export const teamMembers = pgTable(
+  "team_members",
+  {
+    teamId: uuid("team_id")
+      .notNull()
+      .references(() => teams.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role").notNull().default("member"),
+  },
+  (t) => [primaryKey({ columns: [t.teamId, t.userId] })],
+);
+export const contestResults = pgTable(
+  "contest_results",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    contestId: bigint("contest_id", { mode: "number" })
+      .notNull()
+      .references(() => contests.id),
+    rank: integer("rank"),
+    score: text("score"),
+    source: text("source").notNull(),
+    recordedAt: time("recorded_at").notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.contestId] }),
+    index("results_contest_rank_idx").on(t.contestId, t.rank),
+  ],
+);

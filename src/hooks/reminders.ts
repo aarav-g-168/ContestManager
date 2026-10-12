@@ -1,47 +1,25 @@
 "use client";
-import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase";
-import { toast } from "sonner";
-import {
-  collection,
-  onSnapshot,
-  doc,
-  setDoc,
-  deleteDoc,
-} from "firebase/firestore";
 import { useAuth } from "@/components/AuthProvider";
+import { accountRequest } from "@/lib/clientApi";
+import { useAccountCollection } from "./accountCollection";
 import type { Contest } from "@/types/contest";
-import { parseAsUTC } from "@/lib/date";
+import { toast } from "sonner";
 export type ReminderType = "1h" | "6h" | "24h";
+export interface ReminderInfo {
+  contestId: number;
+  reminderType: ReminderType;
+  status: string;
+}
+const empty = { reminders: [] as ReminderInfo[] };
 export function useReminders() {
-  const { user, loading: authLoading, login } = useAuth();
-  const [saved, setSaved] = useState<{
-    uid: string;
-    values: Record<number, ReminderType>;
-  } | null>(null);
-  const [error, setError] = useState(false);
-  useEffect(() => {
-    setError(false);
-    if (!user) {
-      setSaved(null);
-      return;
-    }
-    return onSnapshot(
-      collection(db, "users", user.uid, "reminders"),
-      (snapshot) => {
-        const values: Record<number, ReminderType> = {};
-        snapshot.docs.forEach((item) => {
-          values[Number(item.id)] = item.data().reminderType;
-        });
-        setSaved({ uid: user.uid, values });
-      },
-      () => {
-        setError(true);
-        setSaved({ uid: user.uid, values: {} });
-      },
-    );
-  }, [user]);
-  const reminders = saved?.uid === user?.uid ? (saved?.values ?? {}) : {};
+  const { user, login } = useAuth();
+  const state = useAccountCollection("/api/reminders", empty);
+  const reminders = Object.fromEntries(
+    state.value.reminders.map((row) => [row.contestId, row.reminderType]),
+  ) as Record<number, ReminderType>;
+  const statuses = Object.fromEntries(
+    state.value.reminders.map((row) => [row.contestId, row.status]),
+  ) as Record<number, string>;
   async function addReminder(contest: Contest, reminderType: ReminderType) {
     if (!user) {
       toast("Sign in to get contest reminders.", {
@@ -49,59 +27,43 @@ export function useReminders() {
       });
       return;
     }
-    if (!user.email) {
-      toast.error("Your account needs an email address to receive reminders.");
-      return;
-    }
-    if (
-      parseAsUTC(contest.start).getTime() -
-        Number(reminderType.replace("h", "")) * 3600000 <=
-      Date.now()
-    ) {
-      toast.error(
-        "That reminder time has already passed. Choose a shorter reminder.",
-      );
-      return;
-    }
     try {
-      await setDoc(
-        doc(db, "users", user.uid, "reminders", String(contest.id)),
-        {
-          contestId: contest.id,
-          event: contest.event,
-          host: contest.host,
-          href: contest.href,
-          start: parseAsUTC(contest.start).toISOString(),
-          duration: contest.duration,
-          reminderType,
-          email: user.email,
-          sent: false,
-          createdAt: new Date(),
-        },
+      await accountRequest(user, "/api/reminders", {
+        method: "PUT",
+        body: JSON.stringify({ contestId: contest.id, reminderType }),
+      });
+      await state.reload();
+      toast.success("Reminder saved. We’re confirming the email schedule.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Couldn't set your reminder.",
       );
-      toast.success(
-        `We'll email you ${reminderType.replace("h", "")} hour${reminderType === "1h" ? "" : "s"} before the contest.`,
-      );
-    } catch {
-      toast.error("Couldn't set your reminder. Please try again.");
     }
   }
   async function removeReminder(contestId: number) {
     if (!user) return;
     try {
-      await deleteDoc(
-        doc(db, "users", user.uid, "reminders", String(contestId)),
+      await accountRequest(user, `/api/reminders?contestId=${contestId}`, {
+        method: "DELETE",
+      });
+      await state.reload();
+      toast.success(
+        "Cancellation requested. An email already sent cannot be recalled.",
       );
-      toast.success("Reminder removed.");
-    } catch {
-      toast.error("Couldn't remove your reminder. Please try again.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Couldn't remove your reminder.",
+      );
     }
   }
   return {
     reminders,
+    statuses,
     addReminder,
     removeReminder,
-    loading: authLoading || (!!user && saved?.uid !== user.uid),
-    error,
+    loading: state.loading,
+    error: state.error,
   };
 }

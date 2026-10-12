@@ -1,7 +1,10 @@
 import { randomUUID } from "node:crypto";
 import sharp from "sharp";
 import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebaseAdmin";
+import { eq } from "drizzle-orm";
+import { getDatabase } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { ensureAccount } from "@/lib/accountServer";
 import {
   deleteProfilePhoto,
   saveProfilePhoto,
@@ -24,9 +27,18 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   try {
     const user = await authenticateProfile(request);
-    const doc = await adminDb.collection("users").doc(user.uid).get();
+    const account = await ensureAccount(user);
     return NextResponse.json(
-      { profile: readSavedProfile(doc.data(), user) },
+      {
+        profile: readSavedProfile(
+          {
+            profile: { ...account.profile, avatarMode: account.avatarMode },
+            profileRevision: account.profileRevision,
+            profileUpdatedAt: account.profileUpdatedAt?.toISOString(),
+          },
+          user,
+        ),
+      },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
@@ -135,53 +147,47 @@ export async function PUT(request: Request) {
       uploadedPath = `profile-photos/${user.uid}/${randomUUID()}.webp`;
       uploadedStore = await saveProfilePhoto(uploadedPath, user.uid, image);
     }
-    const reference = adminDb.collection("users").doc(user.uid);
+    await ensureAccount(user);
     let previousPath: unknown;
-    let previousStore: unknown;
-    const profile = await adminDb.runTransaction(async (transaction) => {
-      const snapshot = await transaction.get(reference);
-      const current = readSavedProfile(snapshot.data(), user);
-      if (current.revision !== revision)
+    const profile = await getDatabase().transaction(async (transaction) => {
+      const [account] = await transaction
+        .select()
+        .from(users)
+        .where(eq(users.id, user.uid))
+        .for("update");
+      if (account.profileRevision !== revision)
         throw new ProfileRequestError(
           "Your profile changed in another tab. Reload it before saving again.",
           409,
         );
-      previousPath = snapshot.data()?.profile?.photoPath;
-      previousStore = snapshot.data()?.profile?.photoStore;
+      previousPath = account.photoPath;
       const avatarMode = uploadedPath
         ? "custom"
         : avatarAction === "remove"
           ? "none"
           : avatarAction === "google"
             ? "google"
-            : current.avatarMode;
+            : account.avatarMode;
       const next: SavedProfile = {
         values,
-        avatarMode,
-        revision: current.revision + 1,
+        avatarMode: avatarMode as SavedProfile["avatarMode"],
+        revision: revision + 1,
         updatedAt: new Date().toISOString(),
       };
-      transaction.set(
-        reference,
-        {
-          profile: {
-            ...values,
-            avatarMode,
-            photoPath:
-              uploadedPath ??
-              (avatarMode === "custom" &&
-              ownedAvatarPath(previousPath, user.uid)
-                ? previousPath
-                : null),
-            photoStore:
-              uploadedStore ??
-              (avatarMode === "custom" ? (previousStore ?? "storage") : null),
-          },
+      await transaction
+        .update(users)
+        .set({
+          profile: values,
+          avatarMode,
+          photoPath:
+            uploadedPath ??
+            (avatarMode === "custom" && ownedAvatarPath(previousPath, user.uid)
+              ? previousPath
+              : null),
           profileRevision: next.revision,
-          profileUpdatedAt: next.updatedAt,
-        },
-        { merge: true },
-      );
+          profileUpdatedAt: new Date(next.updatedAt!),
+        })
+        .where(eq(users.id, user.uid));
       return next;
     });
     committed = true;
@@ -189,8 +195,8 @@ export async function PUT(request: Request) {
       ownedAvatarPath(previousPath, user.uid) &&
       (uploadedPath || avatarAction !== "keep")
     )
-      await deleteProfilePhoto(previousPath, user.uid, previousStore).catch(
-        () => console.error("Previous profile photo cleanup failed"),
+      await deleteProfilePhoto(previousPath, user.uid, "storage").catch(() =>
+        console.error("Previous profile photo cleanup failed"),
       );
     return NextResponse.json(
       { profile },

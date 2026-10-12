@@ -1,4 +1,4 @@
-import { adminDb } from "@/lib/firebaseAdmin";
+import { ensureAccount } from "@/lib/accountServer";
 import { readProfilePhoto } from "@/lib/profilePhotos";
 import {
   authenticateProfile,
@@ -10,18 +10,11 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   try {
     const user = await authenticateProfile(request);
-    const snapshot = await adminDb.collection("users").doc(user.uid).get();
-    const path = snapshot.data()?.profile?.photoPath;
-    if (
-      snapshot.data()?.profile?.avatarMode !== "custom" ||
-      !ownedAvatarPath(path, user.uid)
-    )
+    const account = await ensureAccount(user);
+    const path = account.photoPath;
+    if (account.avatarMode !== "custom" || !ownedAvatarPath(path, user.uid))
       throw new ProfileRequestError("No uploaded profile photo.", 404);
-    const image = await readProfilePhoto(
-      path,
-      user.uid,
-      snapshot.data()?.profile?.photoStore,
-    );
+    const image = await readProfilePhoto(path, user.uid, "storage");
     return new Response(new Uint8Array(image), {
       headers: {
         "Content-Type": "image/webp",

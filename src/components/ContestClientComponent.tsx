@@ -36,6 +36,7 @@ import ContestSort from "./ContestSort";
 import ContestWeek from "./ContestWeek";
 import { getContestDay } from "@/lib/contestCalendar";
 import type { Contest } from "@/types/contest";
+import { useClock } from "@/hooks/clock";
 interface Props {
   feedError?: string | null;
   initialContests: Contest[];
@@ -47,6 +48,7 @@ interface Props {
   initialDate?: string;
   initialQuery?: string;
   initialRange?: string;
+  initialNow?: number;
 }
 export default function ContestClientComponent({
   feedError,
@@ -59,6 +61,7 @@ export default function ContestClientComponent({
   initialDate = "",
   initialQuery = "",
   initialRange = "all",
+  initialNow,
 }: Props) {
   const [platforms, setPlatforms] = useState<string[]>(
     initialPlatform ? [initialPlatform] : [],
@@ -74,6 +77,8 @@ export default function ContestClientComponent({
   const reminder = useReminders();
   const reduced = useReducedMotion();
   const personal = bookmarksOnly || remindersOnly;
+  const clock = useClock();
+  const now = clock ?? initialNow ?? null;
   const allPlatforms = useMemo(
     () =>
       Array.from(
@@ -82,7 +87,6 @@ export default function ContestClientComponent({
     [initialContests],
   );
   const contests = useMemo(() => {
-    const now = Date.now();
     const results = initialContests.filter((contest) => {
       if (bookmarksOnly && !bookmarks.bookmarkedContests.includes(contest.id))
         return false;
@@ -97,7 +101,7 @@ export default function ContestClientComponent({
           .includes(query.toLowerCase())
       )
         return false;
-      if (range !== "all") {
+      if (range !== "all" && now !== null) {
         const start = parseAsUTC(contest.start).getTime();
         if (start < now || start > now + Number(range) * 86400000) return false;
       }
@@ -124,6 +128,7 @@ export default function ContestClientComponent({
     range,
     sort,
     date,
+    now,
   ]);
   function togglePlatform(host: string) {
     setPlatforms((current) =>
@@ -435,6 +440,7 @@ export default function ContestClientComponent({
                   onBookmarkToggle={bookmarks.toggleBookmark}
                   hasReminder={contest.id in reminder.reminders}
                   reminderType={reminder.reminders[contest.id]}
+                  reminderStatus={reminder.statuses[contest.id]}
                   onReminderSet={reminder.addReminder}
                   onReminderRemove={reminder.removeReminder}
                 />

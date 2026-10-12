@@ -1,43 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase";
-import {
-  doc,
-  setDoc,
-  deleteDoc,
-  collection,
-  onSnapshot,
-} from "firebase/firestore";
 import { useAuth } from "@/components/AuthProvider";
+import { accountRequest } from "@/lib/clientApi";
+import { useAccountCollection } from "./accountCollection";
 import type { Contest } from "@/types/contest";
 import { toast } from "sonner";
+const empty = { ids: [] as number[] };
 export function useBookmarks() {
-  const { user, loading: authLoading, login } = useAuth();
-  const [saved, setSaved] = useState<{ uid: string; ids: number[] } | null>(
-    null,
-  );
-  const [error, setError] = useState(false);
-  useEffect(() => {
-    setError(false);
-    if (!user) {
-      setSaved(null);
-      return;
-    }
-    return onSnapshot(
-      collection(db, "users", user.uid, "bookmarks"),
-      (snapshot) => {
-        setSaved({
-          uid: user.uid,
-          ids: snapshot.docs.map((item) => Number(item.id)),
-        });
-      },
-      () => {
-        setError(true);
-        setSaved({ uid: user.uid, ids: [] });
-      },
-    );
-  }, [user]);
-  const bookmarkedContests = saved?.uid === user?.uid ? (saved?.ids ?? []) : [];
+  const { user, login } = useAuth();
+  const state = useAccountCollection("/api/bookmarks", empty);
   async function toggleBookmark(contest: Contest) {
     if (!user) {
       toast("Sign in to bookmark contests.", {
@@ -45,37 +15,32 @@ export function useBookmarks() {
       });
       return;
     }
-    const reference = doc(
-      db,
-      "users",
-      user.uid,
-      "bookmarks",
-      String(contest.id),
-    );
+    const removing = state.value.ids.includes(contest.id);
     try {
-      if (bookmarkedContests.includes(contest.id)) {
-        await deleteDoc(reference);
-        toast.success("Bookmark removed.");
-      } else {
-        await setDoc(reference, {
-          contestId: contest.id,
-          event: contest.event,
-          host: contest.host,
-          href: contest.href,
-          start: contest.start,
-          duration: contest.duration,
-          createdAt: new Date(),
-        });
-        toast.success("Contest bookmarked.");
-      }
-    } catch {
-      toast.error("Couldn't update your bookmark. Please try again.");
+      await accountRequest(
+        user,
+        removing ? `/api/bookmarks?contestId=${contest.id}` : "/api/bookmarks",
+        {
+          method: removing ? "DELETE" : "PUT",
+          ...(removing
+            ? {}
+            : { body: JSON.stringify({ contestId: contest.id }) }),
+        },
+      );
+      await state.reload();
+      toast.success(removing ? "Bookmark removed." : "Contest bookmarked.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Couldn't update your bookmark.",
+      );
     }
   }
   return {
-    bookmarkedContests,
+    bookmarkedContests: state.value.ids,
     toggleBookmark,
-    loading: authLoading || (!!user && saved?.uid !== user.uid),
-    error,
+    loading: state.loading,
+    error: state.error,
   };
 }

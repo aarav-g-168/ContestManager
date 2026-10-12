@@ -13,8 +13,7 @@ import {
   signOut,
   type User,
 } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 import { toast } from "sonner";
 const AuthContext = createContext<{
   user: User | null;
@@ -57,16 +56,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { user: current } = await signInWithPopup(
         auth,
         new GoogleAuthProvider(),
-      );
-      await setDoc(
-        doc(db, "users", current.uid),
-        {
-          email: current.email,
-          displayName: current.displayName,
-          photoURL: current.photoURL,
-          lastLoginAt: serverTimestamp(),
-        },
-        { merge: true },
       );
       toast.success(
         `Welcome, ${current.displayName?.split(" ")[0] || "coder"}.`,

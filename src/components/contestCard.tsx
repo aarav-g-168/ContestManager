@@ -18,6 +18,7 @@ import { parseAsUTC } from "@/lib/date";
 import { getPlatform } from "@/lib/platforms";
 import { getGoogleCalendarLink } from "@/lib/calendar";
 import CountdownTimer from "./countdownTimer";
+import { useClock } from "@/hooks/clock";
 import { SpotlightCard } from "./ui/interaction";
 interface Props {
   contest: Contest;
@@ -25,6 +26,7 @@ interface Props {
   onBookmarkToggle: (contest: Contest) => Promise<void>;
   hasReminder: boolean;
   reminderType?: ReminderType;
+  reminderStatus?: string;
   onReminderSet: (contest: Contest, type: ReminderType) => Promise<void>;
   onReminderRemove: (id: number) => Promise<void>;
 }
@@ -46,10 +48,12 @@ export default function ContestCard({
   onBookmarkToggle,
   hasReminder,
   reminderType,
+  reminderStatus,
   onReminderSet,
   onReminderRemove,
 }: Props) {
   const [busy, setBusy] = useState(false);
+  const now = useClock();
   const platform = getPlatform(contest.host);
   const start = parseAsUTC(contest.start);
   const validDate = Number.isFinite(start.getTime());
@@ -132,7 +136,29 @@ export default function ContestCard({
             <Clock3 size={13} aria-hidden="true" />
             {duration}
             {hasReminder && (
-              <span className="text-primary">· {reminderType} reminder</span>
+              <span
+                className={
+                  ["failed", "bounced", "uncertain", "expired"].includes(
+                    reminderStatus ?? "",
+                  )
+                    ? "text-destructive"
+                    : "text-primary"
+                }
+              >
+                ·{" "}
+                {(
+                  {
+                    pending: "Scheduling email",
+                    scheduled: `${reminderType} email scheduled`,
+                    sent: "Email sent",
+                    delivered: "Email delivered",
+                    failed: "Email failed — set again",
+                    bounced: "Email bounced",
+                    uncertain: "Email status needs review",
+                    expired: "Reminder time passed",
+                  } as Record<string, string>
+                )[reminderStatus ?? ""] ?? `${reminderType} reminder`}
+              </span>
             )}
           </p>
         </div>
@@ -194,7 +220,7 @@ export default function ContestCard({
                       !validDate ||
                       start.getTime() -
                         Number(type.replace("h", "")) * 3600000 <=
-                        Date.now()
+                        (now ?? 0)
                     }
                     onSelect={() => run(() => onReminderSet(contest, type))}
                   >
