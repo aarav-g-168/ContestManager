@@ -11,6 +11,8 @@ export function getDatabase(): Database {
   if (cache.contestDatabase) return cache.contestDatabase;
   if (!process.env.DATABASE_URL)
     throw new Error("DATABASE_URL is not configured");
+  if (new URL(process.env.DATABASE_URL).hostname.endsWith(".neon.tech"))
+    throw new Error("Replace the retired Neon URL with your Supabase PostgreSQL URL");
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     max: 5,

@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Server-only credentials. Firebase remains the application's identity provider.
+// Server-only credentials. Supabase handles authentication, PostgreSQL, and private photos.
 export function photoStorage() {
-  const url = process.env.SUPABASE_URL;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY;
   const bucket = process.env.SUPABASE_PHOTO_BUCKET || "profile-photos";
   if (!url || !key) throw new Error("Configure Supabase photo storage");

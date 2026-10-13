@@ -1,93 +1,76 @@
 "use client";
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  GoogleAuthProvider,
-  onAuthStateChanged,
-  signInWithPopup,
-  signOut,
-  type User,
-} from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import type { User } from "@supabase/supabase-js";
+import { browserSupabase } from "@/lib/supabaseBrowser";
+import { accountUser, type AccountUser } from "@/lib/authUser";
 import { toast } from "sonner";
+
 const AuthContext = createContext<{
-  user: User | null;
+  user: AccountUser | null;
   loading: boolean;
   busy: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
-}>({
-  user: null,
-  loading: true,
-  busy: false,
-  login: async () => {},
-  logout: async () => {},
-});
+}>({ user: null, loading: true, busy: false, login: async () => {}, logout: async () => {} });
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AccountUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  useEffect(
-    () =>
-      onAuthStateChanged(
-        auth,
-        (current) => {
-          setUser(current);
-          setLoading(false);
-        },
-        () => {
-          setLoading(false);
-          toast.error(
-            "We couldn't check your session. Please try signing in again.",
-          );
-        },
-      ),
-    [],
-  );
+  const busyRef = useRef(false);
+  useEffect(() => {
+    let active = true;
+    try {
+      const client = browserSupabase();
+      const apply = (current: User | null) => {
+        if (!active) return;
+        setUser(current ? accountUser(current, async () => {
+          const { data, error } = await client.auth.getSession();
+          if (error || !data.session || data.session.user.id !== current.id)
+            throw new Error("Your session changed. Sign in again.");
+          return data.session.access_token;
+        }) : null);
+        setLoading(false);
+      };
+      const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => apply(session?.user ?? null));
+      return () => { active = false; subscription.unsubscribe(); };
+    } catch {
+      setLoading(false);
+    }
+    return () => { active = false; };
+  }, []);
+
   async function login() {
-    if (busy) return;
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
     try {
-      const { user: current } = await signInWithPopup(
-        auth,
-        new GoogleAuthProvider(),
-      );
-      toast.success(
-        `Welcome, ${current.displayName?.split(" ")[0] || "coder"}.`,
-      );
-    } catch (error) {
-      const code = (error as { code?: string }).code;
-      if (
-        code !== "auth/popup-closed-by-user" &&
-        code !== "auth/cancelled-popup-request"
-      )
-        toast.error(
-          "Sign-in didn't finish. Please allow popups and try again.",
-        );
-    } finally {
+      const { error } = await browserSupabase().auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: `${window.location.origin}/` },
+      });
+      if (error) throw error;
+    } catch {
+      toast.error("Sign-in couldn't start. Check the connection and try again.");
+      busyRef.current = false;
       setBusy(false);
     }
   }
   async function logout() {
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
     try {
-      await signOut(auth);
+      const { error } = await browserSupabase().auth.signOut();
+      if (error) throw error;
       toast.success("You're signed out.");
     } catch {
       toast.error("Couldn't sign out. Please try again.");
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   }
-  return (
-    <AuthContext.Provider value={{ user, loading, busy, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading, busy, login, logout }}>{children}</AuthContext.Provider>;
 }
 export const useAuth = () => useContext(AuthContext);

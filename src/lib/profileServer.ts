@@ -1,6 +1,5 @@
-import type { DecodedIdToken } from "firebase-admin/auth";
+import { verifyAccountToken, type VerifiedAccount } from "./authServer";
 import { NextResponse } from "next/server";
-import { adminAuth } from "./firebaseAdmin";
 import { normalizeProfile, type SavedProfile } from "./profile";
 
 import { ProfileRequestError } from "./requestError";
@@ -11,18 +10,11 @@ export async function authenticateProfile(request: Request) {
     ?.match(/^Bearer (.+)$/)?.[1];
   if (!token)
     throw new ProfileRequestError("Sign in to manage your account.", 401);
-  try {
-    return await adminAuth.verifyIdToken(token, true);
-  } catch {
-    throw new ProfileRequestError(
-      "Your session expired. Sign in again to continue.",
-      401,
-    );
-  }
+  return verifyAccountToken(token);
 }
 export function readSavedProfile(
   data: Record<string, unknown> | undefined,
-  token: DecodedIdToken,
+  token: VerifiedAccount,
 ): SavedProfile {
   const stored = data?.profile as Record<string, unknown> | undefined;
   return {

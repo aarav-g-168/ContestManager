@@ -78,7 +78,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     requestController.current = controller;
     setLoading(true);
     try {
-      const headers = { Authorization: `Bearer ${await user.getIdToken()}` };
+      const headers = { Authorization: `Bearer ${await user.getAccessToken()}` };
       const response = await fetch("/api/profile", {
         headers,
         signal: controller.signal,
@@ -158,7 +158,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     try {
       response = await fetch("/api/profile", {
         method: "PUT",
-        headers: { Authorization: `Bearer ${await user.getIdToken()}` },
+        headers: { Authorization: `Bearer ${await user.getAccessToken()}` },
         body: form,
         signal: AbortSignal.timeout(45000),
       });

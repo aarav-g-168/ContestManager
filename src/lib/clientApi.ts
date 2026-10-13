@@ -1,7 +1,7 @@
-import type { User } from "firebase/auth";
+import type { AccountUser } from "./authUser";
 
 export async function accountRequest<T>(
-  user: User,
+  user: AccountUser,
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
@@ -12,7 +12,7 @@ export async function accountRequest<T>(
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
-      Authorization: `Bearer ${await user.getIdToken()}`,
+      Authorization: `Bearer ${await user.getAccessToken()}`,
     },
   });
   const data = await response.json();

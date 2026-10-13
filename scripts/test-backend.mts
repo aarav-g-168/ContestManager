@@ -19,6 +19,8 @@ import {
   type MailProvider,
 } from "../src/lib/email";
 import { normalizeProfile, validateProfile } from "../src/lib/profile";
+import { resolveAccountIdentity } from "../src/lib/authServer";
+import type { User } from "@supabase/supabase-js";
 
 process.env.RESEND_FROM = "Contest Manager <reminders@example.test>";
 const engine = new PGlite();
@@ -83,6 +85,23 @@ try {
     { id: "alice", email: "alice@example.test" },
     { id: "bob", email: "bob@example.test" },
   ]);
+  await db.insert(schema.accountIdentities).values({ provider: "google", subject: "google-alice", userId: "alice" });
+  const verifiedUser = {
+    id: "supabase-alice", email: "alice@example.test", email_confirmed_at: "2026-10-01",
+    user_metadata: { full_name: "Alice" },
+    identities: [{ provider: "google", identity_data: { sub: "google-alice" } }],
+  } as unknown as User;
+  assert.equal((await resolveAccountIdentity(verifiedUser, db)).uid, "alice");
+  assert.equal((await resolveAccountIdentity({ ...verifiedUser, identities: [] }, db)).uid, "supabase-alice", "Email alone cannot recover a legacy account");
+  assert.equal((await resolveAccountIdentity({ ...verifiedUser, identities: [], user_metadata: { sub: "google-alice" } }, db)).uid, "supabase-alice", "Editable metadata cannot claim a legacy identity");
+  assert.equal((await resolveAccountIdentity({ ...verifiedUser, email_confirmed_at: undefined }, db)).email_verified, false);
+  await engine.exec("create role browser_test; grant usage on schema public to browser_test; grant select, insert, update, delete on all tables in schema public to browser_test; set role browser_test;");
+  try {
+    assert.equal((await engine.query("select * from users")).rows.length, 0, "RLS blocks direct browser table access");
+    await assert.rejects(() => engine.exec("insert into users (id) values ('unauthorized')"));
+  } finally {
+    await engine.exec("reset role");
+  }
   await db
     .insert(schema.contests)
     .values({ ...contest, start: new Date(contest.start) });

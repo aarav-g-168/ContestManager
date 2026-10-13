@@ -1,12 +1,12 @@
 import { eq } from "drizzle-orm";
-import type { DecodedIdToken } from "firebase-admin/auth";
+import type { VerifiedAccount } from "./authServer";
 import { getDatabase } from "./db";
 import { users, contests } from "./db/schema";
 import { getContestFeed } from "./contestFeed";
 import { parseAsUTC } from "./date";
 import { ProfileRequestError } from "./profileServer";
 
-export async function ensureAccount(token: DecodedIdToken) {
+export async function ensureAccount(token: VerifiedAccount) {
   const db = getDatabase();
   await db
     .insert(users)

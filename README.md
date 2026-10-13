@@ -32,12 +32,12 @@ storage. Authenticated API requests serve them; replacements are cleaned up.
 | --- | --- |
 | Application | Next.js 16, React 19, TypeScript |
 | UI | Tailwind CSS, Radix/shadcn, Motion, Lucide |
-| Application data | PostgreSQL and Drizzle ORM |
-| Sign-in | Firebase Authentication (Google) |
+| Application data | Supabase PostgreSQL and Drizzle ORM |
+| Sign-in | Supabase Auth (Google, PKCE) |
 | Uploaded photos | Supabase Storage (Free plan, private bucket) |
 | Contest schedules | CLIST, cached for 30 minutes |
 | Email | Resend scheduled emails and signed delivery webhooks |
-| Recovery worker | Authenticated endpoint, triggered by GitHub Actions |
+| Recovery worker | Authenticated endpoint, triggered by Supabase Cron |
 
 The SQL schema includes users, contests, bookmarks, reminders, delivery history,
 and foundational tables for teams, memberships, and contest results. Teams and
@@ -55,20 +55,18 @@ npm run check:services
 npm run dev
 ```
 
-`DATABASE_URL` is the application's PostgreSQL connection. If your database
-provider recommends a direct connection for migrations, set
-`DIRECT_DATABASE_URL` too. Firebase Auth still uses the Firebase project settings and server service account.
-Photos use a private Supabase bucket; see [free photo storage setup](docs/free-photo-storage.md). Credentials must stay in environment
-files or deployment secrets, never source control.
+One Supabase Free project handles the database, Google login and private photos.
+Follow [Supabase setup and cutover](docs/supabase-setup.md) before deployment.
+Configure the variables in `.env.example`; `DATABASE_URL` uses the session
+pooler, while `DIRECT_DATABASE_URL` may use a direct or session-pooler connection
+for migrations. The server secret must never be exposed with `NEXT_PUBLIC_*`.
 
-For existing Firestore data, follow the [migration and rollout guide](docs/stack-migration.md).
-The importer defaults to a read-only dry run and never deletes source records:
-
-```sh
-npm run db:import-firestore
-# Only after backup, schema migration, and pausing the old writer/sender:
-npm run db:import-firestore -- --apply
-```
+The one-time Firestore importer preserves existing Google account ownership via
+verified provider subjects and copies private photos. It reads retired credentials
+only from ignored `.migration-backups/legacy.env`. Firebase Admin is a development
+migration dependency; no Firebase SDK is used by the application. Source projects
+remain intact until cutover is verified. Never import while the old writer/sender
+is active or enable new account writes before the identity import is complete.
 
 ## Email delivery
 
@@ -82,17 +80,13 @@ The UI distinguishes scheduling, scheduled, sent, delivered, and failed emails.
 Failures are retained for review. A saved reminder does not mean an email has
 already been delivered, and no provider can guarantee exact inbox arrival.
 
-Production setup requires:
-
-- `RESEND_API_KEY` and `RESEND_FROM` on a verified sender domain.
-- A signed Resend webhook at `/api/webhooks/resend` and its
-  `RESEND_WEBHOOK_SECRET`.
-- A random `CRON_SECRET` in both deployment secrets and GitHub Actions secrets.
-- GitHub repository variable `APP_URL` containing the deployed https origin.
-
-`.github/workflows/reminders.yml` calls `/api/jobs/reminders` every five minutes
-for recovery. It fails on HTTP errors. The worker only accepts its secret; normal
-user reminder operations require a verified Firebase user token.
+Production setup requires a verified `RESEND_FROM`, `RESEND_API_KEY`, and signed
+webhook at `/api/webhooks/resend` with `RESEND_WEBHOOK_SECRET`. The protected worker
+uses `CRON_SECRET`. Configure `APP_URL` to the deployed HTTPS origin, then run
+`npm run setup:cron -- --apply` after deployment verification to set up five-minute
+Supabase Cron recovery with credentials stored in Vault. The old GitHub reminder
+workflow is removed. Free-project pauses can interrupt recovery; advance email
+scheduling does not depend on a cron invocation for the normal path.
 
 ## Checks
 
@@ -109,26 +103,19 @@ check relational ownership/constraints, profile revisions, scheduling,
 concurrent claims, cancellation, lost responses, retries, delivery events, and
 expired reminders. They do not access live databases or send mail.
 
-The separate profile HTTP integration suite requires an isolated local PostgreSQL
-database with `test` in its name, the Firebase Auth emulator, local Supabase
-Storage (`SUPABASE_URL` must use `127.0.0.1`), and a test app on port 3001.
-Both the app and test process need the same local storage settings/private bucket.
-Start the Auth emulator with:
-
-```sh
-firebase emulators:start --config firebase.emulators.json --project demo-contest-manager --only auth
-```
-
-Start the test app with `NEXT_PUBLIC_FIREBASE_EMULATORS=true` and `DATABASE_URL`
-pointing to the isolated test database. Set `PROFILE_TEST_DATABASE_URL` to that
-same URL in the test process and run `npm run test:profile`. Never use production
-credentials for integration tests.
+The separate profile HTTP integration suite requires local Supabase Auth/Storage,
+a PostgreSQL database on `127.0.0.1` with `test` in its name, and a test app on
+port 3001. Both processes need the same local Supabase URL, publishable key,
+server secret and private bucket. Start the app with `PROFILE_TEST_MODE=true`
+and the test database as `DATABASE_URL`. Set `PROFILE_TEST_DATABASE_URL` to the
+same URL in the test process, then run `npm run test:profile`. The suite creates
+and removes local Auth users. Never use production credentials for these tests.
 
 ## Deployment
 
 Configure production environment variables, apply SQL migrations with
 `npm run db:migrate`, and deploy to a Node.js-compatible Next.js host. Enable the
-new worker only after importing and checking existing data. See the rollout guide
+new worker only after importing and checking existing data. See the Supabase cutover guide
 for rollback precautions: scheduled provider emails must be reconciled before
 re-enabling the old sender.
 

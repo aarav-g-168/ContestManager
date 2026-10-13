@@ -10,15 +10,17 @@ import {
   deliveries,
   reminders,
   users,
+  accountIdentities,
 } from "../src/lib/db/schema";
 import { normalizeProfile } from "../src/lib/profile";
 import { parseAsUTC } from "../src/lib/date";
 import { uploadPhoto, downloadPhoto, checkPhotoStorage } from "../src/lib/photoStorage";
-config({ path: ".env.local", quiet: true });
+config({ path: ".migration-backups/legacy.env", quiet: true });
+config({ path: ".env.local", quiet: true, override: true });
 const apply = process.argv.includes("--apply");
 if (apply && !process.env.DATABASE_URL)
   throw new Error("Set DATABASE_URL before applying the import.");
-const { adminAuth, profileBucket } = await import("../src/lib/firebaseAdmin");
+const { adminAuth, profileBucket } = await import("./legacyFirebase.mts");
 const source = getFirestore(adminAuth.app);
 if (apply) await checkPhotoStorage();
 const counts = {
@@ -28,6 +30,7 @@ const counts = {
   expiredReminders: 0,
   photos: 0,
   failedUsers: 0,
+  googleIdentities: 0,
 };
 console.log(
   apply
@@ -61,6 +64,10 @@ try {
           )
             counts.expiredReminders++;
         }
+        const legacyIdentity = await adminAuth.getUser(document.id);
+        const googleSubject = legacyIdentity.providerData.find((provider) => provider.providerId === "google.com")?.uid;
+        if (googleSubject) counts.googleIdentities++;
+        else throw new Error("Legacy account needs an explicit identity migration");
         if (!apply) continue;
         const db = getDatabase();
         await db
@@ -76,6 +83,13 @@ try {
           .select()
           .from(users)
           .where(eq(users.id, document.id));
+        if (googleSubject) {
+          await db.insert(accountIdentities).values({ provider: "google", subject: googleSubject, userId: document.id }).onConflictDoNothing();
+          const [mapping] = await db.select().from(accountIdentities).where(and(eq(accountIdentities.provider, "google"), eq(accountIdentities.subject, googleSubject)));
+          if (mapping.userId !== document.id) throw new Error("Google identity mapping conflict; review before cutover");
+        } else {
+          throw new Error("Legacy account needs an explicit identity migration");
+        }
         if (
           !current.profile &&
           current.profileRevision === 0 &&

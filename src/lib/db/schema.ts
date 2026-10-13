@@ -16,7 +16,7 @@ import type { ProfileValues } from "../profile";
 const time = (name: string) =>
   timestamp(name, { withTimezone: true, mode: "date" });
 export const users = pgTable("users", {
-  id: text("id").primaryKey(), // Firebase Auth UID remains the identity boundary.
+  id: text("id").primaryKey(), // Stable account ID; imported accounts retain their legacy ID.
   email: text("email"),
   name: text("name"),
   googlePhotoUrl: text("google_photo_url"),
@@ -26,7 +26,7 @@ export const users = pgTable("users", {
   profileRevision: integer("profile_revision").notNull().default(0),
   profileUpdatedAt: time("profile_updated_at"),
   createdAt: time("created_at").notNull().defaultNow(),
-});
+}).enableRLS();
 export const contests = pgTable(
   "contests",
   {
@@ -42,7 +42,7 @@ export const contests = pgTable(
     index("contests_start_idx").on(t.start),
     index("contests_host_idx").on(t.host),
   ],
-);
+).enableRLS();
 export const bookmarks = pgTable(
   "bookmarks",
   {
@@ -55,7 +55,7 @@ export const bookmarks = pgTable(
     createdAt: time("created_at").notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.contestId] })],
-);
+).enableRLS();
 // Immutable delivery snapshots form the durable email outbox. Removing a reminder
 // requests cancellation here; history is retained rather than silently deleted.
 export const deliveries = pgTable(
@@ -94,7 +94,7 @@ export const deliveries = pgTable(
     index("deliveries_work_idx").on(t.status, t.nextAttemptAt),
     uniqueIndex("deliveries_provider_idx").on(t.providerId),
   ],
-);
+).enableRLS();
 export const reminders = pgTable(
   "reminders",
   {
@@ -109,7 +109,7 @@ export const reminders = pgTable(
       .references(() => deliveries.id),
   },
   (t) => [primaryKey({ columns: [t.userId, t.contestId] })],
-);
+).enableRLS();
 export const mailEvents = pgTable(
   "mail_events",
   {
@@ -119,7 +119,7 @@ export const mailEvents = pgTable(
     createdAt: time("created_at").notNull().defaultNow(),
   },
   (t) => [index("mail_events_provider_idx").on(t.providerId)],
-);
+).enableRLS();
 // Relational foundations for future features; no speculative product flows.
 export const teams = pgTable("teams", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -128,7 +128,7 @@ export const teams = pgTable("teams", {
     .notNull()
     .references(() => users.id),
   createdAt: time("created_at").notNull().defaultNow(),
-});
+}).enableRLS();
 export const teamMembers = pgTable(
   "team_members",
   {
@@ -141,7 +141,7 @@ export const teamMembers = pgTable(
     role: text("role").notNull().default("member"),
   },
   (t) => [primaryKey({ columns: [t.teamId, t.userId] })],
-);
+).enableRLS();
 export const contestResults = pgTable(
   "contest_results",
   {
@@ -160,4 +160,11 @@ export const contestResults = pgTable(
     primaryKey({ columns: [t.userId, t.contestId] }),
     index("results_contest_rank_idx").on(t.contestId, t.rank),
   ],
-);
+).enableRLS();
+
+// Trusted external subject -> account mapping preserves existing users across Auth migration.
+export const accountIdentities = pgTable("account_identities", {
+  provider: text("provider").notNull(),
+  subject: text("subject").notNull(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+}, (t) => [primaryKey({ columns: [t.provider, t.subject] })]).enableRLS();

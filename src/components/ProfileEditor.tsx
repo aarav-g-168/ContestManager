@@ -129,7 +129,7 @@ interface ProfileFormProps {
   counts: { bookmarks: number | string; reminders: number | string };
 }
 
-// The form is independent of Firebase so its interactions can be checked in isolation.
+// The form is independent of the authentication provider so its interactions can be checked in isolation.
 export function ProfileForm({
   initial,
   user,

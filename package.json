@@ -15,7 +15,8 @@
     "test:backend": "tsx scripts/test-backend.mts",
     "typecheck": "tsc --noEmit",
     "check:services": "tsx scripts/check-services.mts",
-    "test:photos": "tsx scripts/test-photo-storage.mts"
+    "test:photos": "tsx scripts/test-photo-storage.mts",
+    "setup:cron": "tsx scripts/setup-reminder-cron.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",
@@ -24,8 +25,6 @@
     "cmdk": "^1.1.1",
     "dotenv": "^18.0.7",
     "drizzle-orm": "^0.45.4",
-    "firebase": "^12.14.0",
-    "firebase-admin": "^14.0.0",
     "lucide-react": "^1.16.0",
     "motion": "^12.42.0",
     "next": "^16.4.0",
@@ -51,6 +50,7 @@
     "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "^16.4.0",
+    "firebase-admin": "^14.5.0",
     "shadcn": "^4.7.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",

@@ -1,11 +1,13 @@
 // HTTP integration tests require an isolated local PostgreSQL test database,
-// Firebase Auth emulator and local Supabase Storage, and a test app at PROFILE_TEST_ORIGIN.
+// local Supabase Auth/Storage, and a test app at PROFILE_TEST_ORIGIN.
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, inArray } from "drizzle-orm";
 import sharp from "sharp";
+import { createClient } from "@supabase/supabase-js";
+import { randomUUID } from "node:crypto";
 import { photoStorage, removePhoto } from "../src/lib/photoStorage";
 import { users } from "../src/lib/db/schema";
 
@@ -22,7 +24,7 @@ assert.match(
   /test/i,
   "Never run against production data.",
 );
-assert.equal(new URL(process.env.SUPABASE_URL || "").hostname, "127.0.0.1", "Use local Supabase for photo integration tests.");
+assert.equal(new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || "").hostname, "127.0.0.1", "Use local Supabase for photo integration tests.");
 const photoExists = async (path: string) => {
   const { error } = await photoStorage().files.info(path);
   if (!error) return true;
@@ -52,20 +54,21 @@ interface TestUser {
   idToken: string;
   localId: string;
 }
+const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!, { auth: { persistSession: false, autoRefreshToken: false } });
 async function newUser(): Promise<TestUser> {
-  const response = await fetch(
-    "http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-api-key",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ returnSecureToken: true }),
-    },
-  );
-  assert.equal(response.status, 200, "Start the Auth emulator.");
-  const user = await response.json();
-  created.push(user.localId);
-  return user;
+  const email = `profile-${randomUUID()}@example.test`;
+  const password = randomUUID();
+  const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  assert.ifError(error);
+  assert.ok(data.user);
+  created.push(data.user.id);
+  const client = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, { auth: { persistSession: false, autoRefreshToken: false } });
+  const signed = await client.auth.signInWithPassword({ email, password });
+  assert.ifError(signed.error);
+  assert.ok(signed.data.session);
+  return { localId: data.user.id, idToken: signed.data.session.access_token };
 }
+
 const get = (user: TestUser, path = "/api/profile") =>
   fetch(`${origin}${path}`, {
     headers: { Authorization: `Bearer ${user.idToken}` },
@@ -160,5 +163,6 @@ try {
   if (created.length) await db.delete(users).where(inArray(users.id, created));
   for (const path of paths)
     await removePhoto(path);
+  for (const id of created) await admin.auth.admin.deleteUser(id);
   await pool.end();
 }

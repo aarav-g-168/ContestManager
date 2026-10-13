@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { checkPhotoStorage, uploadPhoto, downloadPhoto, removePhoto } from "../src/lib/photoStorage";
 
 // Isolated transport tests: no real storage account or credentials are used.
-process.env.SUPABASE_URL = "https://photo-test.supabase.co";
+process.env.NEXT_PUBLIC_SUPABASE_URL = "https://photo-test.supabase.co";
 process.env.SUPABASE_SECRET_KEY = "sb_secret_test_only";
 process.env.SUPABASE_PHOTO_BUCKET = "profile-photos";
 const originalFetch = globalThis.fetch;
