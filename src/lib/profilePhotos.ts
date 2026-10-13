@@ -1,4 +1,4 @@
-import { profileBucket } from "./firebaseAdmin";
+import { uploadPhoto, downloadPhoto, removePhoto } from "./photoStorage";
 import { ownedAvatarPath } from "./profileServer";
 export type PhotoStore = "storage";
 export async function saveProfilePhoto(
@@ -8,13 +8,7 @@ export async function saveProfilePhoto(
 ): Promise<PhotoStore> {
   if (image.length > 192 * 1024 || !ownedAvatarPath(path, uid))
     throw new Error("Invalid profile image");
-  await profileBucket()
-    .file(path)
-    .save(image, {
-      resumable: false,
-      contentType: "image/webp",
-      metadata: { cacheControl: "private, max-age=300" },
-    });
+  await uploadPhoto(path, image);
   return "storage";
 }
 export async function readProfilePhoto(
@@ -24,8 +18,7 @@ export async function readProfilePhoto(
 ): Promise<Buffer> {
   if (!ownedAvatarPath(path, uid) || store !== "storage")
     throw new Error("Invalid profile image");
-  const [image] = await profileBucket().file(path).download();
-  return image;
+  return downloadPhoto(path);
 }
 export async function deleteProfilePhoto(
   path: string,
@@ -33,5 +26,5 @@ export async function deleteProfilePhoto(
   store: unknown,
 ) {
   if (!ownedAvatarPath(path, uid) || store !== "storage") return;
-  await profileBucket().file(path).delete({ ignoreNotFound: true });
+  await removePhoto(path);
 }

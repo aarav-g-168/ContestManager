@@ -4,7 +4,7 @@ import { users } from "../src/lib/db/schema";
 config({ path: ".env.local", quiet: true });
 const checks: Record<string, string> = {};
 let ready = true;
-for (const name of ["DATABASE_URL", "RESEND_FROM", "RESEND_API_KEY", "RESEND_WEBHOOK_SECRET", "CRON_SECRET"]) {
+for (const name of ["DATABASE_URL", "RESEND_FROM", "RESEND_API_KEY", "RESEND_WEBHOOK_SECRET", "CRON_SECRET", "SUPABASE_URL", "SUPABASE_SECRET_KEY"]) {
   checks[name] = process.env[name] ? "configured" : "missing";
   if (!process.env[name]) ready = false;
 }
@@ -13,11 +13,10 @@ if (process.env.DATABASE_URL) {
   catch { checks.databaseSchema = "unavailable or migrations not applied"; ready = false; }
 }
 try {
-  const { profileBucket } = await import("../src/lib/firebaseAdmin");
-  const [exists] = await profileBucket().exists();
-  checks.photoBucket = exists ? "available" : "not created";
-  if (!exists) ready = false;
-} catch { checks.photoBucket = "unavailable; check server credentials and bucket configuration"; ready = false; }
+  const { checkPhotoStorage } = await import("../src/lib/photoStorage");
+  await checkPhotoStorage();
+  checks.photoBucket = "available and private (Supabase)";
+} catch { checks.photoBucket = "unavailable; configure Supabase credentials and a private bucket"; ready = false; }
 if (process.env.RESEND_FROM && /@resend\.dev\b/i.test(process.env.RESEND_FROM)) { checks.RESEND_FROM = "test sender; use a verified domain"; ready = false; }
 if (process.env.CRON_SECRET && Buffer.byteLength(process.env.CRON_SECRET) < 32) { checks.CRON_SECRET = "must be at least 32 bytes"; ready = false; }
 checks.senderDomainVerification = "Verify in the Resend dashboard; no test email was sent";

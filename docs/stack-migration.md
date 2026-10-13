@@ -1,7 +1,7 @@
 # PostgreSQL and reminder rollout
 
 The application uses Next.js/React, Drizzle + PostgreSQL, Firebase Authentication,
-Firebase Storage for uploaded photos, and Resend for scheduled reminder emails.
+Supabase Free Storage for uploaded photos, and Resend for scheduled reminder emails.
 Firestore is now only a source for the explicit one-time import script.
 
 ## Configure services
@@ -11,9 +11,11 @@ Firestore is now only a source for the explicit one-time import script.
    provider's pooled URL for the app; set `DIRECT_DATABASE_URL` for migrations
    when the provider recommends a separate direct URL. Keep TLS enabled for
    hosted databases. Never expose these through `NEXT_PUBLIC_*` variables.
-2. Retain the existing Firebase Auth configuration and service account. Enable a
-   Firebase Storage bucket and ensure the server account can access it. Uploaded
-   photos are private and served through the authenticated profile-photo API.
+2. Retain the existing Firebase Auth configuration and service account. Do not
+   enable Firebase Blaze for photos. Create a private Supabase Free bucket using
+   [the setup guide](free-photo-storage.md). Configure `SUPABASE_URL`,
+   `SUPABASE_SECRET_KEY`, and `SUPABASE_PHOTO_BUCKET` locally and on deployment.
+   Firebase Storage is only read by the importer if a legacy photo lives there.
 3. Verify a sending domain in Resend, including its required DNS records. Set
    `RESEND_FROM` to a sender on that domain; the application rejects `resend.dev`
    test senders. Keep `RESEND_API_KEY` server-only.
@@ -51,7 +53,7 @@ npm run db:import-firestore -- --apply
 Pause the old reminder workflow and put the old deployment into maintenance mode
 before the final import, so users cannot write to two data stores simultaneously.
 The script preserves Firebase UIDs, copies profiles/bookmarks/future reminders,
-copies Firestore-backed photos into Storage and verifies their bytes, and leaves
+copies legacy photos into private Supabase Storage and verifies their bytes, and leaves
 Firestore untouched. Existing PostgreSQL profile edits are not overwritten.
 Expired reminders remain in the source and are not queued for stale email sends.
 An interrupted import can be rerun; a nonzero exit means some records need review.
@@ -76,8 +78,7 @@ made after cutover.
 - Run `npm run test:backend`, `npm run typecheck`, `npm run lint`, and
   `npm run build`. Backend tests use an in-memory PostgreSQL engine and a fake
   mail provider. They do not connect to live accounts or send emails.
-- Run `npm run test:profile` against the isolated local database and Firebase
-  emulators described in the README to verify authenticated HTTP saves and photos.
+- Run `npm run test:profile` against the isolated local database and Firebase Auth emulator and local Supabase Storage described in the README to verify authenticated HTTP saves and photos.
 - With an explicitly chosen test recipient, save a real future reminder and
   verify its scheduled time in Resend, its signed webhook events, and its actual
   arrival. Provider acceptance and inbox delivery are different events.

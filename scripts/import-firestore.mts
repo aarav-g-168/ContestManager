@@ -13,12 +13,14 @@ import {
 } from "../src/lib/db/schema";
 import { normalizeProfile } from "../src/lib/profile";
 import { parseAsUTC } from "../src/lib/date";
+import { uploadPhoto, downloadPhoto, checkPhotoStorage } from "../src/lib/photoStorage";
 config({ path: ".env.local", quiet: true });
 const apply = process.argv.includes("--apply");
 if (apply && !process.env.DATABASE_URL)
   throw new Error("Set DATABASE_URL before applying the import.");
 const { adminAuth, profileBucket } = await import("../src/lib/firebaseAdmin");
 const source = getFirestore(adminAuth.app);
+if (apply) await checkPhotoStorage();
 const counts = {
   users: 0,
   bookmarks: 0,
@@ -86,34 +88,29 @@ try {
               photo.split("/").length !== 3
             )
               throw new Error("Invalid legacy photo path");
+            let bytes: Buffer;
             if (legacy.profile.photoStore === "firestore") {
               const photoId = photo
                 .split("/")
                 .at(-1)!
                 .replace(/\.webp$/, "");
-              const bytes = (
+              const storedBytes = (
                 await document.ref
                   .collection("profilePhotos")
                   .doc(photoId)
                   .get()
               ).data()?.image;
-              if (!Buffer.isBuffer(bytes))
+              if (!Buffer.isBuffer(storedBytes))
                 throw new Error("Legacy photo is unavailable");
-              await profileBucket()
-                .file(photo)
-                .save(bytes, {
-                  resumable: false,
-                  contentType: "image/webp",
-                  metadata: { cacheControl: "private, max-age=300" },
-                });
-              const [copied] = await profileBucket().file(photo).download();
-              if (
-                createHash("sha256").update(bytes).digest("hex") !==
-                createHash("sha256").update(copied).digest("hex")
-              )
-                throw new Error("Photo copy verification failed");
-            } else if (!(await profileBucket().file(photo).exists())[0])
-              throw new Error("Legacy storage photo is unavailable");
+              bytes = storedBytes;
+            } else {
+              [bytes] = await profileBucket().file(photo).download();
+            }
+            await uploadPhoto(photo, bytes);
+            const copied = await downloadPhoto(photo);
+            if (createHash("sha256").update(bytes).digest("hex") !==
+                createHash("sha256").update(copied).digest("hex"))
+              throw new Error("Photo copy verification failed");
           }
           await db
             .update(users)

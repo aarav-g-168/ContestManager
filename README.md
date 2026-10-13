@@ -34,7 +34,7 @@ storage. Authenticated API requests serve them; replacements are cleaned up.
 | UI | Tailwind CSS, Radix/shadcn, Motion, Lucide |
 | Application data | PostgreSQL and Drizzle ORM |
 | Sign-in | Firebase Authentication (Google) |
-| Uploaded photos | Firebase Storage |
+| Uploaded photos | Supabase Storage (Free plan, private bucket) |
 | Contest schedules | CLIST, cached for 30 minutes |
 | Email | Resend scheduled emails and signed delivery webhooks |
 | Recovery worker | Authenticated endpoint, triggered by GitHub Actions |
@@ -57,8 +57,8 @@ npm run dev
 
 `DATABASE_URL` is the application's PostgreSQL connection. If your database
 provider recommends a direct connection for migrations, set
-`DIRECT_DATABASE_URL` too. Firebase Auth and Storage still use the Firebase
-project settings and server service account. Credentials must stay in environment
+`DIRECT_DATABASE_URL` too. Firebase Auth still uses the Firebase project settings and server service account.
+Photos use a private Supabase bucket; see [free photo storage setup](docs/free-photo-storage.md). Credentials must stay in environment
 files or deployment secrets, never source control.
 
 For existing Firestore data, follow the [migration and rollout guide](docs/stack-migration.md).
@@ -98,6 +98,7 @@ user reminder operations require a verified Firebase user token.
 
 ```sh
 npm run test:backend
+npm run test:photos
 npm run typecheck
 npm run lint
 npm run build
@@ -109,18 +110,19 @@ concurrent claims, cancellation, lost responses, retries, delivery events, and
 expired reminders. They do not access live databases or send mail.
 
 The separate profile HTTP integration suite requires an isolated local PostgreSQL
-database with `test` in its name, Firebase Auth/Storage emulators, and a test app.
-Install the Firebase CLI and its Java prerequisite, then start the emulators:
+database with `test` in its name, the Firebase Auth emulator, local Supabase
+Storage (`SUPABASE_URL` must use `127.0.0.1`), and a test app on port 3001.
+Both the app and test process need the same local storage settings/private bucket.
+Start the Auth emulator with:
 
 ```sh
-firebase emulators:start --config firebase.emulators.json --project demo-contest-manager --only auth,storage
+firebase emulators:start --config firebase.emulators.json --project demo-contest-manager --only auth
 ```
 
-Start the test app on port 3001 with `NEXT_PUBLIC_FIREBASE_EMULATORS=true` and
-`DATABASE_URL` pointing to that isolated test database. In another terminal set
-`PROFILE_TEST_DATABASE_URL` to the same URL and run `npm run test:profile`.
-This suite tests authenticated HTTP saves, photo processing/cleanup, account
-isolation, and concurrent profile revisions. Test rules are not production rules.
+Start the test app with `NEXT_PUBLIC_FIREBASE_EMULATORS=true` and `DATABASE_URL`
+pointing to the isolated test database. Set `PROFILE_TEST_DATABASE_URL` to that
+same URL in the test process and run `npm run test:profile`. Never use production
+credentials for integration tests.
 
 ## Deployment
 

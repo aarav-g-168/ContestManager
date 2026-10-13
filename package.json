@@ -14,9 +14,11 @@
     "db:import-firestore": "tsx scripts/import-firestore.mts",
     "test:backend": "tsx scripts/test-backend.mts",
     "typecheck": "tsc --noEmit",
-    "check:services": "tsx scripts/check-services.mts"
+    "check:services": "tsx scripts/check-services.mts",
+    "test:photos": "tsx scripts/test-photo-storage.mts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

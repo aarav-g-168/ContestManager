@@ -1,13 +1,12 @@
 // HTTP integration tests require an isolated local PostgreSQL test database,
-// Firebase Auth/Storage emulators, and a test app at PROFILE_TEST_ORIGIN.
+// Firebase Auth emulator and local Supabase Storage, and a test app at PROFILE_TEST_ORIGIN.
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { eq, inArray } from "drizzle-orm";
 import sharp from "sharp";
-import { initializeApp, deleteApp } from "firebase-admin/app";
-import { getStorage } from "firebase-admin/storage";
+import { photoStorage, removePhoto } from "../src/lib/photoStorage";
 import { users } from "../src/lib/db/schema";
 
 const origin = process.env.PROFILE_TEST_ORIGIN || "http://127.0.0.1:3001";
@@ -23,15 +22,13 @@ assert.match(
   /test/i,
   "Never run against production data.",
 );
-process.env.FIREBASE_STORAGE_EMULATOR_HOST = "127.0.0.1:9199";
-const app = initializeApp(
-  {
-    projectId: "demo-contest-manager",
-    storageBucket: "demo-contest-manager.appspot.com",
-  },
-  "profile-integration-test",
-);
-const bucket = getStorage(app).bucket();
+assert.equal(new URL(process.env.SUPABASE_URL || "").hostname, "127.0.0.1", "Use local Supabase for photo integration tests.");
+const photoExists = async (path: string) => {
+  const { error } = await photoStorage().files.info(path);
+  if (!error) return true;
+  if (error.statusCode === "404" || error.statusCode === "400") return false;
+  throw error;
+};
 const pool = new Pool({ connectionString: databaseUrl });
 const db = drizzle(pool);
 const created: string[] = [];
@@ -146,9 +143,9 @@ try {
   const current = (await account(user)).photoPath!;
   paths.add(current);
   assert.notEqual(current, previous);
-  assert.equal((await bucket.file(previous).exists())[0], false);
+  assert.equal(await photoExists(previous), false);
   assert.equal((await save(user, 3, { bio: "" }, null, "remove")).status, 200);
-  assert.equal((await bucket.file(current).exists())[0], false);
+  assert.equal(await photoExists(current), false);
   assert.equal((await get(user, "/api/profile/photo")).status, 404);
   const simultaneous = await Promise.all([
     save(user, 4, { headline: "First" }),
@@ -162,7 +159,6 @@ try {
 } finally {
   if (created.length) await db.delete(users).where(inArray(users.id, created));
   for (const path of paths)
-    await bucket.file(path).delete({ ignoreNotFound: true });
+    await removePhoto(path);
   await pool.end();
-  await deleteApp(app);
 }
