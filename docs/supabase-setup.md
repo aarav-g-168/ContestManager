@@ -32,6 +32,12 @@ Neon connection in the active application configuration.
    family. Do not use the old Neon URL. Keep existing Resend, CLIST and CRON_SECRET
    values. Never paste private keys/URLs into chat or tracked files.
 
+   For verified TLS, keep the public `supabase-ca.crt` downloaded from Database >
+   Settings > SSL Configuration in the project root. Both database URLs must
+   include `sslmode=verify-full&sslrootcert=supabase-ca.crt` (use `&` to append to
+   existing query parameters). Use the same parameters in Vercel. Next.js includes
+   this public CA certificate in deployed server files; it is not a private key.
+
 ## Google login
 
 1. Supabase > Authentication > Sign In / Providers > Google: enable Google.

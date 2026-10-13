@@ -33,7 +33,7 @@ export async function resolveAccountIdentity(user: User, db: Database): Promise<
   };
 }
 
-export async function verifyAccountToken(token: string): Promise<VerifiedAccount> {
+export async function verifyAccountToken(token: string, database?: Database): Promise<VerifiedAccount> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) throw new ProfileRequestError("Sign-in is not configured yet.", 503);
@@ -47,5 +47,5 @@ export async function verifyAccountToken(token: string): Promise<VerifiedAccount
       throw new ProfileRequestError("Sign-in service is unavailable. Try again shortly.", 503);
     throw new ProfileRequestError("Your session expired. Sign in again to continue.", 401);
   }
-  return resolveAccountIdentity(data.user, getDatabase());
+  return resolveAccountIdentity(data.user, database ?? getDatabase());
 }

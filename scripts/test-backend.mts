@@ -19,7 +19,7 @@ import {
   type MailProvider,
 } from "../src/lib/email";
 import { normalizeProfile, validateProfile } from "../src/lib/profile";
-import { resolveAccountIdentity } from "../src/lib/authServer";
+import { resolveAccountIdentity, verifyAccountToken } from "../src/lib/authServer";
 import type { User } from "@supabase/supabase-js";
 
 process.env.RESEND_FROM = "Contest Manager <reminders@example.test>";
@@ -95,6 +95,28 @@ try {
   assert.equal((await resolveAccountIdentity({ ...verifiedUser, identities: [] }, db)).uid, "supabase-alice", "Email alone cannot recover a legacy account");
   assert.equal((await resolveAccountIdentity({ ...verifiedUser, identities: [], user_metadata: { sub: "google-alice" } }, db)).uid, "supabase-alice", "Editable metadata cannot claim a legacy identity");
   assert.equal((await resolveAccountIdentity({ ...verifiedUser, email_confirmed_at: undefined }, db)).email_verified, false);
+  const realFetch = globalThis.fetch;
+  const previousUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const previousKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://auth-test.supabase.co";
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_test";
+  let authStatus = 200;
+  globalThis.fetch = async (input, init) => {
+    assert.equal(String(input), "https://auth-test.supabase.co/auth/v1/user");
+    assert.equal(new Headers(init?.headers).get("Authorization"), "Bearer test-token");
+    return Response.json(authStatus === 200 ? verifiedUser : { message: "Rejected", code: "bad_jwt" }, { status: authStatus });
+  };
+  try {
+    assert.equal((await verifyAccountToken("test-token", db)).uid, "alice");
+    authStatus = 401;
+    await assert.rejects(() => verifyAccountToken("test-token", db), (error: unknown) => (error as { status: number }).status === 401);
+    authStatus = 503;
+    await assert.rejects(() => verifyAccountToken("test-token", db), (error: unknown) => (error as { status: number }).status === 503);
+  } finally {
+    globalThis.fetch = realFetch;
+    if (previousUrl === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL; else process.env.NEXT_PUBLIC_SUPABASE_URL = previousUrl;
+    if (previousKey === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; else process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = previousKey;
+  }
   await engine.exec("create role browser_test; grant usage on schema public to browser_test; grant select, insert, update, delete on all tables in schema public to browser_test; set role browser_test;");
   try {
     assert.equal((await engine.query("select * from users")).rows.length, 0, "RLS blocks direct browser table access");
