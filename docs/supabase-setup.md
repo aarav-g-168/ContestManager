@@ -11,9 +11,9 @@ Neon connection in the active application configuration.
 2. Copy the project URL and publishable API key (legacy `anon` also works) from
    Connect / Settings > API Keys. Copy the server secret key separately (legacy
    `service_role` also works). Never expose that secret to the browser.
-3. Connect > Connection string > **Session pooler**, port **5432**, provides an
-   IPv4-compatible URL for local development, migrations and the application's
-   small connection pool. Insert the database password where the dashboard
+3. Connect > Connection string > **Transaction pooler**, port **6543**, provides an
+   IPv4-compatible URL for the application on Vercel. Use **Session pooler**, port
+   **5432**, separately for migrations. Insert the database password where the dashboard
    shows a placeholder, URL-encoding special characters. Keep TLS enabled.
    The API secret and database password are different credentials.
 4. Set `.env.local` and later Vercel's environment:
@@ -23,7 +23,7 @@ Neon connection in the active application configuration.
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
    SUPABASE_SECRET_KEY=YOUR_SERVER_SECRET_KEY
    SUPABASE_PHOTO_BUCKET=profile-photos
-   DATABASE_URL=YOUR_SESSION_POOLER_POSTGRES_URL
+   DATABASE_URL=YOUR_TRANSACTION_POOLER_POSTGRES_URL
    DIRECT_DATABASE_URL=YOUR_SESSION_POOLER_POSTGRES_URL
    APP_URL=https://contest-manager.vercel.app
    ```
@@ -31,6 +31,13 @@ Neon connection in the active application configuration.
    A direct URL also works for migrations if your network supports its address
    family. Do not use the old Neon URL. Keep existing Resend, CLIST and CRON_SECRET
    values. Never paste private keys/URLs into chat or tracked files.
+
+   Runtime also converts older Supabase session-pooler URLs on port 5432 to
+   transaction mode on 6543, preserving the host, credentials and TLS parameters.
+   Each application instance uses at most two client connections, releases idle
+   connections after 10 seconds and rotates connections after 60 seconds. The
+   application uses unnamed parameterized queries; it does not use named prepared
+   statements or session-level database state. Migration URLs are not converted.
 
    For verified TLS, keep the public `supabase-ca.crt` downloaded from Database >
    Settings > SSL Configuration in the project root. Both database URLs must

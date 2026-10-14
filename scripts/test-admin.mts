@@ -9,6 +9,17 @@ import { requireAdmin } from "../src/lib/adminAccess";
 import { recordMailEvent } from "../src/lib/reminderQueue";
 import { GET as overview } from "../src/app/api/admin/overview/route";
 import { GET as access } from "../src/app/api/admin/access/route";
+import { runtimeDatabaseUrl } from "../src/lib/db/connection";
+
+const sessionUrl = "postgresql://postgres.example:p%40ss@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=verify-full&sslrootcert=supabase-ca.crt";
+const transactionUrl = new URL(runtimeDatabaseUrl(sessionUrl));
+assert.equal(transactionUrl.port, "6543");
+assert.equal(transactionUrl.password, new URL(sessionUrl).password);
+assert.equal(transactionUrl.search, new URL(sessionUrl).search, "Verified TLS settings are preserved");
+assert.equal(runtimeDatabaseUrl(transactionUrl.toString()), transactionUrl.toString());
+assert.equal(runtimeDatabaseUrl("postgresql://localhost:5432/test"), "postgresql://localhost:5432/test");
+assert.equal(runtimeDatabaseUrl("postgresql://db.example.supabase.co:5432/postgres"), "postgresql://db.example.supabase.co:5432/postgres");
+assert.throws(() => runtimeDatabaseUrl("postgresql://example.neon.tech/db"));
 
 const engine = new PGlite();
 const db = drizzle(engine, { schema }) as unknown as Database;
