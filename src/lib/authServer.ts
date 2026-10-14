@@ -5,6 +5,7 @@ import { accountIdentities } from "./db/schema";
 import { ProfileRequestError } from "./requestError";
 
 export type VerifiedAccount = {
+  authId: string;
   uid: string;
   email?: string;
   email_verified: boolean;
@@ -25,6 +26,7 @@ export async function resolveAccountIdentity(user: User, db: Database): Promise<
     if (legacy) uid = legacy.userId;
   }
   return {
+    authId: user.id,
     uid,
     email: user.email,
     email_verified: !!user.email_confirmed_at,

@@ -116,10 +116,21 @@ export const mailEvents = pgTable(
     id: text("id").primaryKey(),
     providerId: text("provider_id").notNull(),
     type: text("type").notNull(),
+    occurredAt: time("occurred_at"), // Provider event time; null for legacy events.
     createdAt: time("created_at").notNull().defaultNow(),
   },
   (t) => [index("mail_events_provider_idx").on(t.providerId)],
 ).enableRLS();
+export const workerRuns = pgTable("reminder_worker_runs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  startedAt: time("started_at").notNull().defaultNow(),
+  finishedAt: time("finished_at"),
+  success: boolean("success"),
+  scheduled: integer("scheduled").notNull().default(0),
+  cancelled: integer("cancelled").notNull().default(0),
+  retried: integer("retried").notNull().default(0),
+  failed: integer("failed").notNull().default(0),
+}, (t) => [index("worker_runs_started_idx").on(t.startedAt)]).enableRLS();
 // Relational foundations for future features; no speculative product flows.
 export const teams = pgTable("teams", {
   id: uuid("id").primaryKey().defaultRandom(),

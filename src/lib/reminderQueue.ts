@@ -62,7 +62,7 @@ export async function reconcileMailEvents(db: Database, providerId: string) {
 }
 export async function recordMailEvent(
   db: Database,
-  event: { id: string; providerId: string; type: string },
+  event: { id: string; providerId: string; type: string; occurredAt?: Date | null },
 ) {
   await db.insert(mailEvents).values(event).onConflictDoNothing();
   await reconcileMailEvents(db, event.providerId);

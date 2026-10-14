@@ -37,6 +37,7 @@ export async function POST(request: Request) {
         id: request.headers.get("svix-id")!,
         providerId: event.data.email_id,
         type: event.type,
+        occurredAt: Number.isFinite(Date.parse(event.created_at)) ? new Date(event.created_at) : null,
       });
     } catch {
       return NextResponse.json(

@@ -9,10 +9,12 @@ import {
   LoaderCircle,
   LogOut,
   UserRound,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { useProfile } from "./ProfileProvider";
 import ProfileAvatar from "./ProfileAvatar";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
 export default function AuthButton({
   expanded = false,
 }: {
@@ -20,6 +22,7 @@ export default function AuthButton({
 }) {
   const { user, loading, busy, login, logout } = useAuth();
   const { profile, photoURL } = useProfile();
+  const isAdmin = useAdminAccess();
   const name =
     profile?.values.displayName || user?.displayName || "Your account";
   if (loading)
@@ -93,6 +96,7 @@ export default function AuthButton({
               </Link>
             </DropdownMenu.Item>
           ))}
+          {isAdmin && <DropdownMenu.Item asChild><Link href="/admin" className="menu-item"><ShieldCheck size={15} aria-hidden="true" />Admin dashboard</Link></DropdownMenu.Item>}
           <DropdownMenu.Separator className="my-1 h-px bg-border" />
           <DropdownMenu.Item
             className="menu-item text-muted-foreground"

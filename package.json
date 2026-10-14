@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "check:services": "tsx scripts/check-services.mts",
     "test:photos": "tsx scripts/test-photo-storage.mts",
-    "setup:cron": "tsx scripts/setup-reminder-cron.mts"
+    "setup:cron": "tsx scripts/setup-reminder-cron.mts",
+    "test:admin": "tsx scripts/test-admin.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

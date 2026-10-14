@@ -92,6 +92,7 @@ scheduling does not depend on a cron invocation for the normal path.
 
 ```sh
 npm run test:backend
+npm run test:admin
 npm run test:photos
 npm run typecheck
 npm run lint
@@ -127,3 +128,9 @@ never be committed or pushed.
 [Aarav Gupta](https://aarav.site) ·
 [GitHub](https://github.com/aarav-g-168) ·
 [LinkedIn](https://linkedin.com/in/aaravgupta168)
+
+## Private operations dashboard
+
+`/admin` provides delivery metrics, searchable history and scheduler/webhook health.
+Access uses the server-only `ADMIN_AUTH_USER_IDS` allowlist of verified Supabase
+Auth IDs. See [admin setup and metric definitions](docs/admin-dashboard.md).
