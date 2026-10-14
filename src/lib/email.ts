@@ -47,8 +47,8 @@ export function reminderEmail(delivery: Delivery) {
     throw new MailError("Invalid contest URL", false);
   return {
     subject: `Reminder: ${delivery.event}`,
-    text: `${delivery.event}\nStarts ${start} IST (UTC+5:30).\nYour ${delivery.reminderType} reminder.\nOpen contest: ${url.toString()}\n\nContest Manager`,
-    html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#25211e"><p style="color:#b83d16">CONTEST MANAGER</p><h1 style="font-size:24px">${escapeHtml(delivery.event)}</h1><p>Starts <strong>${escapeHtml(start)} IST (UTC+5:30)</strong>.</p><p>You requested a ${escapeHtml(delivery.reminderType)} reminder.</p><p><a style="color:#b83d16" href="${escapeHtml(url.toString())}">Open contest →</a></p><hr><p style="font-size:12px">You received this because you saved a reminder in Contest Manager.</p></div>`,
+    text: `${delivery.event}\nStarts ${start} IST (UTC+5:30).\nYour ${delivery.reminderType} reminder.\nOpen contest: ${url.toString()}\n\nGood luck with the contest!\nAarav Gupta\nFounder, Contest Manager\nExplore my other projects: https://aarav.site\n\nYou received this because you saved a reminder in Contest Manager.`,
+    html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#25211e"><p style="color:#b83d16">CONTEST MANAGER</p><h1 style="font-size:24px">${escapeHtml(delivery.event)}</h1><p>Starts <strong>${escapeHtml(start)} IST (UTC+5:30)</strong>.</p><p>You requested a ${escapeHtml(delivery.reminderType)} reminder.</p><p><a style="color:#b83d16" href="${escapeHtml(url.toString())}">Open contest →</a></p><div style="margin-top:32px;font-size:14px;line-height:1.6"><p style="margin:0 0 12px">Good luck with the contest!</p><p style="margin:0"><strong>Aarav Gupta</strong><br>Founder, Contest Manager</p><p style="margin:8px 0 24px"><a style="color:#b83d16;text-decoration:underline" href="https://aarav.site">Explore my other projects</a></p></div><hr><p style="font-size:12px">You received this because you saved a reminder in Contest Manager.</p></div>`,
   };
 }
 export function resendPayload(delivery: Delivery) {
