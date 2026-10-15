@@ -18,6 +18,7 @@ Firestore implementation.
 - Request reminder emails 1, 6, or 24 hours before a contest.
 - Add contest details to Google Calendar.
 - Plan the next seven days in My week, with saved rounds, reminder statuses and schedule overlaps.
+- Keep a private contest journal with manual results, review notes, topics, problem checklists and reference links.
 - Edit a personal bio, coding handles, social links, and a custom profile photo.
 - Use light or dark mode; dark is the default.
 
@@ -95,6 +96,7 @@ scheduling does not depend on a cron invocation for the normal path.
 npm run test:backend
 npm run test:admin
 npm run test:week
+npm run test:journal
 npm run test:photos
 npm run typecheck
 npm run lint
@@ -142,3 +144,9 @@ Auth IDs. See [admin setup and metric definitions](docs/admin-dashboard.md).
 `/week` combines your saved rounds and reminders for the next seven IST calendar
 days, with a next-round countdown, day filters, real email statuses and overlap
 checks. See [My week behavior and verification](docs/my-week.md).
+
+## Contest journal
+
+`/journal` records manually entered contest results and review notes, with saved
+contest prefills, topic/date/status filters and an upsolving checklist. Apply the
+additive journal migration before deploying. See [journal behavior and checks](docs/contest-journal.md).

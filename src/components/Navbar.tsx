@@ -9,6 +9,7 @@ import {
   Home,
   Menu,
   CalendarDays,
+  BookOpen,
   X,
 } from "lucide-react";
 import { Dialog } from "radix-ui";
@@ -19,6 +20,7 @@ import Brand from "./Brand";
 const links = [
   { href: "/", label: "Overview", icon: Home },
   { href: "/week", label: "My week", icon: CalendarDays },
+  { href: "/journal", label: "Journal", icon: BookOpen },
   { href: "/contests", label: "Contests", icon: Compass },
   { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
   { href: "/reminders", label: "Reminders", icon: Bell },

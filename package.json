@@ -18,7 +18,8 @@
     "test:photos": "tsx scripts/test-photo-storage.mts",
     "setup:cron": "tsx scripts/setup-reminder-cron.mts",
     "test:admin": "tsx scripts/test-admin.mts",
-    "test:week": "tsx scripts/test-week.mts"
+    "test:week": "tsx scripts/test-week.mts",
+    "test:journal": "tsx scripts/test-journal.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

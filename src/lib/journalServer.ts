@@ -1,0 +1,251 @@
+import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import type { Database } from "./db";
+import {
+  journalEntries as entries,
+  contests,
+  bookmarks,
+  reminders,
+  deliveries,
+} from "./db/schema";
+import { getContestDay } from "./contestCalendar";
+import {
+  validateJournal,
+  type JournalEntry,
+  type JournalSnapshot,
+  type JournalValues,
+  journalQuery,
+} from "./journal";
+import { ProfileRequestError } from "./requestError";
+
+type Row = typeof entries.$inferSelect;
+function dto(row: Row): JournalEntry {
+  return {
+    id: row.id,
+    revision: row.revision,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+    values: {
+      ...row.data,
+      title: row.title,
+      host: row.host,
+      href: row.href,
+      date: row.date,
+      contestId: row.contestId,
+    },
+  };
+}
+function ownedContest(uid: string) {
+  return sql`(exists(select 1 from ${bookmarks} where ${bookmarks.userId}=${uid} and ${bookmarks.contestId}=${contests.id}) or exists(select 1 from ${reminders} where ${reminders.userId}=${uid} and ${reminders.contestId}=${contests.id}) or exists(select 1 from ${deliveries} where ${deliveries.userId}=${uid} and ${deliveries.contestId}=${contests.id}))`;
+}
+async function canonicalValues(db: Database, uid: string, input: unknown) {
+  const raw =
+    input && typeof input === "object" && !Array.isArray(input)
+      ? (input as Record<string, unknown>)
+      : {};
+  if (raw.contestId !== null) {
+    if (!Number.isSafeInteger(raw.contestId) || Number(raw.contestId) <= 0)
+      throw new ProfileRequestError("Choose a valid saved contest.", 400);
+    const [contest] = await db
+      .select()
+      .from(contests)
+      .where(and(eq(contests.id, Number(raw.contestId)), ownedContest(uid)));
+    if (!contest)
+      throw new ProfileRequestError(
+        "That saved contest is unavailable for your account.",
+        404,
+      );
+    if (contest.start > new Date())
+      throw new ProfileRequestError(
+        "Add this contest to your journal once it starts.",
+        400,
+      );
+    return validateJournal({
+      ...raw,
+      title: contest.event,
+      host: contest.host,
+      date: getContestDay(contest.start),
+      href: contest.href,
+    });
+  }
+  return validateJournal(raw);
+}
+function columns(values: JournalValues) {
+  const { title, host, date, href, contestId, ...data } = values;
+  return { title, host, date, href, contestId, data };
+}
+export async function createJournalEntry(
+  db: Database,
+  uid: string,
+  input: unknown,
+) {
+  const values = await canonicalValues(db, uid, input);
+  try {
+    const [row] = await db
+      .insert(entries)
+      .values({ userId: uid, ...columns(values) })
+      .returning();
+    return dto(row);
+  } catch (error) {
+    const e = error as { code?: string; cause?: { code?: string } };
+    if ((e.code ?? e.cause?.code) === "23505")
+      throw new ProfileRequestError(
+        "This contest already has a journal entry. Open it to make changes.",
+        409,
+      );
+    throw error;
+  }
+}
+export function journalIdentity(input: Record<string, unknown>) {
+  if (
+    typeof input.id !== "string" ||
+    !/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(
+      input.id,
+    ) ||
+    !Number.isSafeInteger(input.revision) ||
+    Number(input.revision) < 0 ||
+    Number(input.revision) > 2147483646
+  )
+    throw new ProfileRequestError(
+      "Choose a valid journal entry and revision.",
+      400,
+    );
+  return { id: input.id, revision: Number(input.revision) };
+}
+export async function updateJournalEntry(
+  db: Database,
+  uid: string,
+  input: Record<string, unknown>,
+) {
+  const { id, revision } = journalIdentity(input);
+  const [current] = await db
+    .select()
+    .from(entries)
+    .where(and(eq(entries.id, id), eq(entries.userId, uid)));
+  if (!current)
+    throw new ProfileRequestError("That journal entry was not found.", 404);
+  const raw =
+    input.values &&
+    typeof input.values === "object" &&
+    !Array.isArray(input.values)
+      ? (input.values as Record<string, unknown>)
+      : {};
+  if (raw.contestId !== current.contestId)
+    throw new ProfileRequestError(
+      "An entry’s source contest cannot be changed. Start a new entry instead.",
+      400,
+    );
+  // A journal is a historical snapshot. Later feed edits or removed bookmarks
+  // must not rewrite its contest details or prevent the owner editing notes.
+  const values = validateJournal(
+    current.contestId === null
+      ? raw
+      : {
+          ...raw,
+          title: current.title,
+          host: current.host,
+          date: current.date,
+          href: current.href,
+        },
+  );
+  const [updated] = await db
+    .update(entries)
+    .set({
+      ...columns(values),
+      revision: sql`${entries.revision} + 1`,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(entries.id, id),
+        eq(entries.userId, uid),
+        eq(entries.revision, revision),
+      ),
+    )
+    .returning();
+  if (!updated)
+    throw new ProfileRequestError(
+      "This entry changed in another tab. Reload the latest entry before saving.",
+      409,
+    );
+  return dto(updated);
+}
+export async function getJournal(
+  db: Database,
+  uid: string,
+  query: ReturnType<typeof journalQuery>,
+): Promise<JournalSnapshot> {
+  const owner = eq(entries.userId, uid);
+  const search = "%" + query.q.replace(/[\\%_]/g, "\\$&") + "%";
+  const filter = and(
+    owner,
+    query.host ? eq(entries.host, query.host) : undefined,
+    query.status ? sql`${entries.data}->>'status'=${query.status}` : undefined,
+    query.topic ? sql`(${entries.data}->'tags') ? ${query.topic}` : undefined,
+    query.from ? gte(entries.date, query.from) : undefined,
+    query.to ? lte(entries.date, query.to) : undefined,
+    query.q
+      ? sql`(${entries.title} ilike ${search} or ${entries.data}::text ilike ${search})`
+      : undefined,
+  );
+  const [rows, total, stats, candidates, platforms, topics] = await Promise.all(
+    [
+      db
+        .select()
+        .from(entries)
+        .where(filter)
+        .orderBy(desc(entries.date), desc(entries.updatedAt), entries.id)
+        .limit(20)
+        .offset((query.page - 1) * 20),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(entries)
+        .where(filter),
+      db
+        .select({
+          total: sql<number>`count(*)::int`,
+          participated: sql<number>`count(*) filter(where ${entries.data}->>'status'='participated')::int`,
+          pendingProblems: sql<number>`coalesce(sum((select count(*) from jsonb_array_elements(${entries.data}->'problems') p where p->>'done'='false')),0)::int`,
+        })
+        .from(entries)
+        .where(owner),
+      db
+        .select({
+          id: contests.id,
+          title: contests.event,
+          host: contests.host,
+          start: contests.start,
+          href: contests.href,
+          entryId: entries.id,
+        })
+        .from(contests)
+        .leftJoin(
+          entries,
+          and(eq(entries.contestId, contests.id), eq(entries.userId, uid)),
+        )
+        .where(and(ownedContest(uid), lte(contests.start, new Date())))
+        .orderBy(desc(contests.start))
+        .limit(100),
+      db
+        .selectDistinct({ host: entries.host })
+        .from(entries)
+        .where(owner)
+        .orderBy(entries.host),
+      db.execute(
+        sql`select distinct jsonb_array_elements_text(${entries.data}->'tags') as topic from ${entries} where ${owner}`,
+      ),
+    ],
+  );
+  return {
+    entries: rows.map(dto),
+    total: total[0].count,
+    page: query.page,
+    pageSize: 20,
+    stats: stats[0],
+    candidates: candidates.map(({ start, ...row }) => ({
+      ...row,
+      date: getContestDay(start),
+    })),
+    platforms: platforms.map((row) => row.host),
+    topics: topics.rows.map((row) => String(row.topic)).sort(),
+  };
+}

@@ -12,6 +12,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import type { ProfileValues } from "../profile";
+import type { JournalReview } from "../journal";
 
 const time = (name: string) =>
   timestamp(name, { withTimezone: true, mode: "date" });
@@ -179,3 +180,14 @@ export const accountIdentities = pgTable("account_identities", {
   subject: text("subject").notNull(),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
 }, (t) => [primaryKey({ columns: [t.provider, t.subject] })]).enableRLS();
+
+export const journalEntries = pgTable("journal_entries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  contestId: bigint("contest_id", { mode: "number" }).references(() => contests.id),
+  title: text("title").notNull(), host: text("host").notNull(), date: text("contest_date").notNull(), href: text("href").notNull().default(""),
+  data: jsonb("data").$type<JournalReview>().notNull(),
+  revision: integer("revision").notNull().default(0),
+  createdAt: time("created_at").notNull().defaultNow(),
+  updatedAt: time("updated_at").notNull().defaultNow(),
+}, (t) => [index("journal_owner_date_idx").on(t.userId, t.date), uniqueIndex("journal_owner_contest_idx").on(t.userId, t.contestId)]).enableRLS();
