@@ -17,6 +17,7 @@ Firestore implementation.
 - Save bookmarks across devices after Google sign-in.
 - Request reminder emails 1, 6, or 24 hours before a contest.
 - Add contest details to Google Calendar.
+- Plan the next seven days in My week, with saved rounds, reminder statuses and schedule overlaps.
 - Edit a personal bio, coding handles, social links, and a custom profile photo.
 - Use light or dark mode; dark is the default.
 
@@ -57,7 +58,7 @@ npm run dev
 
 One Supabase Free project handles the database, Google login and private photos.
 Follow [Supabase setup and cutover](docs/supabase-setup.md) before deployment.
-Configure the variables in `.env.example`; `DATABASE_URL` uses the session
+Configure the variables in `.env.example`; `DATABASE_URL` uses the transaction
 pooler, while `DIRECT_DATABASE_URL` may use a direct or session-pooler connection
 for migrations. The server secret must never be exposed with `NEXT_PUBLIC_*`.
 
@@ -93,6 +94,7 @@ scheduling does not depend on a cron invocation for the normal path.
 ```sh
 npm run test:backend
 npm run test:admin
+npm run test:week
 npm run test:photos
 npm run typecheck
 npm run lint
@@ -134,3 +136,9 @@ never be committed or pushed.
 `/admin` provides delivery metrics, searchable history and scheduler/webhook health.
 Access uses the server-only `ADMIN_AUTH_USER_IDS` allowlist of verified Supabase
 Auth IDs. See [admin setup and metric definitions](docs/admin-dashboard.md).
+
+## Personal weekly planner
+
+`/week` combines your saved rounds and reminders for the next seven IST calendar
+days, with a next-round countdown, day filters, real email statuses and overlap
+checks. See [My week behavior and verification](docs/my-week.md).

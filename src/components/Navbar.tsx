@@ -8,7 +8,7 @@ import {
   Compass,
   Home,
   Menu,
-  UserRound,
+  CalendarDays,
   X,
 } from "lucide-react";
 import { Dialog } from "radix-ui";
@@ -18,10 +18,10 @@ import AuthButton from "./AuthButton";
 import Brand from "./Brand";
 const links = [
   { href: "/", label: "Overview", icon: Home },
+  { href: "/week", label: "My week", icon: CalendarDays },
   { href: "/contests", label: "Contests", icon: Compass },
   { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
   { href: "/reminders", label: "Reminders", icon: Bell },
-  { href: "/profile", label: "Profile", icon: UserRound },
 ];
 export default function Navbar() {
   const pathname = usePathname();

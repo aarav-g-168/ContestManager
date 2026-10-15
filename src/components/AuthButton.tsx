@@ -10,6 +10,7 @@ import {
   LogOut,
   UserRound,
   ShieldCheck,
+  CalendarDays,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { useProfile } from "./ProfileProvider";
@@ -85,6 +86,7 @@ export default function AuthButton({
           </div>
           <DropdownMenu.Separator className="my-1 h-px bg-border" />
           {[
+            { href: "/week", label: "My week", icon: CalendarDays },
             { href: "/profile", label: "Your profile", icon: UserRound },
             { href: "/bookmarks", label: "Saved contests", icon: Bookmark },
             { href: "/reminders", label: "Your reminders", icon: Bell },

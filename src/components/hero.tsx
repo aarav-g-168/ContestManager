@@ -60,6 +60,7 @@ export default function HeroSection({ contests }: { contests: Contest[] }) {
             Codeforces <ArrowUpRight size={13} aria-hidden="true" />
           </Link>
         </div>
+        <Link href="/week" className="text-link mt-5">Plan my week <ArrowRight size={16} aria-hidden="true" /></Link>
       </div>
       <div className="schedule-board">
         <div className="schedule-board-heading">
