@@ -92,36 +92,32 @@ try {
     await engine.exec(await readFile(`drizzle/${file}`, "utf8"));
   await db.insert(schema.users).values([{ id: "alice" }, { id: "bob" }]);
   const past = new Date(now.getTime() - 2 * 86400000);
-  await db
-    .insert(schema.contests)
-    .values(
-      [1, 2, 3, 4].map((id) => ({
-        id,
-        event: `Stored round ${id}`,
-        host: "codeforces.com",
-        href: "https://codeforces.com/contest/1",
-        start: id === 4 ? new Date(now.getTime() + 86400000) : past,
-        duration: 7200,
-      })),
-    );
+  await db.insert(schema.contests).values(
+    [1, 2, 3, 4].map((id) => ({
+      id,
+      event: `Stored round ${id}`,
+      host: "codeforces.com",
+      href: "https://codeforces.com/contest/1",
+      start: id === 4 ? new Date(now.getTime() + 86400000) : past,
+      duration: 7200,
+    })),
+  );
   await db.insert(schema.bookmarks).values([
     { userId: "alice", contestId: 1 },
     { userId: "bob", contestId: 2 },
     { userId: "alice", contestId: 4 },
   ]);
-  await db
-    .insert(schema.deliveries)
-    .values({
-      userId: "alice",
-      contestId: 3,
-      reminderType: "1h",
-      email: "private@example.test",
-      event: "Old round",
-      href: "https://example.test",
-      dueAt: past,
-      contestStart: past,
-      providerPayload: { private: "Never expose" },
-    });
+  await db.insert(schema.deliveries).values({
+    userId: "alice",
+    contestId: 3,
+    reminderType: "1h",
+    email: "private@example.test",
+    event: "Old round",
+    href: "https://example.test",
+    dueAt: past,
+    contestStart: past,
+    providerPayload: { private: "Never expose" },
+  });
   globals.contestDatabase = db;
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://journal-test.supabase.co";
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_test";
@@ -335,19 +331,17 @@ try {
     ...extra,
     date: today,
   };
-  await db
-    .insert(schema.journalEntries)
-    .values(
-      Array.from({ length: 22 }, (_, index) => ({
-        userId: "alice",
-        title: `Extra ${index}`,
-        host,
-        date,
-        href,
-        contestId,
-        data,
-      })),
-    );
+  await db.insert(schema.journalEntries).values(
+    Array.from({ length: 22 }, (_, index) => ({
+      userId: "alice",
+      title: `Extra ${index}`,
+      host,
+      date,
+      href,
+      contestId,
+      data,
+    })),
+  );
   const page2 = await getJournal(
     db,
     "alice",
@@ -357,12 +351,50 @@ try {
   assert.equal(page2.total, 24);
   assert.ok(page2.entries.every((entry) => !Object.hasOwn(entry, "userId")));
   await engine.exec(
+    "update contests set event='Later feed title', start=now()+interval '1 day' where id=1; delete from bookmarks where user_id='alice' and contest_id=1",
+  );
+  const historical = await PUT(
+    request("PUT", {
+      id: prefilled.id,
+      revision: 0,
+      values: {
+        ...prefilled.values,
+        lessons: "A historical note remains editable.",
+      },
+    }),
+  );
+  assert.equal(
+    historical.status,
+    200,
+    "Removing a bookmark or changing the feed cannot block journal edits",
+  );
+  assert.equal(
+    (await historical.json()).values.title,
+    "Stored round 1",
+    "Linked contest details remain a historical snapshot",
+  );
+  assert.equal(
+    (
+      await PUT(
+        request("PUT", { id: created.id, revision: 9000000000, values }),
+      )
+    ).status,
+    400,
+  );
+  await engine.exec(
     "create role journal_browser; grant usage on schema public to journal_browser; grant select,insert on journal_entries to journal_browser; set role journal_browser",
   );
   assert.equal(
     (await engine.query("select * from journal_entries")).rows.length,
     0,
     "RLS denies direct browser reads",
+  );
+  await assert.rejects(
+    () =>
+      engine.query(
+        "insert into journal_entries(user_id,title,host,contest_date,data) values ('alice','Denied','example.test','2026-10-14','{}')",
+      ),
+    "Browser inserts are denied by RLS",
   );
   await engine.exec("reset role");
   console.log(
