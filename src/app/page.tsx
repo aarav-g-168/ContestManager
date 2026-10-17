@@ -23,7 +23,7 @@ export default async function HomePage() {
             </h2>
           </div>
           <Link href="/contests" className="text-link">
-            Full calendar <ArrowUpRight size={16} aria-hidden="true" />
+            Full calendar - <ArrowUpRight size={16} aria-hidden="true" />
           </Link>
         </div>
         {error ? (
