@@ -19,7 +19,7 @@ export default async function HomePage() {
         <div className="section-heading">
           <div>
             <h2 id="home-contests-title" className="section-title">
-              Coming up next
+              Coming up next.
             </h2>
           </div>
           <Link href="/contests" className="text-link">
