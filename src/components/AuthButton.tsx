@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   CalendarDays,
   BookOpen,
+  Activity,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { useProfile } from "./ProfileProvider";
@@ -89,6 +90,7 @@ export default function AuthButton({
           {[
             { href: "/week", label: "My week", icon: CalendarDays },
             { href: "/journal", label: "Contest journal", icon: BookOpen },
+            { href: "/progress", label: "Your progress", icon: Activity },
             { href: "/profile", label: "Your profile", icon: UserRound },
             { href: "/bookmarks", label: "Saved contests", icon: Bookmark },
             { href: "/reminders", label: "Your reminders", icon: Bell },
@@ -100,7 +102,14 @@ export default function AuthButton({
               </Link>
             </DropdownMenu.Item>
           ))}
-          {isAdmin && <DropdownMenu.Item asChild><Link href="/admin" className="menu-item"><ShieldCheck size={15} aria-hidden="true" />Admin dashboard</Link></DropdownMenu.Item>}
+          {isAdmin && (
+            <DropdownMenu.Item asChild>
+              <Link href="/admin" className="menu-item">
+                <ShieldCheck size={15} aria-hidden="true" />
+                Admin dashboard
+              </Link>
+            </DropdownMenu.Item>
+          )}
           <DropdownMenu.Separator className="my-1 h-px bg-border" />
           <DropdownMenu.Item
             className="menu-item text-muted-foreground"

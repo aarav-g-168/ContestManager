@@ -675,10 +675,16 @@ function JournalCard({
     </article>
   );
 }
-export default function ContestJournal({ initialNow }: { initialNow: number }) {
+export default function ContestJournal({
+  initialNow,
+  initialFilters = emptyJournalFilters,
+}: {
+  initialNow: number;
+  initialFilters?: JournalFilters;
+}) {
   const { user, loading: authLoading } = useAuth();
   const [filters, setFilters] = useState<JournalFilters>({
-    ...emptyJournalFilters,
+    ...initialFilters,
   });
   const params = new URLSearchParams(
     Object.entries(filters).map(([key, value]) => [key, String(value)]),
