@@ -19,6 +19,7 @@ Firestore implementation.
 - Add contest details to Google Calendar.
 - Plan the next seven days in My week, with saved rounds, reminder statuses and schedule overlaps.
 - Keep a private contest journal with manual results, review notes, topics, problem checklists and reference links.
+- Review monthly participation, recorded solves, upsolving completion, platform totals and journal topics in Progress.
 - Edit a personal bio, coding handles, social links, and a custom profile photo.
 - Use light or dark mode; dark is the default.
 
@@ -43,7 +44,8 @@ storage. Authenticated API requests serve them; replacements are cleaned up.
 
 The SQL schema includes users, contests, bookmarks, reminders, delivery history,
 and foundational tables for teams, memberships, and contest results. Teams and
-analytics do not yet have product flows.
+platform ratings do not yet have product flows. Private progress analytics are
+derived from journal entries; see [Progress](docs/progress.md).
 
 ## Local setup
 

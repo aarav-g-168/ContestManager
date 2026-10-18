@@ -60,6 +60,23 @@
 .week-heading-tools button {
   font-size: 13px;
 }
+.week-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-block: -12px 28px;
+}
+.week-quick-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 14px;
+  color: var(--muted-foreground);
+}
+.week-quick-links a:hover {
+  color: var(--primary);
+}
 .week-notice {
   display: flex;
   align-items: center;

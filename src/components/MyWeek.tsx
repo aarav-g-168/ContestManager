@@ -351,6 +351,18 @@ export function MyWeekView({
           </button>
         </div>
       </header>
+      <nav className="week-quick-links" aria-label="Manage your week">
+        <Link href="/bookmarks">
+          <Bookmark size={16} aria-hidden="true" />
+          Saved contests
+          <ArrowUpRight size={14} aria-hidden="true" />
+        </Link>
+        <Link href="/reminders">
+          <Bell size={16} aria-hidden="true" />
+          Email reminders
+          <ArrowUpRight size={14} aria-hidden="true" />
+        </Link>
+      </nav>
       {error && (
         <div role="alert" className="week-notice">
           <TriangleAlert size={18} aria-hidden="true" />

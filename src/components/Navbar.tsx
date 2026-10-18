@@ -3,10 +3,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import {
-  Bell,
-  Bookmark,
   Compass,
-  Home,
+  Activity,
   Menu,
   CalendarDays,
   BookOpen,
@@ -18,12 +16,10 @@ import ThemeToggle from "./theme-toggle";
 import AuthButton from "./AuthButton";
 import Brand from "./Brand";
 const links = [
-  { href: "/", label: "Overview", icon: Home },
+  { href: "/contests", label: "Discover", icon: Compass },
   { href: "/week", label: "My week", icon: CalendarDays },
   { href: "/journal", label: "Journal", icon: BookOpen },
-  { href: "/contests", label: "Contests", icon: Compass },
-  { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
-  { href: "/reminders", label: "Reminders", icon: Bell },
+  { href: "/progress", label: "Progress", icon: Activity },
 ];
 export default function Navbar() {
   const pathname = usePathname();
