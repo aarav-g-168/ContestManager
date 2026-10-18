@@ -21,7 +21,7 @@ Firestore implementation.
 - Keep a private contest journal with manual results, review notes, topics, problem checklists and reference links.
 - Review monthly participation, recorded solves, upsolving completion, platform totals and journal topics in Progress.
 - Edit a personal bio, coding handles, social links, and a custom profile photo.
-- Use light or dark mode; dark is the default.
+- Use light or dark mode; light is the default.
 
 Profiles are private account settings, not public pages. Google account metadata
 is kept separate from custom profile details. Profile saves check a revision to
