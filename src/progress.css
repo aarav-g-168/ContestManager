@@ -299,7 +299,7 @@
   width: min(100%, 36px);
   border-radius: 5px 5px 0 0;
   background: var(--primary);
-  opacity: 0.6;
+  opacity: 0.78;
   transform-origin: bottom;
   transition: opacity 0.18s;
 }
@@ -564,7 +564,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 32px;
+  min-height: 44px;
   font-size: 14px;
   font-weight: 500;
   overflow-wrap: anywhere;
