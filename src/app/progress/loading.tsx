@@ -1,2 +1,2 @@
-import { ProgressSkeleton } from "@/components/ProgressDashboard";
+import { ProgressSkeleton } from "@/features/progress/components/ProgressDashboard";
 export default ProgressSkeleton;

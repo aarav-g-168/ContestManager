@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Clock3 } from "lucide-react";
-import ContestClientComponent from "@/components/ContestClientComponent";
-import PageHeading from "@/components/PageHeading";
-import FeedError from "@/components/FeedError";
-import { getContestFeed } from "@/lib/contestFeed";
-import { getContestDay } from "@/lib/contestCalendar";
-import { getPlatformKey } from "@/lib/platforms";
+import ContestClientComponent from "@/features/contests/components/ContestBrowser";
+import PageHeading from "@/components/layout/PageHeading";
+import FeedError from "@/features/contests/components/FeedError";
+import { getContestFeed } from "@/features/contests/server/feed";
+import { getContestDay } from "@/features/contests/lib/calendar";
+import { getPlatformKey } from "@/features/contests/lib/platforms";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Explore contests" };
 export default async function ContestsPage({

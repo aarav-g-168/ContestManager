@@ -1,7 +1,7 @@
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import * as schema from "./schema";
-import { runtimeDatabaseUrl } from "./connection";
+import * as schema from "@/lib/db/schema";
+import { runtimeDatabaseUrl } from "@/lib/db/connection";
 
 export type Database = NodePgDatabase<typeof schema>;
 const cache = globalThis as typeof globalThis & {

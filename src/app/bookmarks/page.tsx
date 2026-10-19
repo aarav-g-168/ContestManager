@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import ContestClientComponent from "@/components/ContestClientComponent";
-import PageHeading from "@/components/PageHeading";
-import { getContestFeed } from "@/lib/contestFeed";
+import ContestClientComponent from "@/features/contests/components/ContestBrowser";
+import PageHeading from "@/components/layout/PageHeading";
+import { getContestFeed } from "@/features/contests/server/feed";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your bookmarks" };
 export default async function BookmarksPage() {

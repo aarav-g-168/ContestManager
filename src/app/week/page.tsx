@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import MyWeek from "@/components/MyWeek";
-import { getContestFeed } from "@/lib/contestFeed";
+import MyWeek from "@/features/week/components/MyWeek";
+import { getContestFeed } from "@/features/contests/server/feed";
 export const metadata: Metadata = {
   title: "My week",
   robots: { index: false, follow: false },

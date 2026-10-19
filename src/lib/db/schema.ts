@@ -11,8 +11,8 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import type { ProfileValues } from "../profile";
-import type { JournalReview } from "../journal";
+import type { ProfileValues } from "@/features/profile/lib/profile";
+import type { JournalReview } from "@/features/journal/lib/journal";
 
 const time = (name: string) =>
   timestamp(name, { withTimezone: true, mode: "date" });

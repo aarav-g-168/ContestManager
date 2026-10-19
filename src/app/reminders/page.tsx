@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Mail } from "lucide-react";
-import ContestClientComponent from "@/components/ContestClientComponent";
-import PageHeading from "@/components/PageHeading";
-import { getContestFeed } from "@/lib/contestFeed";
+import ContestClientComponent from "@/features/contests/components/ContestBrowser";
+import PageHeading from "@/components/layout/PageHeading";
+import { getContestFeed } from "@/features/contests/server/feed";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your reminders" };
 export default async function RemindersPage() {

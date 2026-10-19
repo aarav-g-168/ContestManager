@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ProgressDashboard from "@/components/ProgressDashboard";
+import ProgressDashboard from "@/features/progress/components/ProgressDashboard";
 export const metadata: Metadata = {
   title: "Progress",
   robots: { index: false, follow: false },

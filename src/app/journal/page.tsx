@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import ContestJournal from "@/components/ContestJournal";
-import { journalQuery } from "@/lib/journal";
+import ContestJournal from "@/features/journal/components/ContestJournal";
+import { journalQuery } from "@/features/journal/lib/journal";
 export const metadata: Metadata = {
   title: "Contest journal",
   robots: { index: false, follow: false },
