@@ -1,11 +1,11 @@
-import { ensureAccount } from "@/lib/accountServer";
-import { readProfilePhoto } from "@/lib/profilePhotos";
+import { ensureAccount } from "@/features/auth/server/account";
+import { readProfilePhoto } from "@/features/profile/server/photos";
 import {
   authenticateProfile,
-  ownedAvatarPath,
   profileErrorResponse,
   ProfileRequestError,
-} from "@/lib/profileServer";
+} from "@/lib/http/account-request";
+import { ownedAvatarPath } from "@/features/profile/server/profile";
 export const runtime = "nodejs";
 export async function GET(request: Request) {
   try {

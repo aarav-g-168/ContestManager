@@ -4,24 +4,26 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
 import { users } from "@/lib/db/schema";
-import { ensureAccount } from "@/lib/accountServer";
+import { ensureAccount } from "@/features/auth/server/account";
 import {
   deleteProfilePhoto,
   saveProfilePhoto,
   type PhotoStore,
-} from "@/lib/profilePhotos";
+} from "@/features/profile/server/photos";
 import {
   normalizeProfile,
   validateProfile,
   type SavedProfile,
-} from "@/lib/profile";
+} from "@/features/profile/lib/profile";
 import {
   authenticateProfile,
-  ownedAvatarPath,
   profileErrorResponse,
   ProfileRequestError,
+} from "@/lib/http/account-request";
+import {
+  ownedAvatarPath,
   readSavedProfile,
-} from "@/lib/profileServer";
+} from "@/features/profile/server/profile";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {

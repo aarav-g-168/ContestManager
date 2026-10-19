@@ -1,15 +1,21 @@
 import { NextResponse } from "next/server";
-import { authenticateProfile, profileErrorResponse } from "@/lib/profileServer";
+import {
+  authenticateProfile,
+  profileErrorResponse,
+} from "@/lib/http/account-request";
 import { getDatabase } from "@/lib/db";
-import { ensureAccount } from "@/lib/accountServer";
-import { readLimitedText } from "@/lib/requestBody";
-import { ProfileRequestError } from "@/lib/requestError";
-import { JournalValidationError, journalQuery } from "@/lib/journal";
+import { ensureAccount } from "@/features/auth/server/account";
+import { readLimitedText } from "@/lib/http/request-body";
+import { ProfileRequestError } from "@/lib/http/request-error";
+import {
+  JournalValidationError,
+  journalQuery,
+} from "@/features/journal/lib/journal";
 import {
   createJournalEntry,
   getJournal,
   updateJournalEntry,
-} from "@/lib/journalServer";
+} from "@/features/journal/server/journal";
 export const runtime = "nodejs";
 const headers = { "Cache-Control": "private, no-store", Vary: "Authorization" };
 function failure(error: unknown) {

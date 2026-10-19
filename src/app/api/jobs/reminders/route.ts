@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
-import { runRecoveryWorker } from "@/lib/recoveryWorker";
+import { runRecoveryWorker } from "@/features/reminders/server/recovery-worker";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 export async function GET(request: Request) {

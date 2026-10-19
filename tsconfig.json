@@ -2,11 +2,7 @@
   "compilerOptions": {
     /* Core */
     "target": "ESNext",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "strict": true,
     /* Modules */
     "module": "ESNext",
@@ -29,9 +25,7 @@
     "skipLibCheck": true,
     /* Paths */
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
@@ -43,7 +37,5 @@
     ".next-profile-test/types/**/*.ts",
     ".next-profile-test/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules", ".migration-backups", ".agents", ".codex"]
 }

@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
-import "../globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { AuthProvider } from "@/components/AuthProvider";
-import { ProfileProvider } from "@/components/ProfileProvider";
-import Navbar from "@/components/Navbar";
-import SiteFooter from "@/components/SiteFooter";
-import Notifications from "@/components/Notifications";
+import "@/styles/globals.css";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { AuthProvider } from "@/features/auth/components/AuthProvider";
+import { ProfileProvider } from "@/features/profile/components/ProfileProvider";
+import Navbar from "@/components/layout/Navbar";
+import SiteFooter from "@/components/layout/SiteFooter";
+import Notifications from "@/components/feedback/Notifications";
 const plexSans = IBM_Plex_Sans({
   variable: "--font-ui",
   subsets: ["latin"],

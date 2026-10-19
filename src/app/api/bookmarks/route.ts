@@ -2,13 +2,14 @@ import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { bookmarks } from "@/lib/db/schema";
-import { ensureAccount, verifiedContest } from "@/lib/accountServer";
+import { ensureAccount } from "@/features/auth/server/account";
+import { verifiedContest } from "@/features/contests/server/verify-contest";
 import {
   authenticateProfile,
   profileErrorResponse,
   ProfileRequestError,
-} from "@/lib/profileServer";
-import { readAccountJson } from "@/lib/requestBody";
+} from "@/lib/http/account-request";
+import { readAccountJson } from "@/lib/http/request-body";
 export const runtime = "nodejs";
 export async function GET(request: Request) {
   try {

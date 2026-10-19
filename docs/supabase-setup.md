@@ -77,7 +77,7 @@ Only authenticated Next.js routes access photos through the server secret key.
 3. Back up Firestore, disable the old live reminder workflow and stop old account
    writes. Keep backups private. The locally retired credentials are preserved in
    ignored `.migration-backups/legacy.env`; only the explicit importer reads them.
-   `npx tsx scripts/backup-legacy.mts` exports the user documents and descendants
+   `npx tsx scripts/legacy/backup-legacy.mts` exports the user documents and descendants
    (including photo bytes) and Google identity metadata to that ignored directory,
    with a verified SHA-256 checksum. It is an application-data backup, not a full
    Firebase project export. Source records remain untouched.

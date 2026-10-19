@@ -1,4 +1,4 @@
-import SkeletonGrid from "@/components/SkeletonGrid";
+import SkeletonGrid from "@/features/contests/components/SkeletonGrid";
 export default function Loading() {
   return (
     <div className="site-container py-12">

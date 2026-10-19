@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import HeroSection, { ProductFeatures } from "@/components/hero";
-import HomeDiscovery from "@/components/HomeDiscovery";
-import FeedError from "@/components/FeedError";
-import { getContestFeed } from "@/lib/contestFeed";
-import ExplorePlatforms from "@/components/ExplorePlatforms";
+import HeroSection, {
+  ProductFeatures,
+} from "@/features/home/components/HeroSection";
+import HomeDiscovery from "@/features/home/components/HomeDiscovery";
+import FeedError from "@/features/contests/components/FeedError";
+import { getContestFeed } from "@/features/contests/server/feed";
+import ExplorePlatforms from "@/features/home/components/ExplorePlatforms";
 export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const { contests, error } = await getContestFeed();

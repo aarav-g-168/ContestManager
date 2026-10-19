@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getDatabase } from "@/lib/db";
-import { recordMailEvent } from "@/lib/reminderQueue";
-import { readLimitedText } from "@/lib/requestBody";
+import { recordMailEvent } from "@/features/reminders/server/queue";
+import { readLimitedText } from "@/lib/http/request-body";
 export const runtime = "nodejs";
 export async function POST(request: Request) {
   if (!process.env.RESEND_WEBHOOK_SECRET)
@@ -37,7 +37,9 @@ export async function POST(request: Request) {
         id: request.headers.get("svix-id")!,
         providerId: event.data.email_id,
         type: event.type,
-        occurredAt: Number.isFinite(Date.parse(event.created_at)) ? new Date(event.created_at) : null,
+        occurredAt: Number.isFinite(Date.parse(event.created_at))
+          ? new Date(event.created_at)
+          : null,
       });
     } catch {
       return NextResponse.json(

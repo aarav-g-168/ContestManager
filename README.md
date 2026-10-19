@@ -31,21 +31,30 @@ storage. Authenticated API requests serve them; replacements are cleaned up.
 
 ## Stack
 
-| Purpose | Technology |
-| --- | --- |
-| Application | Next.js 16, React 19, TypeScript |
-| UI | Tailwind CSS, Radix/shadcn, Motion, Lucide |
-| Application data | Supabase PostgreSQL and Drizzle ORM |
-| Sign-in | Supabase Auth (Google, PKCE) |
-| Uploaded photos | Supabase Storage (Free plan, private bucket) |
-| Contest schedules | CLIST, cached for 30 minutes |
-| Email | Resend scheduled emails and signed delivery webhooks |
-| Recovery worker | Authenticated endpoint, triggered by Supabase Cron |
+| Purpose           | Technology                                           |
+| ----------------- | ---------------------------------------------------- |
+| Application       | Next.js 16, React 19, TypeScript                     |
+| UI                | Tailwind CSS, Radix/shadcn, Motion, Lucide           |
+| Application data  | Supabase PostgreSQL and Drizzle ORM                  |
+| Sign-in           | Supabase Auth (Google, PKCE)                         |
+| Uploaded photos   | Supabase Storage (Free plan, private bucket)         |
+| Contest schedules | CLIST, cached for 30 minutes                         |
+| Email             | Resend scheduled emails and signed delivery webhooks |
+| Recovery worker   | Authenticated endpoint, triggered by Supabase Cron   |
 
 The SQL schema includes users, contests, bookmarks, reminders, delivery history,
 and foundational tables for teams, memberships, and contest results. Teams and
 platform ratings do not yet have product flows. Private progress analytics are
 derived from journal entries; see [Progress](docs/progress.md).
+
+## Project structure
+
+Product code lives in `src/features/`, Next.js routes in `src/app/`, shared UI in
+`src/components/`, and common infrastructure in `src/lib/`. Tests live in
+`tests/integration/`; scripts are grouped into checks, setup and legacy migration
+tools. See the [folder map and one-line file responsibilities](docs/project-structure.md).
+Run `npm run check:structure` to verify placement and client/server boundaries;
+this also runs with `npm run lint`.
 
 ## Local setup
 

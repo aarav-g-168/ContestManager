@@ -2,16 +2,20 @@ import { eq } from "drizzle-orm";
 import { after, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
 import { deliveries, reminders } from "@/lib/db/schema";
-import { ensureAccount, verifiedContest } from "@/lib/accountServer";
+import { ensureAccount } from "@/features/auth/server/account";
+import { verifiedContest } from "@/features/contests/server/verify-contest";
 import {
   authenticateProfile,
   profileErrorResponse,
   ProfileRequestError,
-} from "@/lib/profileServer";
-import { assertMailConfigured } from "@/lib/email";
-import { processReminderQueue } from "@/lib/reminderQueue";
-import { cancelReminder, saveReminder } from "@/lib/reminderService";
-import { readAccountJson } from "@/lib/requestBody";
+} from "@/lib/http/account-request";
+import { assertMailConfigured } from "@/features/reminders/server/email";
+import { processReminderQueue } from "@/features/reminders/server/queue";
+import {
+  cancelReminder,
+  saveReminder,
+} from "@/features/reminders/server/service";
+import { readAccountJson } from "@/lib/http/request-body";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 function dispatch(ids: string[]) {

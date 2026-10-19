@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
-import { authenticateProfile, profileErrorResponse } from "@/lib/profileServer";
+import {
+  authenticateProfile,
+  profileErrorResponse,
+} from "@/lib/http/account-request";
 import { getDatabase } from "@/lib/db";
-import { progressQuery } from "@/lib/progress";
-import { getProgress } from "@/lib/progressServer";
+import { progressQuery } from "@/features/progress/lib/progress";
+import { getProgress } from "@/features/progress/server/progress";
 export const runtime = "nodejs";
 export async function GET(request: Request) {
   try {
