@@ -165,3 +165,12 @@ this check, so misplaced source files, unresolved local imports and client runti
 paths reaching server/database/Node-only modules fail normal linting. TypeScript,
 the existing feature tests and a production build remain necessary after broad
 refactors; the structure check does not replace them.
+
+## Loading components
+
+Each page has a `loading.tsx` that imports its feature’s standalone skeleton.
+Reuse that component during the first client fetch rather than importing a full
+dashboard controller into a route fallback. Shared shapes and loading semantics
+live in `components/feedback/LoadingSkeleton.tsx`; the pulse uses global theme
+tokens and respects reduced-motion preferences. See [loading behavior and
+verification](loading-states.md). Run `npm run test:loading` to check page coverage.

@@ -109,6 +109,7 @@ npm run test:admin
 npm run test:week
 npm run test:journal
 npm run test:progress
+npm run test:loading
 npm run test:photos
 npm run typecheck
 npm run lint

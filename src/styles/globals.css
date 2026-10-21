@@ -1465,8 +1465,13 @@
   }
 
   .skeleton {
+    overflow: hidden;
     border-radius: 5px;
-    background: var(--muted);
+    background: color-mix(
+      in srgb,
+      var(--muted) 84%,
+      var(--muted-foreground) 16%
+    );
     animation: skeleton-pulse 1.8s ease-in-out infinite;
   }
   .empty-state {
@@ -1676,6 +1681,10 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none !important;
+    opacity: 1;
+  }
   html {
     scroll-behavior: auto;
   }
