@@ -1,2 +1,1 @@
-import { JournalSkeleton } from "@/features/journal/components/ContestJournal";
-export default JournalSkeleton;
+export { default } from "@/features/journal/components/JournalSkeleton";

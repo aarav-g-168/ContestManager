@@ -1,2 +1,1 @@
-import { WeekSkeleton } from "@/features/week/components/MyWeek";
-export default WeekSkeleton;
+export { default } from "@/features/week/components/WeekSkeleton";

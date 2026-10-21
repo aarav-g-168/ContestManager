@@ -1,1 +1,1 @@
-export { default } from "@/app/loading";
+export { default } from "@/features/contests/components/ContestPageSkeleton";
