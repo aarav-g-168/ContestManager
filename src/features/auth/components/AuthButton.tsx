@@ -18,6 +18,10 @@ import { useAuth } from "@/features/auth/components/AuthProvider";
 import { useProfile } from "@/features/profile/components/ProfileProvider";
 import ProfileAvatar from "@/features/profile/components/ProfileAvatar";
 import { useAdminAccess } from "@/features/admin/hooks/useAdminAccess";
+import {
+  SkeletonBlock,
+  SkeletonStatus,
+} from "@/components/feedback/LoadingSkeleton";
 export default function AuthButton({
   expanded = false,
 }: {
@@ -30,10 +34,9 @@ export default function AuthButton({
     profile?.values.displayName || user?.displayName || "Your account";
   if (loading)
     return (
-      <div
-        className="skeleton h-11 w-[86px] max-[360px]:w-[66px]"
-        aria-label="Checking your session"
-      />
+      <SkeletonStatus label="Checking your session.">
+        <SkeletonBlock className="h-11 w-[86px] max-[360px]:w-[66px]" />
+      </SkeletonStatus>
     );
   if (!user)
     return (

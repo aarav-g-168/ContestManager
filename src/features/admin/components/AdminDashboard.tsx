@@ -16,6 +16,7 @@ import { useAuth } from "@/features/auth/components/AuthProvider";
 import PageHeading from "@/components/layout/PageHeading";
 import type { AdminOverview } from "@/features/admin/server/overview";
 import "@/features/admin/styles.css";
+import AdminSkeleton from "@/features/admin/components/AdminSkeleton";
 
 const formatTime = (value: string | null) =>
   value
@@ -609,9 +610,7 @@ export default function AdminDashboard() {
   return (
     <div className="site-container admin-dashboard pb-12">
       {loading ? (
-        <div className="admin-gate" role="status">
-          Checking your session…
-        </div>
+        <AdminSkeleton contained />
       ) : !user ? (
         <div className="admin-gate">
           <ShieldCheck size={32} aria-hidden="true" />
@@ -677,16 +676,7 @@ export default function AdminDashboard() {
               </label>
             </>
           ) : (
-            !failure && (
-              <div className="admin-loading" role="status">
-                <RefreshCw
-                  size={20}
-                  className="animate-spin"
-                  aria-hidden="true"
-                />
-                Loading reminder operations…
-              </div>
-            )
+            !failure && <AdminSkeleton contained />
           )}
         </>
       )}
