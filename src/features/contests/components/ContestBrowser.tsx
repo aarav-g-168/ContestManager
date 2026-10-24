@@ -34,7 +34,7 @@ import { useAuth } from "@/features/auth/components/AuthProvider";
 import { getPlatform, getPlatformKey } from "@/features/contests/lib/platforms";
 import { parseAsUTC } from "@/lib/date";
 import AccountWelcome from "@/features/auth/components/AccountWelcome";
-import SkeletonGrid from "@/features/contests/components/SkeletonGrid";
+import ContestResultsSkeleton from "@/features/contests/components/ContestResultsSkeleton";
 import FeedError from "@/features/contests/components/FeedError";
 import ContestSort from "@/features/contests/components/ContestSort";
 import ContestWeek from "@/features/contests/components/ContestWeek";
@@ -154,7 +154,16 @@ export default function ContestClientComponent({
     personal &&
     (authLoading || (bookmarksOnly ? bookmarks.loading : reminder.loading))
   )
-    return <SkeletonGrid />;
+    return (
+      <ContestResultsSkeleton
+        showFilters={showFilters}
+        label={
+          bookmarksOnly
+            ? "Loading saved contests."
+            : "Loading your email reminders."
+        }
+      />
+    );
   if (personal && !user) {
     return <AccountWelcome type={bookmarksOnly ? "bookmarks" : "reminders"} />;
   }
@@ -437,6 +446,9 @@ export default function ContestClientComponent({
                 className="min-w-0"
               >
                 <ContestCard
+                  accountLoading={
+                    authLoading || bookmarks.loading || reminder.loading
+                  }
                   contest={contest}
                   isBookmarked={bookmarks.bookmarkedContests.includes(
                     contest.id,

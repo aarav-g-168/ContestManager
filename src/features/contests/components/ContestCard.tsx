@@ -20,7 +20,9 @@ import { getGoogleCalendarLink } from "@/features/contests/lib/google-calendar";
 import CountdownTimer from "@/features/contests/components/CountdownTimer";
 import { useClock } from "@/hooks/useClock";
 import { SpotlightCard } from "@/components/ui/interaction";
+import { SkeletonBlock } from "@/components/feedback/LoadingSkeleton";
 interface Props {
+  accountLoading?: boolean;
   contest: Contest;
   isBookmarked: boolean;
   onBookmarkToggle: (contest: Contest) => Promise<void>;
@@ -43,6 +45,7 @@ export function PlatformBadge({ host }: { host: string }) {
   );
 }
 export default function ContestCard({
+  accountLoading = false,
   contest,
   isBookmarked,
   onBookmarkToggle,
@@ -165,91 +168,107 @@ export default function ContestCard({
       </div>
       <div className="contest-footer">
         <div className="-ml-2 flex">
-          <button
-            className={`icon-button ${isBookmarked ? "!text-primary" : ""}`}
-            disabled={busy}
-            aria-pressed={isBookmarked}
-            aria-label={`${isBookmarked ? "Remove bookmark for" : "Bookmark"} ${contest.event}`}
-            title={isBookmarked ? "Remove bookmark" : "Save contest"}
-            onClick={() => run(() => onBookmarkToggle(contest))}
-          >
-            {busy ? (
-              <LoaderCircle
-                size={16}
-                className="animate-spin"
-                aria-hidden="true"
-              />
-            ) : (
-              <Bookmark
-                size={16}
-                fill={isBookmarked ? "currentColor" : "none"}
-                aria-hidden="true"
-              />
-            )}
-          </button>
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
+          {accountLoading ? (
+            <div
+              role="group"
+              aria-label={`Loading saved actions for ${contest.event}.`}
+              aria-busy="true"
+              className="flex h-11 items-center gap-2 px-2"
+            >
+              <SkeletonBlock className="size-8 !rounded-lg" />
+              <SkeletonBlock className="size-8 !rounded-lg" />
+            </div>
+          ) : (
+            <>
               <button
+                className={`icon-button ${isBookmarked ? "!text-primary" : ""}`}
                 disabled={busy}
-                className={`icon-button ${hasReminder ? "!text-primary" : ""}`}
-                aria-label={`Reminder options for ${contest.event}`}
-                title="Set a reminder"
+                aria-pressed={isBookmarked}
+                aria-label={`${isBookmarked ? "Remove bookmark for" : "Bookmark"} ${contest.event}`}
+                title={isBookmarked ? "Remove bookmark" : "Save contest"}
+                onClick={() => run(() => onBookmarkToggle(contest))}
               >
-                <Bell
-                  size={16}
-                  fill={hasReminder ? "currentColor" : "none"}
-                  aria-hidden="true"
-                />
-              </button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content
-                align="start"
-                sideOffset={8}
-                className="z-50 w-56 rounded-xl border border-border bg-card p-1.5 shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
-              >
-                <DropdownMenu.Label className="eyebrow px-3 py-2">
-                  Remind me before
-                </DropdownMenu.Label>
-                {(["1h", "6h", "24h"] as const).map((type) => (
-                  <DropdownMenu.Item
-                    key={type}
-                    className="menu-item justify-between"
-                    disabled={
-                      busy ||
-                      !validDate ||
-                      start.getTime() -
-                        Number(type.replace("h", "")) * 3600000 <=
-                        (now ?? 0)
-                    }
-                    onSelect={() => run(() => onReminderSet(contest, type))}
-                  >
-                    {type.replace("h", "")} hour{type === "1h" ? "" : "s"}{" "}
-                    before{" "}
-                    {reminderType === type && (
-                      <Check
-                        size={14}
-                        className="text-primary"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </DropdownMenu.Item>
-                ))}
-                {hasReminder && (
-                  <>
-                    <DropdownMenu.Separator className="my-1 h-px bg-border" />
-                    <DropdownMenu.Item
-                      className="menu-item text-destructive"
-                      onSelect={() => run(() => onReminderRemove(contest.id))}
-                    >
-                      <BellOff size={14} aria-hidden="true" />
-                      Remove reminder
-                    </DropdownMenu.Item>
-                  </>
+                {busy ? (
+                  <LoaderCircle
+                    size={16}
+                    className="animate-spin"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Bookmark
+                    size={16}
+                    fill={isBookmarked ? "currentColor" : "none"}
+                    aria-hidden="true"
+                  />
                 )}
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
+              </button>
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button
+                    disabled={busy}
+                    className={`icon-button ${hasReminder ? "!text-primary" : ""}`}
+                    aria-label={`Reminder options for ${contest.event}`}
+                    title="Set a reminder"
+                  >
+                    <Bell
+                      size={16}
+                      fill={hasReminder ? "currentColor" : "none"}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content
+                    align="start"
+                    sideOffset={8}
+                    className="z-50 w-56 rounded-xl border border-border bg-card p-1.5 shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+                  >
+                    <DropdownMenu.Label className="eyebrow px-3 py-2">
+                      Remind me before
+                    </DropdownMenu.Label>
+                    {(["1h", "6h", "24h"] as const).map((type) => (
+                      <DropdownMenu.Item
+                        key={type}
+                        className="menu-item justify-between"
+                        disabled={
+                          busy ||
+                          !validDate ||
+                          start.getTime() -
+                            Number(type.replace("h", "")) * 3600000 <=
+                            (now ?? 0)
+                        }
+                        onSelect={() => run(() => onReminderSet(contest, type))}
+                      >
+                        {type.replace("h", "")} hour{type === "1h" ? "" : "s"}{" "}
+                        before{" "}
+                        {reminderType === type && (
+                          <Check
+                            size={14}
+                            className="text-primary"
+                            aria-hidden="true"
+                          />
+                        )}
+                      </DropdownMenu.Item>
+                    ))}
+                    {hasReminder && (
+                      <>
+                        <DropdownMenu.Separator className="my-1 h-px bg-border" />
+                        <DropdownMenu.Item
+                          className="menu-item text-destructive"
+                          onSelect={() =>
+                            run(() => onReminderRemove(contest.id))
+                          }
+                        >
+                          <BellOff size={14} aria-hidden="true" />
+                          Remove reminder
+                        </DropdownMenu.Item>
+                      </>
+                    )}
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
+            </>
+          )}
           {validDate && (
             <a
               className="icon-button contest-calendar"

@@ -1,4 +1,6 @@
 "use client";
+import JournalSkeleton from "@/features/journal/components/JournalSkeleton";
+import { JournalEntriesSkeleton } from "@/features/journal/components/JournalSkeleton";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -59,20 +61,7 @@ const dateLabel = (day: string) =>
     year: "numeric",
     timeZone: "UTC",
   });
-export function JournalSkeleton() {
-  return (
-    <div className="site-container journal-page" role="status">
-      <span className="sr-only">Loading your private contest journal.</span>
-      <div className="skeleton h-12 w-64" />
-      <div className="skeleton my-8 h-28" />
-      <div className="skeleton h-24" />
-      <div className="journal-grid mt-6">
-        <div className="skeleton h-80" />
-        <div className="skeleton h-80" />
-      </div>
-    </div>
-  );
-}
+
 function JournalWelcome() {
   return (
     <div className="site-container journal-page">
@@ -403,14 +392,7 @@ export function JournalView({
           </div>
         )}
         {pending ? (
-          <div
-            className="journal-grid"
-            aria-busy="true"
-            aria-label="Loading filtered entries"
-          >
-            <div className="skeleton h-80" />
-            <div className="skeleton h-80" />
-          </div>
+          <JournalEntriesSkeleton />
         ) : snapshot.entries.length ? (
           <div className="journal-grid">
             {snapshot.entries.map((entry) => (
