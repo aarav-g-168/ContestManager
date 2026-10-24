@@ -76,6 +76,12 @@ const ready = renderToStaticMarkup(
   React.createElement(Card, { ...props, accountLoading: false }),
 );
 assert.ok(ready.includes('aria-label="Bookmark Loading check"'));
+const PracticeLoading =
+  require("../../src/features/journal/components/PracticeSkeleton.tsx").default;
+const practiceHtml = renderToStaticMarkup(React.createElement(PracticeLoading));
+assert.match(practiceHtml, /Loading your practice queue/);
+assert.match(practiceHtml, /aria-busy="true"/);
+assert.equal((practiceHtml.match(/role="status"/g) ?? []).length, 1);
 console.log(
   "Loading checks passed: all nine page fallbacks render named, busy, noninteractive skeletons; new page routes require fallbacks; saved actions wait for account data.",
 );

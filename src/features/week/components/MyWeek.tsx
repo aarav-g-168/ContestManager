@@ -332,6 +332,9 @@ export function MyWeekView({
         </div>
       </header>
       <nav className="week-quick-links" aria-label="Manage your week">
+        <Link href="/journal?view=practice">
+          To practise <ArrowUpRight size={14} aria-hidden="true" />
+        </Link>
         <Link href="/bookmarks">
           <Bookmark size={16} aria-hidden="true" />
           Saved contests
@@ -475,6 +478,57 @@ export function MyWeekView({
           </p>
         </section>
       </div>
+      <section className="week-practice" aria-labelledby="week-practice-title">
+        <div className="week-section-top">
+          <div>
+            <p className="week-eyebrow">BETWEEN THE ROUNDS</p>
+            <h2 id="week-practice-title">Practice this week</h2>
+          </div>
+          <Link className="text-link" href="/journal?view=practice">
+            Open queue <ArrowUpRight size={15} aria-hidden="true" />
+          </Link>
+        </div>
+        {plan.practice?.items.length ? (
+          <ul>
+            {plan.practice.items.slice(0, 6).map((item) => (
+              <li key={`${item.entryId}:${item.problem.id}`}>
+                <time dateTime={item.problem.plannedDate}>
+                  {new Date(
+                    `${item.problem.plannedDate}T00:00:00Z`,
+                  ).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    timeZone: "UTC",
+                  })}
+                </time>
+                <div>
+                  <strong>{item.problem.title}</strong>
+                  <span>{item.contest}</span>
+                </div>
+                <Link
+                  className="text-link"
+                  href={`/journal?view=practice&planned=${item.problem.plannedDate}`}
+                >
+                  View plan <ArrowUpRight size={14} aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>
+            No practice planned yet. Give a journal problem a date to see it
+            here.
+          </p>
+        )}
+        {plan.practice &&
+          (plan.practice.more || plan.practice.items.length > 6) && (
+            <p>
+              Showing your next six planned problems. Open your queue to see the
+              rest.
+            </p>
+          )}
+        <small>Dates use IST. Practice plans don’t send email reminders.</small>
+      </section>
       <section className="week-calendar" aria-labelledby="week-calendar-title">
         <div className="week-section-top">
           <h2 id="week-calendar-title">Your next seven days</h2>

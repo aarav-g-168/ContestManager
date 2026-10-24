@@ -493,16 +493,47 @@ export function ProgressView({
                     ? "Every checklist problem in this view is marked as revisited."
                     : "Your unfinished problems are waiting in the journal. Pick one when you have time."}
               </p>
-              <Link href={journalLink} className="text-link">
-                Review your checklists{" "}
+              <Link href="/journal?view=practice" className="text-link">
+                Open your practice queue{" "}
                 <ArrowRight size={15} aria-hidden="true" />
               </Link>
               <p className="progress-fine-print">
-                This is today’s checklist state, grouped by contest date.
-                Completion dates aren’t tracked yet.
+                This is today’s checklist state, grouped by contest date. Dated
+                practice below uses the day you marked a problem revisited.
               </p>
             </section>
           </div>
+          {data.practice && (
+            <section
+              className="progress-panel progress-dated-practice"
+              aria-labelledby="dated-practice-title"
+            >
+              <div className="progress-panel-heading">
+                <div>
+                  <p className="progress-eyebrow">WHEN YOU CAME BACK</p>
+                  <h2 id="dated-practice-title">Practice over time</h2>
+                </div>
+                <strong>{data.practice.completed} revisited</strong>
+              </div>
+              <p className="progress-panel-description">
+                Problems marked revisited during this period, including problems
+                from older contests. Dates use IST.
+              </p>
+              <div className="progress-practice-months">
+                {data.practice.monthly.map((month) => (
+                  <div key={month.key}>
+                    <span>{month.label}</span>
+                    <strong>{month.completed}</strong>
+                  </div>
+                ))}
+              </div>
+              <p className="progress-fine-print">
+                Older checkboxes without a recorded completion date are
+                excluded. Reopening a problem removes its completion from these
+                totals; marking it again records a new date.
+              </p>
+            </section>
+          )}
           <section
             className="progress-panel progress-platforms"
             aria-labelledby="progress-platform-title"

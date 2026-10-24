@@ -15,7 +15,7 @@ export async function getProgress(
 ) {
   const window = progressWindow(query.months, now);
   const owner = eq(journal.userId, uid);
-  const [records, count, platforms] = await Promise.all([
+  const [records, count, platforms, practice] = await Promise.all([
     db
       .select({
         id: journal.id,
@@ -48,12 +48,33 @@ export async function getProgress(
       .from(journal)
       .where(owner)
       .orderBy(journal.host),
+    db.execute(sql`select substring(to_char((p->>'completedAt')::timestamptz at time zone 'Asia/Kolkata','YYYY-MM-DD') from 1 for 7) as month,count(*)::int as completed
+      from ${journal} e cross join lateral jsonb_array_elements(e.data->'problems') p
+      where e.user_id=${uid} and (${query.platform}='' or e.host=${query.platform}) and p->>'done'='true'
+      and nullif(p->>'completedAt','') is not null
+      and (p->>'completedAt')::timestamptz >= (${window.from}::date::timestamp at time zone 'Asia/Kolkata')
+      and (p->>'completedAt')::timestamptz <= ${now}
+      group by month`),
   ]);
-  return aggregateProgress(
+  const snapshot = aggregateProgress(
     records as ProgressRecord[],
     query,
     now,
     count[0].count,
     platforms.map((row) => row.host),
   );
+  const monthly = window.monthly.map((month) => ({
+    key: month.key,
+    label: month.label,
+    completed: Number(
+      practice.rows.find((row) => row.month === month.key)?.completed ?? 0,
+    ),
+  }));
+  return {
+    ...snapshot,
+    practice: {
+      completed: monthly.reduce((sum, month) => sum + month.completed, 0),
+      monthly,
+    },
+  };
 }

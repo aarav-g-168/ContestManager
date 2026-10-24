@@ -44,6 +44,10 @@ export type ProgressMonth = ProgressTotals & {
   label: string;
 };
 export type ProgressSnapshot = {
+  practice?: {
+    completed: number;
+    monthly: { key: string; label: string; completed: number }[];
+  };
   asOf: string;
   months: number;
   platform: string;

@@ -1,4 +1,5 @@
 import type { Contest } from "@/features/contests/types";
+import type { PracticeItem } from "@/features/journal/lib/practice";
 import { parseAsUTC } from "@/lib/date";
 import {
   getContestDay,
@@ -15,7 +16,11 @@ export type WeekItem = {
     contestStart: string;
   } | null;
 };
-export type WeekPlan = { asOf: string; items: WeekItem[] };
+export type WeekPlan = {
+  asOf: string;
+  items: WeekItem[];
+  practice?: { items: PracticeItem[]; more: boolean };
+};
 export type WeekRound = WeekItem & {
   start: number;
   end: number;

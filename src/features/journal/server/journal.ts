@@ -13,6 +13,7 @@ import {
   type JournalEntry,
   type JournalSnapshot,
   type JournalValues,
+  type JournalProblem,
   journalQuery,
 } from "@/features/journal/lib/journal";
 import { ProfileRequestError } from "@/lib/http/request-error";
@@ -73,12 +74,34 @@ function columns(values: JournalValues) {
   const { title, host, date, href, contestId, ...data } = values;
   return { title, host, date, href, contestId, data };
 }
+// Dates are server-owned. An older checked item has no known completion date.
+export function stampProblems(
+  next: JournalProblem[],
+  previous: JournalProblem[] = [],
+  now = new Date(),
+) {
+  return next.map((problem) => {
+    const before = previous.find((item) => item.id === problem.id);
+    return {
+      ...problem,
+      priority: problem.priority ?? before?.priority ?? "normal",
+      plannedDate: problem.plannedDate ?? before?.plannedDate ?? "",
+      takeaway: problem.takeaway ?? before?.takeaway ?? "",
+      completedAt: problem.done
+        ? before?.done
+          ? (before.completedAt ?? null)
+          : now.toISOString()
+        : null,
+    };
+  });
+}
 export async function createJournalEntry(
   db: Database,
   uid: string,
   input: unknown,
 ) {
   const values = await canonicalValues(db, uid, input);
+  values.problems = stampProblems(values.problems);
   try {
     const [row] = await db
       .insert(entries)
@@ -147,6 +170,7 @@ export async function updateJournalEntry(
           href: current.href,
         },
   );
+  values.problems = stampProblems(values.problems, current.data.problems);
   const [updated] = await db
     .update(entries)
     .set({

@@ -2,12 +2,21 @@ import { and, eq, isNotNull, or, sql } from "drizzle-orm";
 import type { Database } from "@/lib/db";
 import { bookmarks, contests, deliveries, reminders } from "@/lib/db/schema";
 import type { WeekPlan } from "@/features/week/lib/week";
+import { weekWindow } from "@/features/week/lib/week";
+import { getPlannedPractice } from "@/features/journal/server/practice";
 
 export async function getWeekPlan(
   db: Database,
   uid: string,
   now = new Date(),
 ): Promise<WeekPlan> {
+  const window = weekWindow(now.getTime());
+  const practice = await getPlannedPractice(
+    db,
+    uid,
+    window.today,
+    window.days[6].key,
+  );
   const rows = await db
     .select({
       contest: {
@@ -45,6 +54,7 @@ export async function getWeekPlan(
     )
     .orderBy(contests.start, contests.id);
   return {
+    practice,
     asOf: now.toISOString(),
     items: rows.map((row) => ({
       contest: { ...row.contest, start: row.contest.start.toISOString() },
