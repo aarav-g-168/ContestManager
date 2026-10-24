@@ -4,6 +4,10 @@
 review notes, topic tags, an upsolving checklist, and reference links. Entries can
 be created and edited; bookmarks or emails never count as participation by themselves.
 
+The **To practise** journal view gathers every entry's problems into a private
+queue with priorities, planned dates, takeaways and server-recorded completion
+dates. See [practice workspace](practice-workspace.md) for behavior and storage.
+
 ## Behavior
 
 - The participation choices are Participated, Skipped, and To upsolve. Results are

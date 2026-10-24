@@ -1,6 +1,382 @@
 .journal-page {
   padding-block: 48px 24px;
 }
+.journal-navigation {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  margin: 28px 0;
+}
+.journal-navigation a {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 10px 18px;
+  border-bottom: 2px solid transparent;
+  color: var(--muted-foreground);
+  font-size: 14px;
+}
+.journal-navigation a[aria-current="page"] {
+  color: var(--foreground);
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+.practice-overview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--border);
+  background: var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+.practice-overview > div {
+  padding: 22px 24px;
+  background: var(--card);
+}
+.practice-overview span,
+.practice-overview small {
+  display: block;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+.practice-overview strong {
+  display: block;
+  font:
+    400 34px/1.5 var(--font-code),
+    monospace;
+  color: var(--foreground);
+}
+.practice-overview small {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.practice-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  gap: 40px;
+  align-items: start;
+}
+.practice-layout > section {
+  min-width: 0;
+}
+.practice-filter-fieldset,
+.practice-editor fieldset {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+.practice-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.practice-filters .practice-search {
+  grid-column: span 2;
+}
+.practice-filters label,
+.practice-editor label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+  min-width: 0;
+}
+.practice-filters input,
+.practice-filters select,
+.practice-editor input,
+.practice-editor select,
+.practice-editor textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 14px;
+  color-scheme: light;
+}
+.dark .practice-filters input,
+.dark .practice-filters select,
+.dark .practice-editor input,
+.dark .practice-editor select,
+.dark .practice-editor textarea {
+  color-scheme: dark;
+}
+.practice-filters option,
+.practice-editor option {
+  color: var(--foreground);
+  background: var(--background);
+}
+.practice-search > div {
+  position: relative;
+}
+.practice-search svg {
+  position: absolute;
+  top: 14px;
+  left: 12px;
+}
+.practice-search input {
+  padding-left: 36px;
+}
+.practice-reset {
+  min-height: 44px;
+  margin-bottom: 16px;
+}
+.practice-hint {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.7;
+  margin-block: 12px !important;
+}
+.practice-list {
+  display: grid;
+  gap: 16px;
+}
+.practice-card {
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  transition:
+    border-color 180ms,
+    box-shadow 180ms;
+}
+.practice-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--foreground) 3%, transparent);
+}
+.practice-card h3 {
+  margin: 18px 0 6px !important;
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.practice-card h3 a {
+  display: inline-flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.practice-card h3 a svg {
+  flex-shrink: 0;
+}
+.practice-card h3 a:hover {
+  color: var(--primary);
+}
+.practice-contest {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.practice-card-meta,
+.practice-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.practice-priority {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  border: 1px solid var(--border);
+  padding: 4px 9px;
+  border-radius: 6px;
+}
+.practice-priority[data-priority="high"] {
+  color: var(--foreground);
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+.practice-card-actions {
+  margin-top: 22px;
+}
+.practice-card-actions button {
+  min-height: 44px;
+  font-size: 13px;
+}
+.practice-date {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.practice-date[data-overdue="true"] {
+  color: var(--foreground);
+  font-weight: 600;
+}
+.practice-date[data-overdue="true"] svg {
+  color: var(--primary);
+}
+.practice-editor {
+  margin-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.practice-editor summary {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 48px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--muted-foreground);
+  list-style: none;
+}
+.practice-editor summary::-webkit-details-marker {
+  display: none;
+}
+.practice-editor summary > span {
+  margin-left: auto;
+  color: var(--foreground);
+  font-size: 12px;
+}
+.practice-editor[open] summary svg {
+  transform: rotate(180deg);
+}
+.practice-editor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 6px 0 18px;
+}
+.practice-editor textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+.practice-editor label small {
+  font-size: 12px;
+}
+.practice-save {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+.practice-save button {
+  min-height: 44px;
+  font-size: 13px;
+}
+.practice-takeaway {
+  margin: 16px 0 0;
+  padding: 8px 0 8px 14px;
+  border-left: 2px solid var(--primary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.practice-aside {
+  border-left: 1px solid var(--border);
+  padding-left: 28px;
+}
+.practice-aside h2 {
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+  margin: 16px 0 !important;
+}
+.practice-aside > p:not(.journal-eyebrow) {
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1.8;
+}
+.practice-aside ol {
+  padding-left: 20px;
+  margin: 24px 0;
+  display: grid;
+  gap: 22px;
+}
+.practice-aside li::marker {
+  color: var(--primary);
+  font-family: var(--font-code), monospace;
+}
+.practice-aside li {
+  padding-left: 8px;
+}
+.practice-aside li strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}
+.practice-aside li span {
+  display: block;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.7;
+  margin-top: 5px;
+}
+.practice-aside > a {
+  min-height: 44px;
+}
+@media (max-width: 1000px) {
+  .practice-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+  }
+  .practice-aside {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    padding: 24px 0 0;
+  }
+  .practice-aside ol {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 32px;
+  }
+}
+@media (max-width: 640px) {
+  .practice-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 30px;
+  }
+  .practice-overview > div {
+    padding: 18px;
+  }
+  .practice-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .practice-filters .practice-search {
+    grid-column: 1/-1;
+  }
+  .practice-filters input,
+  .practice-filters select,
+  .practice-editor input,
+  .practice-editor select,
+  .practice-editor textarea {
+    font-size: 16px;
+  }
+  .practice-card {
+    padding: 18px;
+  }
+  .practice-card-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .practice-aside ol {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .practice-editor-grid {
+    grid-template-columns: 1fr;
+  }
+  .journal-navigation a {
+    padding-inline: 14px;
+  }
+}
 .journal-page h1,
 .journal-page h2,
 .journal-page h3,

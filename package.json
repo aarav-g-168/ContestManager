@@ -22,7 +22,8 @@
     "test:week": "tsx tests/integration/week.test.mts",
     "test:journal": "tsx tests/integration/journal.test.mts",
     "test:progress": "tsx tests/integration/progress.test.mts",
-    "test:loading": "tsx tests/unit/loading.test.mts"
+    "test:loading": "tsx tests/unit/loading.test.mts",
+    "test:practice": "tsx tests/integration/practice.test.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

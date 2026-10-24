@@ -174,3 +174,15 @@ dashboard controller into a route fallback. Shared shapes and loading semantics
 live in `components/feedback/LoadingSkeleton.tsx`; the pulse uses global theme
 tokens and respects reduced-motion preferences. See [loading behavior and
 verification](loading-states.md). Run `npm run test:loading` to check page coverage.
+
+## Practice workspace
+
+The practice queue stays inside `features/journal/`, alongside its source
+entries. `components/PracticeQueue.tsx` renders cards and filters;
+`hooks/usePractice.ts` handles authenticated requests and conflict recovery;
+`lib/practice.ts` defines queue types and query validation;
+`server/practice.ts` reads the owner’s full queue and applies narrow problem
+updates. `components/JournalNavigation.tsx` connects Entries and To practise.
+`app/api/journal/practice/route.ts` is the HTTP boundary. My week reuses the
+server’s planned-problem query; Progress independently aggregates completion
+timestamps. See [practice workspace](practice-workspace.md).

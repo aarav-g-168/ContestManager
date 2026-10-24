@@ -28,6 +28,10 @@ export type JournalProblem = {
   title: string;
   url: string;
   done: boolean;
+  priority?: "high" | "normal" | "low";
+  plannedDate?: string;
+  completedAt?: string | null;
+  takeaway?: string;
 };
 export type JournalLink = { id: string; label: string; url: string };
 export type JournalReview = {
@@ -200,7 +204,31 @@ export function validateJournal(
         title: text(p.title, "problems", 120, true),
         url: url(p.url, "problems"),
         done: p.done === true,
+        ...(p.priority === undefined
+          ? {}
+          : { priority: p.priority as JournalProblem["priority"] }),
+        ...(p.plannedDate === undefined
+          ? {}
+          : { plannedDate: text(p.plannedDate, "problems", 10) }),
+        ...(p.takeaway === undefined
+          ? {}
+          : { takeaway: text(p.takeaway, "problems", 1000) }),
       });
+      if (
+        p.priority !== undefined &&
+        (typeof p.priority !== "string" ||
+          !["high", "normal", "low"].includes(p.priority))
+      )
+        errors.problems = "Choose a valid problem priority.";
+      if (
+        p.plannedDate !== undefined &&
+        p.plannedDate !== "" &&
+        (typeof p.plannedDate !== "string" ||
+          !validJournalDate(p.plannedDate) ||
+          p.plannedDate < "2000-01-01" ||
+          p.plannedDate > "2100-12-31")
+      )
+        errors.problems = "Choose a real planned date between 2000 and 2100.";
     }
   const links: JournalLink[] = [];
   if (!Array.isArray(raw.links) || raw.links.length > 10)

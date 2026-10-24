@@ -14,8 +14,11 @@ Deploy it with the existing journal migration (`0003_contest_journal`) applied.
 - Interactive monthly participation/solve bars, with month summaries, journal
   drilldowns, and an accessible monthly data table.
 - Checklist completion across all entry statuses within the selected period.
-  This is the current checkbox state, grouped by contest date; completion dates
-  are not recorded. It does not claim when a problem was completed.
+  This is the current checkbox state, grouped by contest date.
+- Practice over time counts dated completions by the month a problem was marked
+  revisited in IST, including older contests. Unknown legacy dates are excluded.
+  Reopening a problem removes that completion; checking it again records a new
+  date. See [To practise](practice-workspace.md).
 - Platform totals and the smallest manually entered rank among Participated
   rounds on that platform. Field sizes vary, so no cross-platform rank is shown.
 - Entry tag frequency and recent entries. Tags describe journal topics, not
@@ -38,7 +41,7 @@ cannot choose another account. Responses use `private, no-store` and
 `Vary: Authorization`.
 
 The SQL query selects only aggregate inputs: contest title/platform/date, status,
-solved count, rank, checklist completion flags and topic tags. It excludes review
+solved count, rank, checklist completion flags, dated completion counts and topic tags. It excludes review
 notes, problem titles, reference URLs, user profiles and email data. It covers all
 matching entries rather than the journal’s paginated response.
 

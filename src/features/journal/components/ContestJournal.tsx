@@ -33,6 +33,7 @@ import {
   type JournalValues,
 } from "@/features/journal/lib/journal";
 import JournalEditor from "@/features/journal/components/JournalEditor";
+import JournalNavigation from "@/features/journal/components/JournalNavigation";
 import { toast } from "sonner";
 import "@/features/journal/styles.css";
 
@@ -223,6 +224,7 @@ export function JournalView({
           </button>
         </div>
       </header>
+      <JournalNavigation active="entries" />
       <div className="journal-context">
         <span>
           <LockKeyhole size={14} aria-hidden="true" />
