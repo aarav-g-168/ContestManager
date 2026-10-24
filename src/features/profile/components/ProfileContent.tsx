@@ -1,4 +1,5 @@
 "use client";
+import { ProfileFieldsSkeleton } from "@/features/profile/components/ProfileSkeleton";
 import { Code2, GitFork, LockKeyhole, UserRound } from "lucide-react";
 import { useAuth } from "@/features/auth/components/AuthProvider";
 import { useProfile } from "@/features/profile/components/ProfileProvider";
@@ -22,23 +23,7 @@ export default function ProfileContent() {
         </span>
       </PageHeading>
       {authLoading || (user && account.loading) ? (
-        <div
-          className="profile-layout"
-          aria-label="Loading profile"
-          aria-busy="true"
-        >
-          <div className="surface p-7">
-            <div className="skeleton mb-6 size-20 !rounded-full" />
-            <div className="skeleton mb-4 h-6 w-40" />
-            <div className="skeleton h-4 w-52 max-w-full" />
-          </div>
-          <div className="surface p-7">
-            <div className="skeleton mb-8 h-6 w-40" />
-            <div className="skeleton mb-6 h-12" />
-            <div className="skeleton mb-6 h-28" />
-            <div className="skeleton h-12" />
-          </div>
-        </div>
+        <ProfileFieldsSkeleton />
       ) : !user ? (
         <div className="profile-signin-layout">
           <div className="profile-signin-feature">

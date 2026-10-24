@@ -51,6 +51,7 @@ import {
 } from "@/features/profile/lib/profile";
 import AvatarPicker from "@/features/profile/components/AvatarPicker";
 import ProfileAvatar from "@/features/profile/components/ProfileAvatar";
+import { SkeletonBlock } from "@/components/feedback/LoadingSkeleton";
 
 const socialFields = [
   {
@@ -412,7 +413,14 @@ export function ProfileForm({
             <Link key={href} href={href}>
               <Icon size={16} aria-hidden="true" />
               <span>{label}</span>
-              <strong>{value}</strong>
+              <strong
+                aria-label={
+                  value === "…" ? `Loading ${label.toLowerCase()}` : undefined
+                }
+                aria-busy={value === "…" || undefined}
+              >
+                {value === "…" ? <SkeletonBlock className="h-5 w-8" /> : value}
+              </strong>
               <ArrowUpRight size={13} aria-hidden="true" />
             </Link>
           ))}

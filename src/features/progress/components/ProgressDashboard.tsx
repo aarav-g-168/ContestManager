@@ -1,4 +1,5 @@
 "use client";
+import ProgressSkeleton from "@/features/progress/components/ProgressSkeleton";
 import { useState, type CSSProperties } from "react";
 import Link from "next/link";
 import {
@@ -38,24 +39,7 @@ const date = (day: string) =>
   });
 const solved = (value: { solved: number; solvedRecorded: number }) =>
   value.solvedRecorded ? number(value.solved) : "—";
-export function ProgressSkeleton() {
-  return (
-    <div className="site-container progress-page" role="status">
-      <span className="sr-only">Loading your journal progress.</span>
-      <div className="skeleton h-14 w-64" />
-      <div className="skeleton my-8 h-20" />
-      <div className="progress-metrics">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="skeleton h-36" />
-        ))}
-      </div>
-      <div className="progress-feature-grid mt-7">
-        <div className="skeleton h-96" />
-        <div className="skeleton h-96" />
-      </div>
-    </div>
-  );
-}
+
 function ProgressWelcome() {
   return (
     <div className="site-container progress-page">

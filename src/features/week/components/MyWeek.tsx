@@ -1,4 +1,5 @@
 "use client";
+import WeekSkeleton from "@/features/week/components/WeekSkeleton";
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { DropdownMenu } from "radix-ui";
@@ -166,27 +167,6 @@ function RoundActions({
       >
         <CalendarPlus size={17} aria-hidden="true" />
       </a>
-    </div>
-  );
-}
-
-export function WeekSkeleton() {
-  return (
-    <div
-      className="site-container week-page"
-      role="status"
-      aria-label="Loading your week"
-    >
-      <div className="skeleton h-12 w-48" />
-      <div className="week-top-grid mt-8">
-        <div className="skeleton h-80" />
-        <div className="skeleton h-80" />
-      </div>
-      <div className="skeleton mt-7 h-36" />
-      <div className="skeleton mt-7 h-64" />
-      <span className="sr-only">
-        Loading your saved contests and reminders.
-      </span>
     </div>
   );
 }
