@@ -1,5 +1,6 @@
 "use client";
 import WeekSkeleton from "@/features/week/components/WeekSkeleton";
+import WeeklyGoals from "@/features/goals/components/WeeklyGoals";
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { DropdownMenu } from "radix-ui";
@@ -226,6 +227,7 @@ function WeekWelcome() {
 }
 
 type ViewProps = {
+  goals?: React.ReactNode;
   plan: WeekPlan;
   contests: Contest[];
   now: number;
@@ -248,6 +250,7 @@ export function MyWeekView({
   busyId,
   onRefresh,
   onAction,
+  goals,
 }: ViewProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const window = weekWindow(now);
@@ -478,6 +481,7 @@ export function MyWeekView({
           </p>
         </section>
       </div>
+      {goals}
       <section className="week-practice" aria-labelledby="week-practice-title">
         <div className="week-section-top">
           <div>
@@ -1016,6 +1020,7 @@ export default function MyWeek({ contests, feedError, initialNow }: Props) {
   return (
     <MyWeekView
       plan={state.data}
+      goals={<WeeklyGoals />}
       contests={contests}
       now={now}
       feedError={feedError}

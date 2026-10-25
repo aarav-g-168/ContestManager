@@ -1,6 +1,8 @@
 import {
   bigint,
   boolean,
+  check,
+  date,
   index,
   integer,
   jsonb,
@@ -11,6 +13,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import type { ProfileValues } from "@/features/profile/lib/profile";
 import type { JournalReview } from "@/features/journal/lib/journal";
 
@@ -191,3 +194,17 @@ export const journalEntries = pgTable("journal_entries", {
   createdAt: time("created_at").notNull().defaultNow(),
   updatedAt: time("updated_at").notNull().defaultNow(),
 }, (t) => [index("journal_owner_date_idx").on(t.userId, t.date), uniqueIndex("journal_owner_contest_idx").on(t.userId, t.contestId)]).enableRLS();
+
+export const weeklyGoals = pgTable("weekly_goals", {
+  userId:text("user_id").notNull().references(()=>users.id,{onDelete:"cascade"}),
+  weekStart:date("week_start",{mode:"string"}).notNull(),
+  contests:integer("contests").notNull().default(0),
+  problems:integer("problems").notNull().default(0),
+  revision:integer("revision").notNull().default(0),
+  updatedAt:time("updated_at").notNull().defaultNow(),
+},t=>[
+  primaryKey({columns:[t.userId,t.weekStart]}),
+  check("weekly_goals_contests_check",sql`${t.contests} between 0 and 21`),
+  check("weekly_goals_problems_check",sql`${t.problems} between 0 and 500`),
+  check("weekly_goals_monday_check",sql`extract(isodow from ${t.weekStart}) = 1`),
+]).enableRLS();

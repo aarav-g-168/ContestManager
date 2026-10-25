@@ -1,5 +1,6 @@
 "use client";
 import ProgressSkeleton from "@/features/progress/components/ProgressSkeleton";
+import WeeklyGoals from "@/features/goals/components/WeeklyGoals";
 import { useState, type CSSProperties } from "react";
 import Link from "next/link";
 import {
@@ -85,6 +86,7 @@ function ProgressWelcome() {
   );
 }
 type ViewProps = {
+  goals?: React.ReactNode;
   data: ProgressSnapshot;
   months: number;
   platform: string;
@@ -95,6 +97,7 @@ type ViewProps = {
   onRefresh: () => void;
 };
 export function ProgressView({
+  goals,
   data,
   months,
   platform,
@@ -236,6 +239,7 @@ export function ProgressView({
           </button>
         </div>
       )}
+      {goals}
       {!data.journalCount ? (
         <section className="progress-empty">
           <span>
@@ -832,6 +836,7 @@ export default function ProgressDashboard() {
     <ProgressView
       key={user.uid}
       data={state.data}
+      goals={<WeeklyGoals />}
       months={months}
       platform={platform}
       onMonthsChange={setMonths}

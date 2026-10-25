@@ -16,6 +16,7 @@ export default function WeekSkeleton() {
           <SkeletonBlock className="h-80" />
           <SkeletonBlock className="h-80" />
         </div>
+        <SkeletonBlock className="mt-7 h-80 w-full" />
         <SkeletonBlock className="mt-7 h-36 w-full" />
         <SkeletonBlock className="mt-7 h-64 w-full" />
       </div>

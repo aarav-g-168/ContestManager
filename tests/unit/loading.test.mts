@@ -82,6 +82,12 @@ const practiceHtml = renderToStaticMarkup(React.createElement(PracticeLoading));
 assert.match(practiceHtml, /Loading your practice queue/);
 assert.match(practiceHtml, /aria-busy="true"/);
 assert.equal((practiceHtml.match(/role="status"/g) ?? []).length, 1);
+const GoalsLoading =
+  require("../../src/features/goals/components/WeeklyGoals.tsx").WeeklyGoalsSkeleton;
+const goalsHtml = renderToStaticMarkup(React.createElement(GoalsLoading));
+assert.match(goalsHtml, /Loading your weekly goals/);
+assert.match(goalsHtml, /aria-busy="true"/);
+assert.equal((goalsHtml.match(/role="status"/g) ?? []).length, 1);
 console.log(
   "Loading checks passed: all nine page fallbacks render named, busy, noninteractive skeletons; new page routes require fallbacks; saved actions wait for account data.",
 );

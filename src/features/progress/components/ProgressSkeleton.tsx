@@ -13,6 +13,7 @@ export default function ProgressSkeleton() {
       <SkeletonHeading />
       <div aria-hidden="true">
         <SkeletonBlock className="my-8 h-20 w-full" />
+        <SkeletonBlock className="my-7 h-80 w-full" />
         <div className="progress-metrics">
           {[0, 1, 2, 3].map((i) => (
             <SkeletonBlock key={i} className="h-36" />

@@ -90,6 +90,11 @@ try {
     .filter((file) => file.endsWith(".sql"))
     .sort())
     await engine.exec(await readFile(`drizzle/${file}`, "utf8"));
+  // Queue scenarios use a fixed clock. Match the test database's enqueue
+  // default to it, so running the suite after that date cannot defer every job.
+  await engine.exec(
+    `alter table reminder_deliveries alter column next_attempt_at set default '${now.toISOString()}'::timestamptz`,
+  );
   await db.insert(schema.users).values([
     { id: "alice", email: "alice@example.test" },
     { id: "bob", email: "bob@example.test" },
