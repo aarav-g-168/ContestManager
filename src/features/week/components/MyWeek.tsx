@@ -1,7 +1,10 @@
 "use client";
+import { reminderTimeLabel } from "@/features/reminders/lib/timing";
+import GettingStarted from "@/features/account/components/GettingStarted";
 import WeekSkeleton from "@/features/week/components/WeekSkeleton";
 import WeeklyGoals from "@/features/goals/components/WeeklyGoals";
 import { useMemo, useRef, useState } from "react";
+import ReminderChoices from "@/features/reminders/components/ReminderChoices";
 import Link from "next/link";
 import { DropdownMenu } from "radix-ui";
 import {
@@ -45,7 +48,7 @@ import AuthButton from "@/features/auth/components/AuthButton";
 import { toast } from "sonner";
 import "@/features/week/styles.css";
 
-type Action = "bookmark" | "remove-reminder" | "1h" | "6h" | "24h";
+type Action = "bookmark" | "remove-reminder" | "15m" | "1h" | "3h";
 type Props = {
   contests: Contest[];
   feedError: string | null;
@@ -119,26 +122,13 @@ function RoundActions({
             <DropdownMenu.Label className="eyebrow px-3 py-2">
               Email me before the start
             </DropdownMenu.Label>
-            {(["1h", "6h", "24h"] as const).map((type) => (
-              <DropdownMenu.Item
-                key={type}
-                className="menu-item justify-between"
-                disabled={
-                  busy || start - Number(type.slice(0, -1)) * 3600000 <= now
-                }
-                onSelect={() => onAction(item, type)}
-              >
-                {type.slice(0, -1)} hour{type === "1h" ? "" : "s"} before{" "}
-                {item.reminder?.type === type && (
-                  <Check size={14} aria-hidden="true" />
-                )}
-              </DropdownMenu.Item>
-            ))}
-            {start - 3600000 <= now && (
-              <p className="px-3 py-2 text-xs leading-5 text-muted-foreground">
-                The available reminder times have passed.
-              </p>
-            )}
+            <ReminderChoices
+              start={start}
+              now={now}
+              disabled={busy}
+              selected={item.reminder?.type}
+              onChoose={(type) => onAction(item, type)}
+            />
             {item.reminder && (
               <>
                 <DropdownMenu.Separator className="my-1 h-px bg-border" />
@@ -227,6 +217,7 @@ function WeekWelcome() {
 }
 
 type ViewProps = {
+  gettingStarted?: React.ReactNode;
   goals?: React.ReactNode;
   plan: WeekPlan;
   contests: Contest[];
@@ -240,6 +231,7 @@ type ViewProps = {
   onAction: (item: WeekItem, action: Action) => void;
 };
 export function MyWeekView({
+  gettingStarted,
   plan,
   contests,
   now,
@@ -334,6 +326,7 @@ export function MyWeekView({
           </button>
         </div>
       </header>
+      {gettingStarted}
       <nav className="week-quick-links" aria-label="Manage your week">
         <Link href="/journal?view=practice">
           To practise <ArrowUpRight size={14} aria-hidden="true" />
@@ -707,7 +700,7 @@ export function MyWeekView({
                     <small>
                       {["scheduled", "pending"].includes(round.reminder!.status)
                         ? `Due ${date(round.reminder!.dueAt)} · ${time(round.reminder!.dueAt)} IST`
-                        : `Requested ${round.reminder!.type} before start`}
+                        : `Requested ${reminderTimeLabel(round.reminder!.type)} before start`}
                     </small>
                   </li>
                 ))}
@@ -1021,6 +1014,7 @@ export default function MyWeek({ contests, feedError, initialNow }: Props) {
     <MyWeekView
       plan={state.data}
       goals={<WeeklyGoals />}
+      gettingStarted={<GettingStarted />}
       contests={contests}
       now={now}
       feedError={feedError}

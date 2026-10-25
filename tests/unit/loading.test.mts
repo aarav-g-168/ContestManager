@@ -17,6 +17,10 @@ const pages = [
   "journal",
   "progress",
   "admin",
+  "settings",
+  "support",
+  "privacy",
+  "terms",
 ];
 for (const route of pages) {
   const Loading = require(
@@ -89,5 +93,5 @@ assert.match(goalsHtml, /Loading your weekly goals/);
 assert.match(goalsHtml, /aria-busy="true"/);
 assert.equal((goalsHtml.match(/role="status"/g) ?? []).length, 1);
 console.log(
-  "Loading checks passed: all nine page fallbacks render named, busy, noninteractive skeletons; new page routes require fallbacks; saved actions wait for account data.",
+  "Loading checks passed: all page fallbacks render named, busy, noninteractive skeletons; new page routes require fallbacks; saved actions wait for account data.",
 );

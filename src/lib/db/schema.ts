@@ -30,6 +30,7 @@ export const users = pgTable("users", {
   profileRevision: integer("profile_revision").notNull().default(0),
   profileUpdatedAt: time("profile_updated_at"),
   createdAt: time("created_at").notNull().defaultNow(),
+  accountState: text("account_state").notNull().default("active"),
 }).enableRLS();
 export const contests = pgTable(
   "contests",
@@ -125,16 +126,20 @@ export const mailEvents = pgTable(
   },
   (t) => [index("mail_events_provider_idx").on(t.providerId)],
 ).enableRLS();
-export const workerRuns = pgTable("reminder_worker_runs", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  startedAt: time("started_at").notNull().defaultNow(),
-  finishedAt: time("finished_at"),
-  success: boolean("success"),
-  scheduled: integer("scheduled").notNull().default(0),
-  cancelled: integer("cancelled").notNull().default(0),
-  retried: integer("retried").notNull().default(0),
-  failed: integer("failed").notNull().default(0),
-}, (t) => [index("worker_runs_started_idx").on(t.startedAt)]).enableRLS();
+export const workerRuns = pgTable(
+  "reminder_worker_runs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    startedAt: time("started_at").notNull().defaultNow(),
+    finishedAt: time("finished_at"),
+    success: boolean("success"),
+    scheduled: integer("scheduled").notNull().default(0),
+    cancelled: integer("cancelled").notNull().default(0),
+    retried: integer("retried").notNull().default(0),
+    failed: integer("failed").notNull().default(0),
+  },
+  (t) => [index("worker_runs_started_idx").on(t.startedAt)],
+).enableRLS();
 // Relational foundations for future features; no speculative product flows.
 export const teams = pgTable("teams", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -178,33 +183,133 @@ export const contestResults = pgTable(
 ).enableRLS();
 
 // Trusted external subject -> account mapping preserves existing users across Auth migration.
-export const accountIdentities = pgTable("account_identities", {
-  provider: text("provider").notNull(),
-  subject: text("subject").notNull(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-}, (t) => [primaryKey({ columns: [t.provider, t.subject] })]).enableRLS();
+export const accountIdentities = pgTable(
+  "account_identities",
+  {
+    provider: text("provider").notNull(),
+    subject: text("subject").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (t) => [primaryKey({ columns: [t.provider, t.subject] })],
+).enableRLS();
 
-export const journalEntries = pgTable("journal_entries", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  contestId: bigint("contest_id", { mode: "number" }).references(() => contests.id),
-  title: text("title").notNull(), host: text("host").notNull(), date: text("contest_date").notNull(), href: text("href").notNull().default(""),
-  data: jsonb("data").$type<JournalReview>().notNull(),
-  revision: integer("revision").notNull().default(0),
-  createdAt: time("created_at").notNull().defaultNow(),
-  updatedAt: time("updated_at").notNull().defaultNow(),
-}, (t) => [index("journal_owner_date_idx").on(t.userId, t.date), uniqueIndex("journal_owner_contest_idx").on(t.userId, t.contestId)]).enableRLS();
+export const journalEntries = pgTable(
+  "journal_entries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    contestId: bigint("contest_id", { mode: "number" }).references(
+      () => contests.id,
+    ),
+    title: text("title").notNull(),
+    host: text("host").notNull(),
+    date: text("contest_date").notNull(),
+    href: text("href").notNull().default(""),
+    data: jsonb("data").$type<JournalReview>().notNull(),
+    revision: integer("revision").notNull().default(0),
+    createdAt: time("created_at").notNull().defaultNow(),
+    updatedAt: time("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    index("journal_owner_date_idx").on(t.userId, t.date),
+    uniqueIndex("journal_owner_contest_idx").on(t.userId, t.contestId),
+  ],
+).enableRLS();
 
-export const weeklyGoals = pgTable("weekly_goals", {
-  userId:text("user_id").notNull().references(()=>users.id,{onDelete:"cascade"}),
-  weekStart:date("week_start",{mode:"string"}).notNull(),
-  contests:integer("contests").notNull().default(0),
-  problems:integer("problems").notNull().default(0),
-  revision:integer("revision").notNull().default(0),
-  updatedAt:time("updated_at").notNull().defaultNow(),
-},t=>[
-  primaryKey({columns:[t.userId,t.weekStart]}),
-  check("weekly_goals_contests_check",sql`${t.contests} between 0 and 21`),
-  check("weekly_goals_problems_check",sql`${t.problems} between 0 and 500`),
-  check("weekly_goals_monday_check",sql`extract(isodow from ${t.weekStart}) = 1`),
-]).enableRLS();
+export const weeklyGoals = pgTable(
+  "weekly_goals",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    weekStart: date("week_start", { mode: "string" }).notNull(),
+    contests: integer("contests").notNull().default(0),
+    problems: integer("problems").notNull().default(0),
+    revision: integer("revision").notNull().default(0),
+    updatedAt: time("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.weekStart] }),
+    check("weekly_goals_contests_check", sql`${t.contests} between 0 and 21`),
+    check("weekly_goals_problems_check", sql`${t.problems} between 0 and 500`),
+    check(
+      "weekly_goals_monday_check",
+      sql`extract(isodow from ${t.weekStart}) = 1`,
+    ),
+  ],
+).enableRLS();
+
+export const accountPreferences = pgTable(
+  "account_preferences",
+  {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => users.id, { onDelete: "cascade" }),
+    defaultReminder: text("default_reminder").notNull().default("15m"),
+    remindersPaused: boolean("reminders_paused").notNull().default(false),
+    onboardingDismissed: boolean("onboarding_dismissed")
+      .notNull()
+      .default(false),
+    revision: integer("revision").notNull().default(0),
+    updatedAt: time("updated_at").notNull().defaultNow(),
+  },
+  (t) => [
+    check(
+      "preferences_reminder_check",
+      sql`${t.defaultReminder} in ('15m','1h','3h')`,
+    ),
+  ],
+).enableRLS();
+
+export const requestBuckets = pgTable("request_buckets", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull().default(0),
+  expiresAt: time("expires_at").notNull(),
+}).enableRLS();
+
+export const accountDeletions = pgTable(
+  "account_deletions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id"),
+    authId: text("auth_id"),
+    receiptHash: text("receipt_hash").notNull().unique(),
+    status: text("status").notNull().default("pending"),
+    leaseToken: uuid("lease_token"),
+    leaseUntil: time("lease_until"),
+    lastError: text("last_error"),
+    createdAt: time("created_at").notNull().defaultNow(),
+    updatedAt: time("updated_at").notNull().defaultNow(),
+    expiresAt: time("expires_at").notNull(),
+  },
+  (t) => [
+    index("deletion_work_idx").on(t.status, t.updatedAt),
+    uniqueIndex("deletion_owner_idx").on(t.userId),
+  ],
+).enableRLS();
+
+export const feedbackMessages = pgTable(
+  "feedback_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    category: text("category").notNull(),
+    subject: text("subject").notNull(),
+    message: text("message").notNull(),
+    status: text("status").notNull().default("open"),
+    createdAt: time("created_at").notNull().defaultNow(),
+  },
+  (t) => [index("feedback_owner_idx").on(t.userId, t.createdAt)],
+).enableRLS();
+
+export const operationalAlerts = pgTable("operational_alerts", {
+  key: text("key").primaryKey(),
+  lastAttemptAt: time("last_attempt_at").notNull(),
+  lastSuccessAt: time("last_success_at"),
+}).enableRLS();

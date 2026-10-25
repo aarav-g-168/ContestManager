@@ -1,9 +1,19 @@
 import { and, eq, sql } from "drizzle-orm";
 import type { Database } from "@/lib/db";
-import { deliveries, reminders, users } from "@/lib/db/schema";
+import {
+  deliveries,
+  reminders,
+  users,
+  accountPreferences,
+  requestBuckets,
+} from "@/lib/db/schema";
 import type { Contest } from "@/features/contests/types";
 import { parseAsUTC } from "@/lib/date";
 import { ProfileRequestError } from "@/lib/http/request-error";
+import {
+  isReminderType,
+  reminderOffset,
+} from "@/features/reminders/lib/timing";
 
 export async function saveReminder(
   db: Database,
@@ -13,12 +23,10 @@ export async function saveReminder(
   type: string,
   now = new Date(),
 ) {
-  if (!["1h", "6h", "24h"].includes(type))
+  if (!isReminderType(type))
     throw new ProfileRequestError("Choose a valid reminder time.", 400);
   const start = parseAsUTC(contest.start);
-  const dueAt = new Date(
-    start.getTime() - Number(type.replace("h", "")) * 3600000,
-  );
+  const dueAt = new Date(start.getTime() - reminderOffset(type));
   if (dueAt <= now)
     throw new ProfileRequestError(
       "That reminder time has passed. Choose a shorter reminder.",
@@ -26,11 +34,29 @@ export async function saveReminder(
     );
   return db.transaction(async (tx) => {
     // Lock the owner, including first inserts, to serialize changes from multiple tabs.
-    await tx
+    const [owner] = await tx
       .select({ id: users.id })
       .from(users)
       .where(eq(users.id, uid))
       .for("update");
+    if (!owner)
+      throw new ProfileRequestError(
+        "Sign in again before saving a reminder.",
+        401,
+      );
+    const [state] = await tx
+      .select({ state: users.accountState })
+      .from(users)
+      .where(eq(users.id, uid));
+    const [prefs] = await tx
+      .select()
+      .from(accountPreferences)
+      .where(eq(accountPreferences.userId, uid));
+    if (state.state !== "active" || prefs?.remindersPaused)
+      throw new ProfileRequestError(
+        "Email reminders are paused. Open Account settings to resume them.",
+        423,
+      );
     const [existing] = await tx
       .select({ delivery: deliveries })
       .from(reminders)
@@ -48,6 +74,40 @@ export async function saveReminder(
         id: existing.delivery.id,
         previous: existing.delivery.replacesDeliveryId,
       };
+    // Serialize the shared beta budget across server instances; cancellations do
+    // not refund creation slots, preventing create/cancel quota abuse.
+    await tx
+      .insert(requestBuckets)
+      .values({
+        key: "reminder-budget-lock",
+        count: 0,
+        expiresAt: new Date(now.getTime() + 86400000),
+      })
+      .onConflictDoUpdate({
+        target: requestBuckets.key,
+        set: { expiresAt: new Date(now.getTime() + 86400000) },
+      });
+    const [usage] = await tx
+      .select({
+        own: sql<number>`count(*) filter(where ${deliveries.userId}=${uid})::int`,
+        all: sql<number>`count(*)::int`,
+      })
+      .from(deliveries)
+      .where(
+        sql`${deliveries.createdAt} >= ${new Date(now.getTime() - 86400000)} and ${deliveries.createdAt} <= ${now}`,
+      );
+    const [scheduled] = await tx
+      .select({ count: sql<number>`count(*)::int` })
+      .from(deliveries)
+      .where(
+        sql`(${deliveries.dueAt} at time zone 'UTC')::date = (${dueAt}::timestamptz at time zone 'UTC')::date and ${deliveries.status} not in ('cancelled','expired','failed')`,
+      );
+    if (usage.own >= 20 || usage.all >= 80 || scheduled.count >= 80)
+      throw new ProfileRequestError(
+        "The reminder safety limit has been reached. Try again later or use Google Calendar.",
+        429,
+        { "Retry-After": "3600" },
+      );
     if (existing)
       await tx
         .update(deliveries)

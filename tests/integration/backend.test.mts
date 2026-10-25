@@ -247,7 +247,7 @@ try {
     "alice",
     "alice@example.test",
     contest,
-    "6h",
+    "3h",
     now,
   );
   const again = await saveReminder(
@@ -255,7 +255,7 @@ try {
     "alice",
     "alice@example.test",
     contest,
-    "6h",
+    "3h",
     now,
   );
   assert.equal(first.id, again.id, "Repeated save is idempotent");
@@ -263,7 +263,7 @@ try {
   assert.equal((await row(first.id)).status, "scheduled");
   assert.equal(
     (await row(first.id)).requestScheduledAt?.toISOString(),
-    "2026-10-21T02:00:00.000Z",
+    "2026-10-21T05:00:00.000Z",
   );
   assert.equal(requests, 1);
   await Promise.all([run([first.id]), run([first.id])]);
@@ -311,7 +311,7 @@ try {
     "bob",
     "bob@example.test",
     contest,
-    "6h",
+    "3h",
     now,
   );
   interruptOnce = true;
@@ -374,10 +374,10 @@ try {
     "bob",
     "bob@example.test",
     contest,
-    "6h",
+    "3h",
     now,
   );
-  await run([failed.id, late.id], new Date("2026-10-21T03:00:00Z"));
+  await run([failed.id, late.id], new Date("2026-10-21T06:00:00Z"));
   assert.equal((await row(late.id)).requestScheduledAt, null);
   assert.equal((await row(late.id)).status, "scheduled");
   const expired = await saveReminder(
@@ -401,7 +401,7 @@ try {
     "carol",
     "carol@example.test",
     contest,
-    "6h",
+    "3h",
     now,
   );
   let releaseSend!: () => void;
@@ -470,7 +470,7 @@ try {
     globalThis.fetch = async (_input, options) => {
       capturedKey = new Headers(options?.headers).get("Idempotency-Key");
       const payload = JSON.parse(String(options?.body));
-      assert.equal(payload.scheduled_at, "2026-10-21T02:00:00.000Z");
+      assert.equal(payload.scheduled_at, "2026-10-21T05:00:00.000Z");
       assert.ok(!payload.html.includes("<script>"));
       return Response.json({ id: "provider-test-id" });
     };

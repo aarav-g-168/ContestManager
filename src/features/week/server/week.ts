@@ -2,6 +2,7 @@ import { and, eq, isNotNull, or, sql } from "drizzle-orm";
 import type { Database } from "@/lib/db";
 import { bookmarks, contests, deliveries, reminders } from "@/lib/db/schema";
 import type { WeekPlan } from "@/features/week/lib/week";
+import { isSavedReminderType } from "@/features/reminders/lib/timing";
 import { weekWindow } from "@/features/week/lib/week";
 import { getPlannedPractice } from "@/features/journal/server/practice";
 
@@ -60,11 +61,9 @@ export async function getWeekPlan(
       contest: { ...row.contest, start: row.contest.start.toISOString() },
       bookmarked: row.bookmarkId !== null,
       reminder:
-        row.dueAt &&
-        row.reminderStart &&
-        ["1h", "6h", "24h"].includes(row.reminderType ?? "")
+        row.dueAt && row.reminderStart && isSavedReminderType(row.reminderType)
           ? {
-              type: row.reminderType as "1h" | "6h" | "24h",
+              type: row.reminderType,
               status: row.reminderStatus ?? "unknown",
               dueAt: row.dueAt.toISOString(),
               contestStart: row.reminderStart.toISOString(),

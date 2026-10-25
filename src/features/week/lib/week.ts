@@ -1,4 +1,5 @@
 import type { Contest } from "@/features/contests/types";
+import type { SavedReminderType } from "@/features/reminders/lib/timing";
 import type { PracticeItem } from "@/features/journal/lib/practice";
 import { parseAsUTC } from "@/lib/date";
 import {
@@ -10,7 +11,7 @@ export type WeekItem = {
   contest: Contest;
   bookmarked: boolean;
   reminder: {
-    type: "1h" | "6h" | "24h";
+    type: SavedReminderType;
     status: string;
     dueAt: string;
     contestStart: string;
