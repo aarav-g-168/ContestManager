@@ -1,3 +1,4 @@
+import GettingStarted from "@/features/account/components/GettingStarted";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import HeroSection, {
@@ -13,6 +14,7 @@ export default async function HomePage() {
   return (
     <div className="site-container discovery-home">
       <HeroSection contests={contests} />
+      <GettingStarted />
       <section
         id="contests"
         className="home-contests"

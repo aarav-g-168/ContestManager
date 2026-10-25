@@ -7,6 +7,7 @@ import { ProfileProvider } from "@/features/profile/components/ProfileProvider";
 import Navbar from "@/components/layout/Navbar";
 import SiteFooter from "@/components/layout/SiteFooter";
 import Notifications from "@/components/feedback/Notifications";
+import { AccountPreferencesProvider } from "@/features/account/components/AccountPreferencesProvider";
 const plexSans = IBM_Plex_Sans({
   variable: "--font-ui",
   subsets: ["latin"],
@@ -19,6 +20,15 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 export const metadata: Metadata = {
+  metadataBase: new URL("https://contest-manager.vercel.app"),
+  openGraph: {
+    type: "website",
+    siteName: "Contest Manager",
+    title: "Contest Manager — Make time for a good problem.",
+    description:
+      "Discover programming contests, plan your week and keep learning with a private contest journal.",
+  },
+  twitter: { card: "summary_large_image" },
   title: {
     default: "Contest Manager — Competitive programming calendar",
     template: "%s | Contest Manager",
@@ -35,17 +45,19 @@ export default function RootLayout({
       <body className={`${plexSans.variable} ${plexMono.variable}`}>
         <ThemeProvider>
           <AuthProvider>
-            <ProfileProvider>
-              <a className="skip-link" href="#main-content">
-                Skip to content
-              </a>
-              <Navbar />
-              <main id="main-content" className="site-main" tabIndex={-1}>
-                {children}
-              </main>
-              <SiteFooter />
-              <Notifications />
-            </ProfileProvider>
+            <AccountPreferencesProvider>
+              <ProfileProvider>
+                <a className="skip-link" href="#main-content">
+                  Skip to content
+                </a>
+                <Navbar />
+                <main id="main-content" className="site-main" tabIndex={-1}>
+                  {children}
+                </main>
+                <SiteFooter />
+                <Notifications />
+              </ProfileProvider>
+            </AccountPreferencesProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
