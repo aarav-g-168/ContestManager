@@ -17,12 +17,14 @@ const AuthContext = createContext<{
   loading: boolean;
   busy: boolean;
   login: () => Promise<void>;
+  reauthenticate: () => Promise<void>;
   logout: () => Promise<void>;
 }>({
   user: null,
   loading: true,
   busy: false,
   login: async () => {},
+  reauthenticate: async () => {},
   logout: async () => {},
 });
 
@@ -70,14 +72,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  async function login() {
+  async function startLogin(returnTo = "/") {
     if (busyRef.current) return;
     busyRef.current = true;
     setBusy(true);
     try {
       const { error } = await browserSupabase().auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: `${window.location.origin}/` },
+        options: {
+          redirectTo: `${window.location.origin}${returnTo}`,
+          queryParams: { prompt: "select_account" },
+        },
       });
       if (error) throw error;
     } catch {
@@ -88,6 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setBusy(false);
     }
   }
+  const login = () => startLogin();
+  const reauthenticate = () => startLogin("/settings");
   async function logout() {
     if (busyRef.current) return;
     busyRef.current = true;
@@ -104,7 +111,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
   return (
-    <AuthContext.Provider value={{ user, loading, busy, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, busy, login, logout, reauthenticate }}
+    >
       {children}
     </AuthContext.Provider>
   );

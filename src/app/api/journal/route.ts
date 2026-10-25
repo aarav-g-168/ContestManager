@@ -15,6 +15,7 @@ import {
   createJournalEntry,
   getJournal,
   updateJournalEntry,
+  deleteJournalEntry,
 } from "@/features/journal/server/journal";
 export const runtime = "nodejs";
 const headers = { "Cache-Control": "private, no-store", Vary: "Authorization" };
@@ -73,6 +74,17 @@ export async function PUT(request: Request) {
     const account = await authenticateProfile(request);
     return NextResponse.json(
       await updateJournalEntry(getDatabase(), account.uid, await body(request)),
+      { headers },
+    );
+  } catch (error) {
+    return failure(error);
+  }
+}
+export async function DELETE(request: Request) {
+  try {
+    const account = await authenticateProfile(request);
+    return NextResponse.json(
+      await deleteJournalEntry(getDatabase(), account.uid, await body(request)),
       { headers },
     );
   } catch (error) {

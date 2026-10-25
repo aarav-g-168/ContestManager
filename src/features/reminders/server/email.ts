@@ -1,3 +1,4 @@
+import { reminderEmailLabel } from "@/features/reminders/lib/timing";
 import type { deliveries } from "@/lib/db/schema";
 import { getPlatform } from "@/features/contests/lib/platforms";
 import { renderReminderEmail } from "@/features/reminders/server/email-template";
@@ -65,14 +66,7 @@ export function reminderEmail(delivery: Delivery) {
   const weekUrl = new URL("/week", appUrl).toString();
   const remindersUrl = new URL("/reminders", appUrl).toString();
   const platform = getPlatform(url.hostname).name;
-  const reminderLabel =
-    (
-      {
-        "1h": "1-hour reminder",
-        "6h": "6-hour reminder",
-        "24h": "24-hour reminder",
-      } as Record<string, string>
-    )[delivery.reminderType] ?? "contest reminder";
+  const reminderLabel = reminderEmailLabel(delivery.reminderType);
   return {
     subject: `Reminder: ${delivery.event}`,
     text: `CONTEST MANAGER\nYour contest starts soon.\n\n${delivery.event}\nPlatform: ${platform}\nDate: ${date}\nStart time: ${time} IST (UTC+5:30)\nYour saved ${reminderLabel}.\n\nOpen contest: ${url.toString()}\nMy week: ${weekUrl}\nManage reminders: ${remindersUrl}\n\nGood luck with the round,\nAarav Gupta\nFounder, Contest Manager\nExplore my other projects: https://aarav.site\n\nYou received this because you saved a contest reminder in Contest Manager. You can change or remove future reminders from your account.`,

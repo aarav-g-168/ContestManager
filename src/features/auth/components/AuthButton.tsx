@@ -13,6 +13,8 @@ import {
   CalendarDays,
   BookOpen,
   Activity,
+  Settings,
+  LifeBuoy,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/components/AuthProvider";
 import { useProfile } from "@/features/profile/components/ProfileProvider";
@@ -81,7 +83,7 @@ export default function AuthButton({
         <DropdownMenu.Content
           align="end"
           sideOffset={12}
-          className="z-50 w-64 rounded-xl border border-border bg-card p-1.5 shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+          className="max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto z-50 w-64 rounded-xl border border-border bg-card p-1.5 shadow-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
         >
           <div className="px-3 py-3">
             <p className="truncate text-sm font-medium">{name}</p>
@@ -97,6 +99,8 @@ export default function AuthButton({
             { href: "/profile", label: "Your profile", icon: UserRound },
             { href: "/bookmarks", label: "Saved contests", icon: Bookmark },
             { href: "/reminders", label: "Your reminders", icon: Bell },
+            { href: "/settings", label: "Settings & privacy", icon: Settings },
+            { href: "/support", label: "Help & feedback", icon: LifeBuoy },
           ].map(({ href, label, icon: Icon }) => (
             <DropdownMenu.Item key={href} asChild>
               <Link href={href} className="menu-item">

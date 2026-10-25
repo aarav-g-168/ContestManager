@@ -72,7 +72,7 @@ export async function recordMailEvent(
   await db.insert(mailEvents).values(event).onConflictDoNothing();
   await reconcileMailEvents(db, event.providerId);
 }
-async function claim(db: Database, now: Date, ids?: string[]) {
+async function claim(db: Database, now: Date, ids?: string[], userId?: string) {
   return db.transaction(async (tx) => {
     const [row] = await tx
       .select()
@@ -89,6 +89,7 @@ async function claim(db: Database, now: Date, ids?: string[]) {
           lte(deliveries.nextAttemptAt, now),
           or(isNull(deliveries.leaseUntil), lte(deliveries.leaseUntil, now)),
           ids?.length ? inArray(deliveries.id, ids) : undefined,
+          userId ? eq(deliveries.userId, userId) : undefined,
         ),
       )
       .orderBy(desc(deliveries.cancelRequested), deliveries.nextAttemptAt)
@@ -121,6 +122,7 @@ export async function processReminderQueue(
     provider?: MailProvider;
     now?: Date;
     ids?: string[];
+    userId?: string;
     limit?: number;
   } = {},
 ) {
@@ -134,7 +136,7 @@ export async function processReminderQueue(
     count++
   ) {
     const now = options.now ?? new Date();
-    const row = await claim(db, now, options.ids);
+    const row = await claim(db, now, options.ids, options.userId);
     if (!row) break;
     const ownership = and(
       eq(deliveries.id, row.id),

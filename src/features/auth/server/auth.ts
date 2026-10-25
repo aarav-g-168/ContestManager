@@ -11,6 +11,7 @@ export type VerifiedAccount = {
   email_verified: boolean;
   name?: string;
   picture?: string;
+  signedInAt?: string;
 };
 
 // Only provider identities returned by the Auth server may recover an old account.
@@ -36,6 +37,7 @@ export async function resolveAccountIdentity(
   }
   return {
     authId: user.id,
+    ...(user.last_sign_in_at ? { signedInAt: user.last_sign_in_at } : {}),
     uid,
     email: user.email,
     email_verified: !!user.email_confirmed_at,

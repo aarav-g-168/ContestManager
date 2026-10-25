@@ -116,10 +116,35 @@ export function useJournal(query: string) {
         response.status,
         data.fields,
       );
+    window.dispatchEvent(new Event("account-data-changed"));
     await latestRefresh.current();
     return data as JournalEntry;
   }
   const visible = user && state?.uid === user.uid ? state : null;
+  async function remove(entry: JournalEntry) {
+    if (!user) throw new JournalApiError("Sign in to delete an entry.", 401);
+    const response = await fetch("/api/journal", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${await user.getAccessToken()}`,
+      },
+      body: JSON.stringify({
+        id: entry.id,
+        revision: entry.revision,
+        confirmation: "DELETE",
+      }),
+      signal: AbortSignal.timeout(20000),
+    });
+    const data = await response.json();
+    if (!response.ok)
+      throw new JournalApiError(
+        data.error || "Your entry couldn’t be deleted.",
+        response.status,
+      );
+    window.dispatchEvent(new Event("account-data-changed"));
+    await latestRefresh.current();
+  }
   return {
     data: visible?.data ?? null,
     error: visible?.error ?? null,
@@ -130,5 +155,6 @@ export function useJournal(query: string) {
       (!!user && (!visible || (!visible.data && !visible.error))),
     refresh,
     save,
+    remove,
   };
 }

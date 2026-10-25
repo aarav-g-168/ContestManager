@@ -1,3 +1,4 @@
+import { saveBookmark } from "@/features/bookmarks/server/bookmarks";
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { getDatabase } from "@/lib/db";
@@ -32,10 +33,7 @@ export async function PUT(request: Request) {
     const input = await readAccountJson(request);
     await ensureAccount(user);
     const contest = await verifiedContest(input.contestId);
-    await getDatabase()
-      .insert(bookmarks)
-      .values({ userId: user.uid, contestId: contest.id })
-      .onConflictDoNothing();
+    await saveBookmark(getDatabase(), user.uid, contest.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     return profileErrorResponse(error);

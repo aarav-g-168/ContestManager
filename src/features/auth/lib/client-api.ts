@@ -18,5 +18,7 @@ export async function accountRequest<T>(
   const data = await response.json();
   if (!response.ok)
     throw new Error(data.error || "The request failed. Please try again.");
+  if (options.method && !["GET", "HEAD"].includes(options.method))
+    window.dispatchEvent(new Event("account-data-changed"));
   return data as T;
 }

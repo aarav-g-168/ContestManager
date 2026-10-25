@@ -151,7 +151,8 @@ export function ProductFeatures() {
     },
     {
       title: "Get a heads-up",
-      description: "Email reminders, 1, 6, or 24 hours before the start.",
+      description:
+        "Email reminders, 15 minutes, 1 hour, or 3 hours before the start.",
       icon: Bell,
       href: "/reminders",
       label: "Manage reminders",

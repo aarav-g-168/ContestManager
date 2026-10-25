@@ -25,6 +25,10 @@ export default function SiteFooter() {
             <div>
               <p>MAKE IT YOURS</p>
               <Link href="/profile">Your profile</Link>
+              <Link href="/settings">Settings & privacy</Link>
+              <Link href="/support">Help & feedback</Link>
+              <Link href="/privacy">Privacy policy</Link>
+              <Link href="/terms">Terms</Link>
               <a
                 href="https://github.com/aarav-g-168"
                 target="_blank"

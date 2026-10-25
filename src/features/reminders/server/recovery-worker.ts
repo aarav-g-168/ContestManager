@@ -1,6 +1,7 @@
-import { eq, lt } from "drizzle-orm";
+import { eq, lt, and } from "drizzle-orm";
 import { getDatabase } from "@/lib/db";
-import { workerRuns } from "@/lib/db/schema";
+import { workerRuns, requestBuckets, accountDeletions } from "@/lib/db/schema";
+import { processAccountDeletions } from "@/features/account/server/deletion";
 import { processReminderQueue } from "@/features/reminders/server/queue";
 
 export async function runRecoveryWorker() {
@@ -14,7 +15,9 @@ export async function runRecoveryWorker() {
     console.error("Recovery telemetry unavailable");
   }
   try {
+    const started = Date.now();
     const stats = await processReminderQueue();
+    if (Date.now() - started < 20000) await processAccountDeletions(db);
     if (id)
       await db
         .update(workerRuns)
@@ -27,6 +30,19 @@ export async function runRecoveryWorker() {
     await db
       .delete(workerRuns)
       .where(lt(workerRuns.startedAt, new Date(Date.now() - 30 * 86400000)))
+      .catch(() => {});
+    await db
+      .delete(requestBuckets)
+      .where(lt(requestBuckets.expiresAt, new Date(Date.now() - 86400000)))
+      .catch(() => {});
+    await db
+      .delete(accountDeletions)
+      .where(
+        and(
+          eq(accountDeletions.status, "complete"),
+          lt(accountDeletions.expiresAt, new Date()),
+        ),
+      )
       .catch(() => {});
     return stats;
   } catch (error) {

@@ -1,4 +1,5 @@
 "use client";
+import AdminFeedback from "@/features/support/components/AdminFeedback";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Activity,
@@ -666,6 +667,7 @@ export default function AdminDashboard() {
                 onSearch={setSearch}
                 onPage={setPage}
               />
+              <AdminFeedback key={user?.uid} />
               <label className="admin-auto">
                 <input
                   type="checkbox"

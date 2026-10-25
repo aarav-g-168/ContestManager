@@ -1,6 +1,9 @@
 "use client";
 import JournalSkeleton from "@/features/journal/components/JournalSkeleton";
 import { JournalEntriesSkeleton } from "@/features/journal/components/JournalSkeleton";
+
+import { Dialog } from "radix-ui";
+
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -36,6 +39,8 @@ import JournalEditor from "@/features/journal/components/JournalEditor";
 import JournalNavigation from "@/features/journal/components/JournalNavigation";
 import { toast } from "sonner";
 import "@/features/journal/styles.css";
+
+import "@/features/account/styles.css";
 
 export type JournalFilters = {
   q: string;
@@ -126,6 +131,9 @@ type ViewProps = {
   pending: boolean;
   error: string | null;
   onRefresh: () => void;
+
+  onDelete?: (entry: JournalEntry) => Promise<void>;
+
   onSave: (
     values: JournalValues,
     entry: JournalEntry | null,
@@ -140,10 +148,17 @@ export function JournalView({
   error,
   onRefresh,
   onSave,
+
+  onDelete,
 }: ViewProps) {
   const [editing, setEditing] = useState<{ entry: JournalEntry | null } | null>(
     null,
   );
+
+  const [deleting, setDeleting] = useState<JournalEntry | null>(null);
+
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const [busyId, setBusyId] = useState<string | null>(null);
   const active = !!(
     filters.q ||
@@ -403,6 +418,14 @@ export function JournalView({
                 entry={entry}
                 disabled={busyId !== null}
                 busy={busyId === entry.id}
+                onDelete={
+                  onDelete
+                    ? () => {
+                        setDeleteError(null);
+                        setDeleting(entry);
+                      }
+                    : undefined
+                }
                 onEdit={() => setEditing({ entry })}
                 onToggle={(id, done) => void toggle(entry, id, done)}
               />
@@ -445,22 +468,22 @@ export function JournalView({
           <div className="journal-pagination">
             <button
               className="btn-secondary"
-              disabled={filters.page <= 1 || pending}
+              disabled={snapshot.page <= 1 || pending}
               onClick={() =>
-                onFiltersChange({ ...filters, page: filters.page - 1 })
+                onFiltersChange({ ...filters, page: snapshot.page - 1 })
               }
             >
               <ChevronLeft size={15} aria-hidden="true" />
               Previous
             </button>
             <span>
-              Page {filters.page} of {pages}
+              Page {snapshot.page} of {pages}
             </span>
             <button
               className="btn-secondary"
-              disabled={filters.page >= pages || pending}
+              disabled={snapshot.page >= pages || pending}
               onClick={() =>
-                onFiltersChange({ ...filters, page: filters.page + 1 })
+                onFiltersChange({ ...filters, page: snapshot.page + 1 })
               }
             >
               Next <ChevronRight size={15} aria-hidden="true" />
@@ -474,6 +497,69 @@ export function JournalView({
           Find your next round <ArrowRight size={15} aria-hidden="true" />
         </Link>
       </footer>
+
+      {deleting && onDelete && (
+        <Dialog.Root
+          open
+          onOpenChange={(open) => {
+            if (!open && !busyId) setDeleting(null);
+          }}
+        >
+          <Dialog.Portal>
+            <Dialog.Overlay className="account-overlay" />
+            <Dialog.Content
+              className="account-dialog"
+              role="alertdialog"
+              onEscapeKeyDown={(e) => {
+                if (busyId) e.preventDefault();
+              }}
+              onPointerDownOutside={(e) => e.preventDefault()}
+            >
+              <Dialog.Title>Delete this journal entry?</Dialog.Title>
+              <Dialog.Description>
+                “{deleting.values.title}” and its practice checklist will be
+                permanently removed. Your progress and weekly counts will
+                update. This can’t be undone.
+              </Dialog.Description>
+              {deleteError && (
+                <p className="account-error" role="alert">
+                  {deleteError}
+                </p>
+              )}
+              <div className="account-actions">
+                <button
+                  className="btn-secondary"
+                  disabled={!!busyId}
+                  onClick={() => setDeleting(null)}
+                >
+                  Keep entry
+                </button>
+                <button
+                  className="btn-secondary account-delete-button"
+                  disabled={!!busyId}
+                  onClick={async () => {
+                    setBusyId(deleting.id);
+                    try {
+                      await onDelete(deleting);
+                      setDeleting(null);
+                      toast.success("Journal entry deleted.");
+                    } catch (e) {
+                      setDeleteError(
+                        e instanceof Error ? e.message : "Deletion failed.",
+                      );
+                    } finally {
+                      setBusyId(null);
+                    }
+                  }}
+                >
+                  {busyId ? "Deleting…" : "Delete entry"}
+                </button>
+              </div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      )}
+
       {editing && (
         <JournalEditor
           key={editing.entry?.id ?? "new"}
@@ -493,10 +579,15 @@ function JournalCard({
   busy,
   onEdit,
   onToggle,
+
+  onDelete,
 }: {
   entry: JournalEntry;
   disabled: boolean;
   busy: boolean;
+
+  onDelete?: () => void;
+
   onEdit: () => void;
   onToggle: (id: string, done: boolean) => void;
 }) {
@@ -651,7 +742,14 @@ function JournalCard({
         </div>
       </details>
       <div className="journal-card-bottom">
-        <span>Entered manually</span>
+        {onDelete ? (
+          <button className="text-link" onClick={onDelete} disabled={disabled}>
+            Delete entry
+          </button>
+        ) : (
+          <span>Entered manually</span>
+        )}
+
         <button className="text-link" onClick={onEdit} disabled={disabled}>
           Review & edit <PencilLine size={14} aria-hidden="true" />
         </button>
@@ -706,6 +804,7 @@ export default function ContestJournal({
       error={state.error}
       onRefresh={() => void state.refresh()}
       onSave={state.save}
+      onDelete={state.remove}
     />
   );
 }

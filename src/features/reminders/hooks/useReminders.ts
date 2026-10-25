@@ -4,10 +4,14 @@ import { accountRequest } from "@/features/auth/lib/client-api";
 import { useAccountCollection } from "@/features/auth/hooks/useAccountCollection";
 import type { Contest } from "@/features/contests/types";
 import { toast } from "sonner";
-export type ReminderType = "1h" | "6h" | "24h";
+import type {
+  ReminderType,
+  SavedReminderType,
+} from "@/features/reminders/lib/timing";
+export type { ReminderType } from "@/features/reminders/lib/timing";
 export interface ReminderInfo {
   contestId: number;
-  reminderType: ReminderType;
+  reminderType: SavedReminderType;
   status: string;
 }
 const empty = { reminders: [] as ReminderInfo[] };
@@ -16,7 +20,7 @@ export function useReminders() {
   const state = useAccountCollection("/api/reminders", empty);
   const reminders = Object.fromEntries(
     state.value.reminders.map((row) => [row.contestId, row.reminderType]),
-  ) as Record<number, ReminderType>;
+  ) as Record<number, SavedReminderType>;
   const statuses = Object.fromEntries(
     state.value.reminders.map((row) => [row.contestId, row.status]),
   ) as Record<number, string>;

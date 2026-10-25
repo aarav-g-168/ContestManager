@@ -1,0 +1,285 @@
+.account-page {
+  max-width: 960px;
+  padding-block: 64px 80px;
+}
+.account-heading {
+  margin-bottom: 32px;
+}
+.account-heading h1 {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+  margin: 14px 0;
+}
+.account-heading h1 span {
+  color: var(--primary);
+}
+.account-heading p,
+.account-panel > p {
+  color: var(--muted-foreground);
+  line-height: 1.7;
+}
+.account-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 28px;
+  margin-block: 18px;
+}
+.account-panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.account-panel form fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.account-field {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0;
+}
+.account-field > span {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+.account-field input,
+.account-field select,
+.account-field textarea {
+  min-height: 46px;
+  width: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 11px 13px;
+  font: inherit;
+}
+.account-field textarea {
+  resize: vertical;
+  min-height: 160px;
+}
+.account-field small,
+.account-help {
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+.account-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  margin-top: 16px;
+}
+.account-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+.account-help {
+  margin: 8px 0 20px;
+}
+.account-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.account-footer {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 32px;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+.account-footer a {
+  padding-block: 12px;
+}
+.account-danger {
+  border-color: color-mix(in srgb, var(--destructive) 35%, var(--border));
+}
+.account-delete-button {
+  color: var(--destructive) !important;
+  background: var(--card) !important;
+  border: 1px solid var(--destructive) !important;
+}
+.account-error {
+  color: var(--destructive);
+  line-height: 1.6;
+  margin: 16px 0;
+}
+.account-notice {
+  border: 1px solid var(--border);
+  padding: 18px;
+  border-radius: 12px;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+.account-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: #0009;
+  backdrop-filter: blur(4px);
+}
+.account-dialog {
+  position: fixed;
+  z-index: 81;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 32px;
+}
+.account-dialog h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  padding-right: 25px;
+  margin-bottom: 14px;
+}
+.account-dialog p {
+  color: var(--muted-foreground);
+  line-height: 1.7;
+}
+.account-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+}
+.getting-started {
+  margin-block: 30px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+}
+.getting-started > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.getting-started h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.getting-started ol {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  list-style: none;
+  margin-top: 20px;
+  padding: 0;
+}
+.getting-started li a {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 56px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.getting-started li[data-complete="true"] {
+  color: var(--primary);
+}
+.account-panel a:not([class]),
+.legal-page a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.legal-page h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 30px 0 12px;
+}
+.legal-page p,
+.legal-page li {
+  line-height: 1.8;
+  color: var(--muted-foreground);
+  margin-block: 12px;
+}
+.legal-page ul {
+  list-style: disc;
+  padding-left: 22px;
+}
+.support-history {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+.support-message {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+.support-message p {
+  white-space: pre-wrap;
+  line-height: 1.7;
+  margin-top: 12px;
+}
+.support-message small {
+  color: var(--muted-foreground);
+}
+@media (max-width: 600px) {
+  .account-page {
+    padding-block: 36px 56px;
+  }
+  .account-panel {
+    padding: 20px;
+  }
+  .account-dialog {
+    padding: 24px;
+  }
+  .account-actions {
+    flex-direction: column;
+  }
+  .account-actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+  .getting-started ol {
+    grid-template-columns: 1fr;
+  }
+  .account-footer {
+    gap: 16px;
+  }
+}
+.getting-started li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.getting-started li a {
+  flex: 1;
+}
+.onboarding-step {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+.onboarding-step[data-done="true"] {
+  color: var(--primary);
+  border-color: var(--primary);
+}

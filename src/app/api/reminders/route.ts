@@ -16,6 +16,7 @@ import {
   saveReminder,
 } from "@/features/reminders/server/service";
 import { readAccountJson } from "@/lib/http/request-body";
+import { isReminderType } from "@/features/reminders/lib/timing";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 function dispatch(ids: string[]) {
@@ -64,7 +65,7 @@ export async function PUT(request: Request) {
       );
     }
     const input = await readAccountJson(request);
-    if (typeof input.reminderType !== "string")
+    if (!isReminderType(input.reminderType))
       throw new ProfileRequestError("Choose a valid reminder time.", 400);
     const contest = await verifiedContest(input.contestId);
     await ensureAccount(user);

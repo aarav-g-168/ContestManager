@@ -25,6 +25,7 @@ import {
   readSavedProfile,
 } from "@/features/profile/server/profile";
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function GET(request: Request) {
   try {
@@ -157,6 +158,8 @@ export async function PUT(request: Request) {
         .from(users)
         .where(eq(users.id, user.uid))
         .for("update");
+      if (!account || account.accountState !== "active")
+        throw new ProfileRequestError("Account deletion is in progress.", 423);
       if (account.profileRevision !== revision)
         throw new ProfileRequestError(
           "Your profile changed in another tab. Reload it before saving again.",

@@ -1,5 +1,6 @@
 "use client";
 import { useState, type CSSProperties } from "react";
+import ReminderChoices from "@/features/reminders/components/ReminderChoices";
 import { DropdownMenu } from "radix-ui";
 import {
   ArrowUpRight,
@@ -8,12 +9,15 @@ import {
   Bookmark,
   CalendarDays,
   CalendarPlus,
-  Check,
   Clock3,
   LoaderCircle,
 } from "lucide-react";
 import type { Contest } from "@/features/contests/types";
 import type { ReminderType } from "@/features/reminders/hooks/useReminders";
+import {
+  reminderTimeLabel,
+  type SavedReminderType,
+} from "@/features/reminders/lib/timing";
 import { parseAsUTC } from "@/lib/date";
 import { getPlatform } from "@/features/contests/lib/platforms";
 import { getGoogleCalendarLink } from "@/features/contests/lib/google-calendar";
@@ -27,7 +31,7 @@ interface Props {
   isBookmarked: boolean;
   onBookmarkToggle: (contest: Contest) => Promise<void>;
   hasReminder: boolean;
-  reminderType?: ReminderType;
+  reminderType?: SavedReminderType;
   reminderStatus?: string;
   onReminderSet: (contest: Contest, type: ReminderType) => Promise<void>;
   onReminderRemove: (id: number) => Promise<void>;
@@ -152,7 +156,7 @@ export default function ContestCard({
                 {(
                   {
                     pending: "Scheduling email",
-                    scheduled: `${reminderType} email scheduled`,
+                    scheduled: `${reminderType ? reminderTimeLabel(reminderType) : ""} email scheduled`,
                     sent: "Email sent",
                     delivered: "Email delivered",
                     failed: "Email failed — set again",
@@ -160,7 +164,8 @@ export default function ContestCard({
                     uncertain: "Email status needs review",
                     expired: "Reminder time passed",
                   } as Record<string, string>
-                )[reminderStatus ?? ""] ?? `${reminderType} reminder`}
+                )[reminderStatus ?? ""] ??
+                  `${reminderType ? reminderTimeLabel(reminderType) : ""} reminder`}
               </span>
             )}
           </p>
@@ -226,30 +231,15 @@ export default function ContestCard({
                     <DropdownMenu.Label className="eyebrow px-3 py-2">
                       Remind me before
                     </DropdownMenu.Label>
-                    {(["1h", "6h", "24h"] as const).map((type) => (
-                      <DropdownMenu.Item
-                        key={type}
-                        className="menu-item justify-between"
-                        disabled={
-                          busy ||
-                          !validDate ||
-                          start.getTime() -
-                            Number(type.replace("h", "")) * 3600000 <=
-                            (now ?? 0)
-                        }
-                        onSelect={() => run(() => onReminderSet(contest, type))}
-                      >
-                        {type.replace("h", "")} hour{type === "1h" ? "" : "s"}{" "}
-                        before{" "}
-                        {reminderType === type && (
-                          <Check
-                            size={14}
-                            className="text-primary"
-                            aria-hidden="true"
-                          />
-                        )}
-                      </DropdownMenu.Item>
-                    ))}
+                    <ReminderChoices
+                      start={start.getTime()}
+                      now={now ?? 0}
+                      disabled={busy || !validDate}
+                      selected={reminderType}
+                      onChoose={(type) =>
+                        run(() => onReminderSet(contest, type))
+                      }
+                    />
                     {hasReminder && (
                       <>
                         <DropdownMenu.Separator className="my-1 h-px bg-border" />

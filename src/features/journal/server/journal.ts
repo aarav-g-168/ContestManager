@@ -6,6 +6,7 @@ import {
   bookmarks,
   reminders,
   deliveries,
+  users,
 } from "@/lib/db/schema";
 import { getContestDay } from "@/features/contests/lib/calendar";
 import {
@@ -103,10 +104,33 @@ export async function createJournalEntry(
   const values = await canonicalValues(db, uid, input);
   values.problems = stampProblems(values.problems);
   try {
-    const [row] = await db
-      .insert(entries)
-      .values({ userId: uid, ...columns(values) })
-      .returning();
+    const row = await db.transaction(async (tx) => {
+      const [owner] = await tx
+        .select()
+        .from(users)
+        .where(eq(users.id, uid))
+        .for("update");
+      if (!owner || owner.accountState !== "active")
+        throw new ProfileRequestError(
+          "Your account is unavailable for changes.",
+          423,
+        );
+      const [usage] = await tx
+        .select({ count: sql<number>`count(*)::int` })
+        .from(entries)
+        .where(eq(entries.userId, uid));
+      if (usage.count >= 1000)
+        throw new ProfileRequestError(
+          "Your journal has reached the 1,000-entry safety limit. Export or remove old entries to add more.",
+          429,
+        );
+      return (
+        await tx
+          .insert(entries)
+          .values({ userId: uid, ...columns(values) })
+          .returning()
+      )[0];
+    });
     return dto(row);
   } catch (error) {
     const e = error as { code?: string; cause?: { code?: string } };
@@ -259,6 +283,9 @@ export async function getJournal(
       ),
     ],
   );
+  const lastPage = Math.max(1, Math.ceil(total[0].count / 20));
+  if (query.page > lastPage)
+    return getJournal(db, uid, { ...query, page: lastPage });
   return {
     entries: rows.map(dto),
     total: total[0].count,
@@ -272,4 +299,40 @@ export async function getJournal(
     platforms: platforms.map((row) => row.host),
     topics: topics.rows.map((row) => String(row.topic)).sort(),
   };
+}
+
+export async function deleteJournalEntry(
+  db: Database,
+  uid: string,
+  input: Record<string, unknown>,
+) {
+  if (input.confirmation !== "DELETE")
+    throw new ProfileRequestError(
+      "Confirm that you want to delete this journal entry.",
+      400,
+    );
+  const { id, revision } = journalIdentity(input);
+  const removed = await db
+    .delete(entries)
+    .where(
+      and(
+        eq(entries.id, id),
+        eq(entries.userId, uid),
+        eq(entries.revision, revision),
+      ),
+    )
+    .returning({ id: entries.id });
+  if (!removed.length) {
+    const [existing] = await db
+      .select({ id: entries.id })
+      .from(entries)
+      .where(and(eq(entries.id, id), eq(entries.userId, uid)));
+    throw new ProfileRequestError(
+      existing
+        ? "This entry changed. Refresh before deleting it."
+        : "That entry was not found.",
+      existing ? 409 : 404,
+    );
+  }
+  return { deleted: true };
 }

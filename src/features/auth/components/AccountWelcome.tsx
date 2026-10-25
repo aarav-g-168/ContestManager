@@ -49,7 +49,7 @@ export default function AccountWelcome({
         <p>
           {saved
             ? "See a contest you like? Tap the bookmark. Your saved rounds will be waiting here, whenever you’re ready."
-            : "Choose an email reminder from a contest’s bell menu. Get a heads-up 1, 6, or 24 hours before it starts."}
+            : "Choose an email reminder from a contest’s bell menu. Get a heads-up 15 minutes, 1 hour, or 3 hours before it starts."}
         </p>
       </div>
       <div className="account-welcome-action">
