@@ -24,7 +24,8 @@
     "test:progress": "tsx tests/integration/progress.test.mts",
     "test:loading": "tsx tests/unit/loading.test.mts",
     "test:practice": "tsx tests/integration/practice.test.mts",
-    "test:goals": "tsx tests/integration/goals.test.mts"
+    "test:goals": "tsx tests/integration/goals.test.mts",
+    "test:email": "tsx tests/unit/reminder-email.test.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

@@ -112,6 +112,7 @@ npm run test:progress
 npm run test:loading
 npm run test:practice
 npm run test:goals
+npm run test:email
 npm run test:photos
 npm run typecheck
 npm run lint

@@ -1,4 +1,7 @@
 import type { deliveries } from "@/lib/db/schema";
+import { getPlatform } from "@/features/contests/lib/platforms";
+import { renderReminderEmail } from "@/features/reminders/server/email-template";
+export { escapeHtml } from "@/features/reminders/server/email-template";
 export type Delivery = typeof deliveries.$inferSelect;
 export class MailError extends Error {
   constructor(
@@ -23,32 +26,66 @@ export function assertMailConfigured() {
       false,
     );
 }
-export function escapeHtml(value: string) {
-  return value.replace(
-    /[&<>"']/g,
-    (char) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        char
-      ]!,
-  );
-}
 export function reminderEmail(delivery: Delivery) {
-  const start = delivery.contestStart.toLocaleString("en-GB", {
+  const date = delivery.contestStart.toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
     month: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
+    year: "numeric",
     timeZone: "Asia/Kolkata",
   });
-  const url = new URL(delivery.href);
-  if (url.protocol !== "https:")
+  const time = delivery.contestStart
+    .toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "Asia/Kolkata",
+    })
+    .toUpperCase();
+  let url: URL;
+  try {
+    url = new URL(delivery.href);
+    if (url.protocol !== "https:" || url.username || url.password)
+      throw new Error();
+  } catch {
     throw new MailError("Invalid contest URL", false);
+  }
+  let appUrl = new URL("https://contest-manager.vercel.app");
+  try {
+    const configured = new URL(process.env.APP_URL ?? "");
+    if (
+      configured.protocol === "https:" &&
+      !configured.username &&
+      !configured.password
+    )
+      appUrl = configured;
+  } catch {
+    /* Public production URL is the fallback for missing/invalid configuration. */
+  }
+  const weekUrl = new URL("/week", appUrl).toString();
+  const remindersUrl = new URL("/reminders", appUrl).toString();
+  const platform = getPlatform(url.hostname).name;
+  const reminderLabel =
+    (
+      {
+        "1h": "1-hour reminder",
+        "6h": "6-hour reminder",
+        "24h": "24-hour reminder",
+      } as Record<string, string>
+    )[delivery.reminderType] ?? "contest reminder";
   return {
     subject: `Reminder: ${delivery.event}`,
-    text: `${delivery.event}\nStarts ${start} IST (UTC+5:30).\nYour ${delivery.reminderType} reminder.\nOpen contest: ${url.toString()}\n\nGood luck with the contest!\nAarav Gupta\nFounder, Contest Manager\nExplore my other projects: https://aarav.site\n\nYou received this because you saved a reminder in Contest Manager.`,
-    html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#25211e"><p style="color:#b83d16">CONTEST MANAGER</p><h1 style="font-size:24px">${escapeHtml(delivery.event)}</h1><p>Starts <strong>${escapeHtml(start)} IST (UTC+5:30)</strong>.</p><p>You requested a ${escapeHtml(delivery.reminderType)} reminder.</p><p><a style="color:#b83d16" href="${escapeHtml(url.toString())}">Open contest →</a></p><div style="margin-top:32px;font-size:14px;line-height:1.6"><p style="margin:0 0 12px">Good luck with the contest!</p><p style="margin:0"><strong>Aarav Gupta</strong><br>Founder, Contest Manager</p><p style="margin:8px 0 24px"><a style="color:#b83d16;text-decoration:underline" href="https://aarav.site">Explore my other projects</a></p></div><hr><p style="font-size:12px">You received this because you saved a reminder in Contest Manager.</p></div>`,
+    text: `CONTEST MANAGER\nYour contest starts soon.\n\n${delivery.event}\nPlatform: ${platform}\nDate: ${date}\nStart time: ${time} IST (UTC+5:30)\nYour saved ${reminderLabel}.\n\nOpen contest: ${url.toString()}\nMy week: ${weekUrl}\nManage reminders: ${remindersUrl}\n\nGood luck with the round,\nAarav Gupta\nFounder, Contest Manager\nExplore my other projects: https://aarav.site\n\nYou received this because you saved a contest reminder in Contest Manager. You can change or remove future reminders from your account.`,
+    html: renderReminderEmail({
+      event: delivery.event,
+      platform,
+      date,
+      time,
+      reminderLabel,
+      contestUrl: url.toString(),
+      weekUrl,
+      remindersUrl,
+    }),
   };
 }
 export function resendPayload(delivery: Delivery) {

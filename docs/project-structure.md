@@ -196,3 +196,8 @@ and refresh; `lib/goals.ts` owns IST week boundaries, types and validation;
 `server/goals.ts` handles owner-scoped persistence and counts. The route boundary
 is `app/api/goals/route.ts`; migration `0004_weekly_goals` adds the private table.
 See [weekly goals](weekly-goals.md) for counting and rollover rules.
+
+The reminder HTML lives in `features/reminders/server/email-template.ts`;
+`email.ts` prepares its content and owns the Resend adapter. See
+[reminder email layout](reminder-email.md) for responsive behavior, previews and
+the rule that scheduled provider payloads must stay immutable.
