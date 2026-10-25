@@ -14,6 +14,9 @@ contestManager/
 │   │   ├── api/              Authenticated APIs, Resend webhook and recovery job
 │   │   └── <route>/          Page and loading state for each existing URL
 │   ├── features/             Product code grouped by what it does
+│   │   ├── account/          Preferences, onboarding, export and durable deletion
+│   │   ├── operations/       Coarse health signals and deduplicated alerts
+│   │   ├── support/          Private feedback, admin inbox, contact and legal copy
 │   │   ├── admin/            Private reminder operations dashboard
 │   │   ├── auth/             Google sign-in, sessions and account identity
 │   │   ├── bookmarks/        Saved-contest state and actions
@@ -34,6 +37,7 @@ contestManager/
 │   ├── lib/                  Shared infrastructure and small generic utilities
 │   │   ├── db/               PostgreSQL connection, Drizzle client and schema
 │   │   ├── http/             Request authentication, body limits and error responses
+│   │   ├── security/         Persistent request budgets and job authentication
 │   │   └── supabase/         Browser Supabase client
 │   └── styles/               Theme tokens, global CSS and shared layout styles
 ├── public/                   Images, icons and files served directly
@@ -201,3 +205,11 @@ The reminder HTML lives in `features/reminders/server/email-template.ts`;
 `email.ts` prepares its content and owns the Resend adapter. See
 [reminder email layout](reminder-email.md) for responsive behavior, previews and
 the rule that scheduled provider payloads must stay immutable.
+
+## Launch operations
+
+`features/account/` owns settings, first-use guidance, data exports and durable deletion jobs. `features/support/` owns feedback validation/storage, public contact and privacy/terms content; admin feedback requests still pass the existing admin allowlist. `features/operations/server/` checks health and sends optional throttled alerts. `lib/security/` holds shared atomic request limits and cron-token checks.
+
+`app/api/account/` exposes private settings/export/deletion routes, with a capability-based deletion-receipt status endpoint. `api/feedback`, `api/admin/feedback`, `api/health` and `api/jobs/monitor` are their HTTP boundaries. Public support/privacy/terms and private settings have their own pages/loading files. `app/sitemap.ts`, `robots.ts`, and `opengraph-image.tsx` provide public metadata.
+
+`scripts/setup/backup*.mts` and `restore.mts` implement encrypted application-data recovery; `.backups/` stays ignored. Tests live in `tests/integration/launch.test.mts` and `tests/e2e/launch.spec.ts`; CI definitions live in `.github/workflows/`. See [launch operations](launch-operations.md) and [backup recovery](backup-recovery.md) for limits and deployment steps.

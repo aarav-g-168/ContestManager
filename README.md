@@ -6,21 +6,22 @@ Google Calendar links, and editable profiles. Contest schedules come from CLIST.
 [Live deployment](https://contest-manager.vercel.app) ·
 [Aarav Gupta](https://aarav.site)
 
-The code in this branch requires the PostgreSQL migration and service setup
-below before deploying. The existing live deployment may still use the earlier
-Firestore implementation.
+Application data, Google sign-in and private photos use Supabase. Apply the versioned SQL migrations before deploying code that depends on new tables.
 
 ## Features
 
 - Browse upcoming contests, search by name/platform, and filter by date.
 - Switch grid/list views and sort by start time, duration, or platform.
 - Save bookmarks across devices after Google sign-in.
-- Request reminder emails 1, 6, or 24 hours before a contest.
+- Request reminder emails 15 minutes, 1 hour, or 3 hours before a contest.
 - Add contest details to Google Calendar.
 - Plan the next seven days in My week, with saved rounds, reminder statuses and schedule overlaps.
 - Keep a private contest journal with manual results, review notes, topics, problem checklists and reference links.
 - Review monthly participation, recorded solves, upsolving completion, platform totals and journal topics in Progress.
 - Edit a personal bio, coding handles, social links, and a custom profile photo.
+- Set weekly contest/practice goals and manage a cross-journal practice queue.
+- Manage reminder preferences, download account data and request account deletion.
+- Send private feedback, with an admin-only inbox; public support, privacy and terms pages.
 - Use light or dark mode; light is the default.
 
 Profiles are private account settings, not public pages. Google account metadata
@@ -104,7 +105,7 @@ scheduling does not depend on a cron invocation for the normal path.
 ## Checks
 
 ```sh
-npm run test:backend
+npm run test:offline
 npm run test:admin
 npm run test:week
 npm run test:journal
@@ -166,3 +167,7 @@ checks. See [My week behavior and verification](docs/my-week.md).
 `/journal` records manually entered contest results and review notes, with saved
 contest prefills, topic/date/status filters and an upsolving checklist. Apply the
 additive journal migration before deploying. See [journal behavior and checks](docs/contest-journal.md).
+
+## Launch controls
+
+See [launch controls and deployment](docs/launch-operations.md), [encrypted backup and recovery](docs/backup-recovery.md), and the [release checklist](docs/launch-readiness.md). GitHub CI includes browser regression definitions; production health checks are separate from the reminder scheduler. Backups are application-data exports, not complete Supabase/Auth/Storage recovery. No paid services are enabled.
