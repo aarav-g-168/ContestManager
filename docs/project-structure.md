@@ -18,6 +18,7 @@ contestManager/
 │   │   ├── auth/             Google sign-in, sessions and account identity
 │   │   ├── bookmarks/        Saved-contest state and actions
 │   │   ├── contests/         Contest browsing, calendar helpers and CLIST feed
+│   │   ├── goals/            Weekly targets and journal-based completion counts
 │   │   ├── home/             Landing-page sections and discovery interactions
 │   │   ├── journal/          Contest reviews, manual results and checklists
 │   │   ├── profile/          Personal details, profile editor and private photos
@@ -186,3 +187,12 @@ updates. `components/JournalNavigation.tsx` connects Entries and To practise.
 `app/api/journal/practice/route.ts` is the HTTP boundary. My week reuses the
 server’s planned-problem query; Progress independently aggregates completion
 timestamps. See [practice workspace](practice-workspace.md).
+
+## Weekly goals
+
+`features/goals/components/WeeklyGoals.tsx` provides the shared My week/Progress
+card and editor. `hooks/useWeeklyGoals.ts` handles account-scoped loading, saving
+and refresh; `lib/goals.ts` owns IST week boundaries, types and validation;
+`server/goals.ts` handles owner-scoped persistence and counts. The route boundary
+is `app/api/goals/route.ts`; migration `0004_weekly_goals` adds the private table.
+See [weekly goals](weekly-goals.md) for counting and rollover rules.

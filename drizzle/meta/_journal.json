@@ -29,6 +29,13 @@
       "when": 1792089345396,
       "tag": "0003_contest_journal",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792843216659,
+      "tag": "0004_weekly_goals",
+      "breakpoints": true
     }
   ]
 }
