@@ -232,7 +232,10 @@ export function JournalView({
           </button>
           <button
             className="btn-primary"
-            onClick={() => setEditing({ entry: null })}
+            onClick={() => {
+              setEditing({ entry: null });
+              onRefresh();
+            }}
           >
             <Plus size={17} aria-hidden="true" />
             New entry
@@ -456,7 +459,10 @@ export function JournalView({
             ) : (
               <button
                 className="btn-primary"
-                onClick={() => setEditing({ entry: null })}
+                onClick={() => {
+                  setEditing({ entry: null });
+                  onRefresh();
+                }}
               >
                 <Plus size={16} aria-hidden="true" />
                 Write your first entry
@@ -565,6 +571,7 @@ export function JournalView({
           key={editing.entry?.id ?? "new"}
           entry={editing.entry}
           candidates={snapshot.candidates}
+          candidateError={snapshot.candidateError}
           today={today}
           onClose={() => setEditing(null)}
           onSave={save}

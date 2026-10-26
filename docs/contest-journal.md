@@ -24,10 +24,15 @@ dates. See [practice workspace](practice-workspace.md) for behavior and storage.
   notes/problem data. Dates are inclusive IST calendar dates. Entries are paginated
   in groups of 20. The three totals cover the entire account journal, not only the
   current filtered page.
-- Prefill choices include the 100 most recent started contests owned through
-  bookmarks, reminders or delivery history. Already logged contests are marked.
+- Prefill choices combine up to 500 recent CLIST rounds from the last 30 days with
+  the 100 most recent started contests owned through bookmarks, reminders or
+  delivery history. Search the picker by name, platform or date. The provider feed
+  is shared in 30-minute cache windows; opening Add a round refreshes the account
+  list. Future contests are excluded. Feed failures show a notice and preserve
+  saved choices and manual entry. New linked rounds are verified on the server.
+  Already logged contests are marked, deduplicated by contest ID, and disabled.
   One linked entry per account/contest is enforced by a unique database index.
-  Contests missing from saved history can be recorded manually.
+  Contests outside the available feed and saved history can be recorded manually.
 - A linked entry keeps a historical snapshot of its contest details. Removing a
   bookmark or a later feed change does not rewrite the entry or block note edits.
 - Requests use the verified account identity, ignoring client-supplied user IDs.

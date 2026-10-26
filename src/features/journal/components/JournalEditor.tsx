@@ -27,6 +27,7 @@ import { getPlatform } from "@/features/contests/lib/platforms";
 type Props = {
   entry: JournalEntry | null;
   candidates: JournalCandidate[];
+  candidateError?: string | null;
   today: string;
   onClose: () => void;
   onSave: (
@@ -63,6 +64,7 @@ function Field({
 export default function JournalEditor({
   entry,
   candidates,
+  candidateError,
   today,
   onClose,
   onSave,
@@ -74,6 +76,14 @@ export default function JournalEditor({
   const [busy, setBusy] = useState(false);
   const [discard, setDiscard] = useState(false);
   const [tag, setTag] = useState("");
+  const [contestSearch, setContestSearch] = useState("");
+  const visibleCandidates = candidates.filter(
+    (candidate) =>
+      candidate.id === values.contestId ||
+      `${candidate.title} ${candidate.host} ${candidate.date}`
+        .toLowerCase()
+        .includes(contestSearch.trim().toLowerCase()),
+  );
   const formRef = useRef<HTMLFormElement>(null);
   const keepEditingRef = useRef<HTMLButtonElement>(null);
   const lock = useRef(false);
@@ -242,51 +252,80 @@ export default function JournalEditor({
                     <h3 id="journal-contest-section">The contest</h3>
                   </div>
                   {!entry && (
-                    <Field
-                      name="prefill"
-                      label="Start with a saved contest"
-                      hint="Your 100 most recent started contests from bookmarks and reminder history."
-                    >
-                      <select
-                        id="journal-prefill"
-                        value={values.contestId ?? ""}
-                        onChange={(event) => {
-                          const candidate = candidates.find(
-                            (c) => c.id === Number(event.target.value),
-                          );
-                          if (!candidate)
-                            setValues({
-                              ...values,
-                              contestId: null,
-                              title: "",
-                              host: "",
-                              href: "",
-                              date: today,
-                            });
-                          else
-                            setValues({
-                              ...values,
-                              contestId: candidate.id,
-                              title: candidate.title,
-                              host: candidate.host,
-                              date: candidate.date,
-                              href: candidate.href,
-                            });
-                        }}
+                    <>
+                      <Field
+                        name="contest-search"
+                        label="Find a recent or saved contest"
                       >
-                        <option value="">Enter contest details manually</option>
-                        {candidates.map((c) => (
-                          <option
-                            key={c.id}
-                            value={c.id}
-                            disabled={!!c.entryId}
-                          >
-                            {c.title} · {c.date}
-                            {c.entryId ? " · Already in your journal" : ""}
+                        <input
+                          id="journal-contest-search"
+                          type="search"
+                          value={contestSearch}
+                          onChange={(event) =>
+                            setContestSearch(event.target.value)
+                          }
+                          placeholder="Search name, platform or date"
+                        />
+                      </Field>
+                      {candidateError && (
+                        <p className="journal-hint" role="status">
+                          {candidateError}
+                        </p>
+                      )}
+                      <Field
+                        name="prefill"
+                        label="Choose a contest"
+                        hint="Recent rounds from the last 30 days, plus your saved contest history. Only contests that have started appear. The recent feed refreshes every 30 minutes."
+                      >
+                        <select
+                          id="journal-prefill"
+                          value={values.contestId ?? ""}
+                          onChange={(event) => {
+                            const candidate = candidates.find(
+                              (c) => c.id === Number(event.target.value),
+                            );
+                            if (!candidate)
+                              setValues({
+                                ...values,
+                                contestId: null,
+                                title: "",
+                                host: "",
+                                href: "",
+                                date: today,
+                              });
+                            else
+                              setValues({
+                                ...values,
+                                contestId: candidate.id,
+                                title: candidate.title,
+                                host: candidate.host,
+                                date: candidate.date,
+                                href: candidate.href,
+                              });
+                          }}
+                        >
+                          <option value="">
+                            Enter contest details manually
                           </option>
-                        ))}
-                      </select>
-                    </Field>
+                          {visibleCandidates.map((c) => (
+                            <option
+                              key={c.id}
+                              value={c.id}
+                              disabled={!!c.entryId}
+                            >
+                              {c.title} · {c.date}
+                              {c.entryId ? " · Already in your journal" : ""}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      {visibleCandidates.length === 0 && (
+                        <p className="journal-hint" role="status">
+                          No matching contests. Try a different search or enter
+                          the details manually below.
+                        </p>
+                      )}
+                    </>
                   )}
                   <Field name="title" label="Contest name" error={fields.title}>
                     <input
@@ -360,7 +399,7 @@ export default function JournalEditor({
                   </Field>
                   {linked && (
                     <p className="journal-hint">
-                      Contest details are prefilled from your saved round. Your
+                      Contest details are prefilled from the selected round. Your
                       results and notes are entered by you.
                     </p>
                   )}

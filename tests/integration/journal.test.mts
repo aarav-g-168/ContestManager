@@ -13,7 +13,7 @@ import {
 } from "../../src/features/journal/lib/journal";
 import { getJournal } from "../../src/features/journal/server/journal";
 import { getContestDay } from "../../src/features/contests/lib/calendar";
-import { GET, POST, PUT } from "../../src/app/api/journal/route";
+import { GET, POST, PUT, DELETE } from "../../src/app/api/journal/route";
 
 const now = new Date(),
   today = getContestDay(now);
@@ -85,6 +85,17 @@ const globals = globalThis as typeof globalThis & {
 const previous = globals.contestDatabase,
   originalFetch = globalThis.fetch;
 let authId = "alice";
+const oldClistKey = process.env.CLIST_API_KEY;
+process.env.CLIST_API_KEY = "test-only";
+let feedUnavailable = false;
+const recentRound = {
+  id: 6,
+  event: "Monday Munch - DSA Challenge 026 (Rated)",
+  host: "geeksforgeeks.org",
+  href: "https://www.geeksforgeeks.org/contest/monday-munch-26",
+  start: new Date(now.getTime() - 3600000).toISOString(),
+  duration: 7200,
+};
 try {
   for (const file of (await readdir("drizzle"))
     .filter((f) => f.endsWith(".sql"))
@@ -118,17 +129,49 @@ try {
     contestStart: past,
     providerPayload: { private: "Never expose" },
   });
+  await db.insert(schema.contests).values({
+    id: 5,
+    event: "Monday Munch - DSA Challenge 025 (Rated)",
+    host: "geeksforgeeks.org",
+    href: "https://www.geeksforgeeks.org/contest/monday-munch-25",
+    start: new Date(now.getTime() - 7 * 86400000),
+    duration: 7200,
+  });
+  await db.insert(schema.bookmarks).values({ userId: "alice", contestId: 5 });
   globals.contestDatabase = db;
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://journal-test.supabase.co";
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_test";
-  globalThis.fetch = async () =>
-    Response.json({
+  globalThis.fetch = async (input) => {
+    if (String(input).startsWith("https://clist.by/")) {
+      if (feedUnavailable) return new Response("Unavailable", { status: 503 });
+      const url = new URL(String(input));
+      assert.equal(url.searchParams.get("order_by"), "-start");
+      assert.equal(url.searchParams.get("limit"), "500");
+      return Response.json({
+        objects: [
+          recentRound,
+          {
+            ...recentRound,
+            id: 7,
+            start: new Date(now.getTime() + 86400000).toISOString(),
+          },
+          {
+            ...recentRound,
+            id: 8,
+            start: new Date(now.getTime() - 31 * 86400000).toISOString(),
+          },
+          { ...recentRound, id: 9, href: "javascript:alert(1)" },
+        ],
+      });
+    }
+    return Response.json({
       id: authId,
       email: `${authId}@example.test`,
       email_confirmed_at: now.toISOString(),
       user_metadata: {},
       identities: [],
     });
+  };
   function request(method = "GET", body?: unknown, query = "") {
     return new Request(
       `http://localhost/api/journal${query ? "?" + query : ""}`,
@@ -162,11 +205,77 @@ try {
   const initial = await (await GET(request())).json();
   assert.deepEqual(
     initial.candidates.map((c: { id: number }) => c.id).sort(),
-    [1, 3],
-    "Only owned started contests are offered; reminder history works after removal",
+    [1, 3, 5, 6],
+    "Saved history and new weekly editions appear without a prior bookmark; future, old and unsafe feed items are excluded",
   );
   assert.ok(!JSON.stringify(initial).includes("private@example.test"));
   assert.ok(!JSON.stringify(initial).includes("Never expose"));
+  assert.equal(
+    initial.candidates.find((c: { id: number }) => c.id === 6).title,
+    recentRound.event,
+  );
+  const recentResponse = await POST(
+    request("POST", {
+      values: {
+        ...values,
+        contestId: 6,
+        title: "Forged title",
+        host: "evil.test",
+        href: "https://evil.test",
+      },
+    }),
+  );
+  assert.equal(recentResponse.status, 201);
+  const recentEntry = await recentResponse.json();
+  assert.equal(
+    recentEntry.values.title,
+    recentRound.event,
+    "New unsaved rounds use trusted provider details",
+  );
+  assert.equal(recentEntry.values.host, recentRound.host);
+  const withRecent = await (await GET(request())).json();
+  assert.equal(
+    withRecent.candidates.find((c: { id: number }) => c.id === 6).entryId,
+    recentEntry.id,
+  );
+  assert.equal(
+    withRecent.candidates.find((c: { id: number }) => c.id === 5).title,
+    "Monday Munch - DSA Challenge 025 (Rated)",
+  );
+  assert.equal(
+    (await POST(request("POST", { values: { ...values, contestId: 6 } })))
+      .status,
+    409,
+  );
+  assert.equal(
+    (
+      await DELETE(
+        request("DELETE", {
+          id: recentEntry.id,
+          revision: 0,
+          confirmation: "DELETE",
+        }),
+      )
+    ).status,
+    200,
+  );
+  feedUnavailable = true;
+  const degraded = await (await GET(request())).json();
+  assert.deepEqual(
+    degraded.candidates.map((c: { id: number }) => c.id).sort(),
+    [1, 3, 5],
+  );
+  assert.ok(
+    degraded.candidateError,
+    "Feed outages keep saved contests usable and show feedback",
+  );
+  assert.equal(
+    (await POST(request("POST", { values: { ...values, contestId: 6 } })))
+      .status,
+    503,
+    "A shared database row alone does not authorize a contest; provider verification is required",
+  );
+  feedUnavailable = false;
   const createdResponse = await POST(
     request("POST", { values, userId: "bob" }),
   );
@@ -401,6 +510,8 @@ try {
     "Journal checks passed: private API, owner isolation, input limits/HTTPS links, canonical prefills, manual results, historical candidates, duplicate prevention, revision conflicts, independent checklists, search/topics/status/date filters, pagination and RLS. No network or emails.",
   );
 } finally {
+  if (oldClistKey === undefined) delete process.env.CLIST_API_KEY;
+  else process.env.CLIST_API_KEY = oldClistKey;
   globals.contestDatabase = previous;
   globalThis.fetch = originalFetch;
   await engine.close();

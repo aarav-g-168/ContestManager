@@ -101,6 +101,7 @@ they do not need duplicate components merely to fill out this pattern.
 | `src/features/auth/lib/client-api.ts`                 | Makes authenticated requests from browser code.                                   |
 | `src/features/contests/components/ContestBrowser.tsx` | Renders and filters discovery, bookmark and reminder contest lists.               |
 | `src/features/contests/server/get-contests.ts`        | Fetches upcoming contests from CLIST with the existing cache policy.              |
+| `src/features/contests/server/recent-contests.ts`     | Loads a cached recent contest feed for journal prefills without prior bookmarks.  |
 | `src/features/contests/server/feed.ts`                | Wraps feed loading with recoverable error information.                            |
 | `src/features/contests/server/verify-contest.ts`      | Validates a selected contest against the trusted feed before saving it.           |
 | `src/features/contests/lib/calendar.ts`               | Calculates IST contest dates and calendar days.                                   |
