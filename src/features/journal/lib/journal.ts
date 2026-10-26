@@ -74,6 +74,7 @@ export type JournalSnapshot = {
   page: number;
   pageSize: number;
   candidates: JournalCandidate[];
+  candidateError?: string | null;
   platforms: string[];
   topics: string[];
   stats: { total: number; participated: number; pendingProblems: number };

@@ -1,4 +1,6 @@
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { getRecentContests } from "@/features/contests/server/recent-contests";
+import { parseAsUTC } from "@/lib/date";
+import { and, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import type { Database } from "@/lib/db";
 import {
   journalEntries as entries,
@@ -46,16 +48,30 @@ async function canonicalValues(db: Database, uid: string, input: unknown) {
       : {};
   if (raw.contestId !== null) {
     if (!Number.isSafeInteger(raw.contestId) || Number(raw.contestId) <= 0)
-      throw new ProfileRequestError("Choose a valid saved contest.", 400);
-    const [contest] = await db
+      throw new ProfileRequestError("Choose a valid contest.", 400);
+    let [contest] = await db
       .select()
       .from(contests)
       .where(and(eq(contests.id, Number(raw.contestId)), ownedContest(uid)));
-    if (!contest)
-      throw new ProfileRequestError(
-        "That saved contest is unavailable for your account.",
-        404,
-      );
+    if (!contest) {
+      let recent;
+      try {
+        recent = await getRecentContests();
+      } catch {
+        throw new ProfileRequestError(
+          "Recent contests couldn’t be verified. Try again, or enter the contest manually.", 503,
+        );
+      }
+      const selected = recent.find((item) => item.id === raw.contestId);
+      if (!selected)
+        throw new ProfileRequestError("That contest is no longer in the recent list. Enter its details manually.", 404);
+      // Provider data is public; other users' saved state and notes remain private.
+      await db.insert(contests).values({
+        id: selected.id, event: selected.event, host: selected.host,
+        href: selected.href, start: parseAsUTC(selected.start), duration: selected.duration,
+      }).onConflictDoNothing();
+      [contest] = await db.select().from(contests).where(eq(contests.id, selected.id));
+    }
     if (contest.start > new Date())
       throw new ProfileRequestError(
         "Add this contest to your journal once it starts.",
@@ -235,7 +251,7 @@ export async function getJournal(
       ? sql`(${entries.title} ilike ${search} or ${entries.data}::text ilike ${search})`
       : undefined,
   );
-  const [rows, total, stats, candidates, platforms, topics] = await Promise.all(
+  const [rows, total, stats, candidates, platforms, topics, recent] = await Promise.all(
     [
       db
         .select()
@@ -281,8 +297,22 @@ export async function getJournal(
       db.execute(
         sql`select distinct jsonb_array_elements_text(${entries.data}->'tags') as topic from ${entries} where ${owner}`,
       ),
+      getRecentContests().then(
+        (contests) => ({ contests, error: null }),
+        () => ({ contests: [], error: "Recent contests couldn’t load. Your saved contests are still available. Retry with Refresh, or enter details manually." }),
+      ),
     ],
   );
+  const linked = recent.contests.length ? await db.select({ contestId: entries.contestId, id: entries.id })
+    .from(entries).where(and(owner, inArray(entries.contestId, recent.contests.map((c) => c.id)))) : [];
+  const candidateMap = new Map(candidates.map(({ start, ...row }) => [row.id, { ...row, date: getContestDay(start) }]));
+  for (const contest of recent.contests) {
+    if (!candidateMap.has(contest.id)) candidateMap.set(contest.id, {
+      id: contest.id, title: contest.event, host: contest.host, href: contest.href,
+      date: getContestDay(parseAsUTC(contest.start)),
+      entryId: linked.find((entry) => entry.contestId === contest.id)?.id ?? null,
+    });
+  }
   const lastPage = Math.max(1, Math.ceil(total[0].count / 20));
   if (query.page > lastPage)
     return getJournal(db, uid, { ...query, page: lastPage });
@@ -292,10 +322,8 @@ export async function getJournal(
     page: query.page,
     pageSize: 20,
     stats: stats[0],
-    candidates: candidates.map(({ start, ...row }) => ({
-      ...row,
-      date: getContestDay(start),
-    })),
+    candidates: [...candidateMap.values()].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id),
+    candidateError: recent.error,
     platforms: platforms.map((row) => row.host),
     topics: topics.rows.map((row) => String(row.topic)).sort(),
   };
