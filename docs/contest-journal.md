@@ -26,7 +26,8 @@ dates. See [practice workspace](practice-workspace.md) for behavior and storage.
   current filtered page.
 - Prefill choices combine up to 500 recent CLIST rounds from the last 30 days with
   the 100 most recent started contests owned through bookmarks, reminders or
-  delivery history. Search the picker by name, platform or date. The provider feed
+  delivery history. Open the picker to search by name, platform or date. Arrow keys and Enter select
+  a contest; Escape closes the dropdown and preserves the journal draft. The provider feed
   is shared in 30-minute cache windows; opening Add a round refreshes the account
   list. Future contests are excluded. Feed failures show a notice and preserve
   saved choices and manual entry. New linked rounds are verified on the server.

@@ -36,6 +36,12 @@ export default function JournalContestPicker({
     document.addEventListener("pointerdown", dismiss);
     return () => document.removeEventListener("pointerdown", dismiss);
   }, [open]);
+  const terms = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const matches = candidates.filter((candidate) => {
+    const text =
+      `${candidate.title} ${candidate.host} ${getPlatform(candidate.host).name} ${candidate.date}`.toLowerCase();
+    return terms.every((term) => text.includes(term));
+  });
   const selected = candidates.find((candidate) => candidate.id === value);
   function choose(candidate: JournalCandidate | null) {
     onSelect(candidate);
@@ -47,6 +53,9 @@ export default function JournalContestPicker({
       ref={root}
       className="journal-contest-picker"
       data-picker-open={open}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+      }}
       onKeyDown={(event) => {
         if (open && event.key === "Escape") {
           event.preventDefault();
@@ -86,7 +95,7 @@ export default function JournalContestPicker({
           aria-label="Choose a contest"
           className="journal-contest-popover"
         >
-          <Command label="Find a contest" loop>
+          <Command label="Find a contest" loop shouldFilter={false}>
             <CommandInput
               ref={searchInput}
               value={search}
@@ -98,16 +107,7 @@ export default function JournalContestPicker({
               <CommandEmpty>
                 No matching contests. Try another name, platform or date.
               </CommandEmpty>
-              <CommandItem
-                value="manual"
-                forceMount
-                onSelect={() => choose(null)}
-                data-checked={value === null}
-              >
-                <PencilLine aria-hidden="true" />
-                Enter contest details manually
-              </CommandItem>
-              {candidates.map((candidate) => (
+              {matches.map((candidate) => (
                 <CommandItem
                   key={candidate.id}
                   value={String(candidate.id)}
@@ -133,6 +133,15 @@ export default function JournalContestPicker({
                   </span>
                 </CommandItem>
               ))}
+              <CommandItem
+                value="manual"
+                forceMount
+                onSelect={() => choose(null)}
+                data-checked={value === null}
+              >
+                <PencilLine aria-hidden="true" />
+                Enter contest details manually
+              </CommandItem>
             </CommandList>
           </Command>
         </div>

@@ -190,7 +190,11 @@ export default function JournalEditor({
                 ?.focus();
             }}
             onEscapeKeyDown={(event) => {
-              if (busy || formRef.current?.querySelector('[data-picker-open="true"]')) event.preventDefault();
+              if (
+                busy ||
+                formRef.current?.querySelector('[data-picker-open="true"]')
+              )
+                event.preventDefault();
             }}
             onPointerDownOutside={(event) => {
               if (busy) event.preventDefault();

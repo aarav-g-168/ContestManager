@@ -68,7 +68,8 @@ The journal shows the pattern. Features create only the folders they need:
 src/features/journal/
 ├── components/
 │   ├── ContestJournal.tsx    Journal screen, list, filters and sign-in states
-│   └── JournalEditor.tsx     Entry form and unsaved-change handling
+│   ├── JournalEditor.tsx     Entry form and unsaved-change handling
+│   └── JournalContestPicker.tsx Searchable contest dropdown inside the editor
 ├── hooks/
 │   └── useJournal.ts         Authenticated loading, refresh and save requests
 ├── lib/
