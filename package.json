@@ -30,7 +30,8 @@
     "db:restore": "tsx scripts/setup/restore.mts",
     "test:launch": "tsx tests/integration/launch.test.mts",
     "test:e2e": "playwright test",
-    "test:offline": "npm run test:backend && npm run test:admin && npm run test:photos && npm run test:week && npm run test:journal && npm run test:progress && npm run test:practice && npm run test:goals && npm run test:loading && npm run test:email && npm run test:launch"
+    "test:offline": "npm run test:backend && npm run test:admin && npm run test:photos && npm run test:week && npm run test:journal && npm run test:progress && npm run test:practice && npm run test:goals && npm run test:loading && npm run test:email && npm run test:launch && npm run test:discovery",
+    "test:discovery": "tsx tests/integration/discovery.test.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

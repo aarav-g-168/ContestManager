@@ -20,7 +20,7 @@ contestManager/
 │   │   ├── admin/            Private reminder operations dashboard
 │   │   ├── auth/             Google sign-in, sessions and account identity
 │   │   ├── bookmarks/        Saved-contest state and actions
-│   │   ├── contests/         Contest browsing, calendar helpers and CLIST feed
+│   │   ├── contests/         Contest browsing, personalised suggestions, preferences and CLIST feed
 │   │   ├── goals/            Weekly targets and journal-based completion counts
 │   │   ├── home/             Landing-page sections and discovery interactions
 │   │   ├── journal/          Contest reviews, manual results and checklists
@@ -90,52 +90,55 @@ they do not need duplicate components merely to fill out this pattern.
 
 ## Important files, one line each
 
-| File                                                  | Responsibility                                                                    |
-| ----------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `src/app/layout.tsx`                                  | Loads fonts, global styles, providers, navigation and footer.                     |
-| `src/app/page.tsx`                                    | Composes the landing page from discovery sections.                                |
-| `src/app/<route>/page.tsx`                            | Defines a page’s URL, metadata and initial server data.                           |
-| `src/app/api/**/route.ts`                             | Handles HTTP requests and connects them to feature logic.                         |
-| `src/features/auth/components/AuthProvider.tsx`       | Manages the browser’s signed-in account and Google login flow.                    |
-| `src/features/auth/server/auth.ts`                    | Verifies access tokens and resolves stable account ownership.                     |
-| `src/features/auth/server/account.ts`                 | Creates or updates the verified user’s account record.                            |
-| `src/features/auth/lib/client-api.ts`                 | Makes authenticated requests from browser code.                                   |
-| `src/features/contests/components/ContestBrowser.tsx` | Renders and filters discovery, bookmark and reminder contest lists.               |
-| `src/features/contests/server/get-contests.ts`        | Fetches upcoming contests from CLIST with the existing cache policy.              |
-| `src/features/contests/server/recent-contests.ts`     | Loads a cached recent contest feed for journal prefills without prior bookmarks.  |
-| `src/features/contests/server/feed.ts`                | Wraps feed loading with recoverable error information.                            |
-| `src/features/contests/server/verify-contest.ts`      | Validates a selected contest against the trusted feed before saving it.           |
-| `src/features/contests/lib/calendar.ts`               | Calculates IST contest dates and calendar days.                                   |
-| `src/features/contests/lib/platforms.ts`              | Defines platform names, visual identities and host matching.                      |
-| `src/features/profile/server/storage.ts`              | Reads and writes private profile photos through Supabase Storage.                 |
-| `src/features/reminders/server/service.ts`            | Saves or cancels reminders and their durable delivery records.                    |
-| `src/features/reminders/server/queue.ts`              | Claims and submits queued deliveries, retries and records mail events.            |
-| `src/features/reminders/server/email.ts`              | Builds the reminder email and communicates with Resend.                           |
-| `src/features/reminders/server/recovery-worker.ts`    | Runs reminder recovery and records worker health.                                 |
-| `src/features/week/server/week.ts`                    | Reads the account’s saved contests and reminders for the planner.                 |
-| `src/features/progress/lib/progress.ts`               | Calculates monthly totals, coverage and checklist completion.                     |
-| `src/features/progress/server/progress.ts`            | Selects only the signed-in account’s permitted analytics inputs.                  |
-| `src/features/admin/server/access.ts`                 | Enforces the server-side admin allowlist.                                         |
-| `src/features/admin/server/overview.ts`               | Queries reminder metrics, delivery history and system health.                     |
-| `src/lib/db/schema.ts`                                | Defines database tables, relations, indexes and ownership fields.                 |
-| `src/lib/db/index.ts`                                 | Creates and reuses the application’s PostgreSQL connection pool.                  |
-| `src/lib/db/connection.ts`                            | Normalizes the runtime connection to the Supabase transaction pooler.             |
-| `src/lib/http/account-request.ts`                     | Authenticates API requests and returns safe error responses.                      |
-| `src/lib/http/request-body.ts`                        | Limits and parses incoming request bodies.                                        |
-| `src/lib/http/request-error.ts`                       | Defines the shared request error and HTTP status.                                 |
-| `src/lib/supabase/browser.ts`                         | Creates the browser client using public Supabase configuration.                   |
-| `src/lib/date.ts`                                     | Parses contest timestamps consistently as UTC.                                    |
-| `src/lib/utils.ts`                                    | Combines CSS class names for shared controls.                                     |
-| `src/hooks/useClock.ts`                               | Supplies a shared live clock for countdowns and time-sensitive screens.           |
-| `src/components/theme/ThemeProvider.tsx`              | Applies the saved appearance preference, defaulting to light mode.                |
-| `src/styles/globals.css`                              | Defines theme tokens, base styles and shared CSS imports.                         |
-| `src/styles/components.css`                           | Holds existing shared component and application layout rules.                     |
-| `src/styles/discovery.css`                            | Holds landing-page and contest-browsing layout overrides.                         |
-| `scripts/checks/structure.mjs`                        | Checks file placement, imports, entry points and client/server boundaries.        |
-| `drizzle.config.ts`                                   | Configures schema generation and migration database access.                       |
-| `next.config.ts`                                      | Configures Next.js and includes the database CA certificate in deployment output. |
-| `components.json`                                     | Tells shadcn where shared UI, utilities and global CSS live.                      |
-| `supabase-ca.crt`                                     | Supplies the public CA certificate needed for verified database TLS.              |
+| File                                                         | Responsibility                                                                    |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| `src/app/layout.tsx`                                         | Loads fonts, global styles, providers, navigation and footer.                     |
+| `src/app/page.tsx`                                           | Composes the landing page from discovery sections.                                |
+| `src/app/<route>/page.tsx`                                   | Defines a page’s URL, metadata and initial server data.                           |
+| `src/app/api/**/route.ts`                                    | Handles HTTP requests and connects them to feature logic.                         |
+| `src/features/auth/components/AuthProvider.tsx`              | Manages the browser’s signed-in account and Google login flow.                    |
+| `src/features/auth/server/auth.ts`                           | Verifies access tokens and resolves stable account ownership.                     |
+| `src/features/auth/server/account.ts`                        | Creates or updates the verified user’s account record.                            |
+| `src/features/auth/lib/client-api.ts`                        | Makes authenticated requests from browser code.                                   |
+| `src/features/contests/components/ContestBrowser.tsx`        | Renders and filters discovery, bookmark and reminder contest lists.               |
+| `src/features/contests/components/PersonalizedDiscovery.tsx` | Shows explained suggestions and the preference editor on home and contests.       |
+| `src/features/contests/hooks/useDiscoveryPreferences.ts`     | Reads account or guest choices and saves without crossing account boundaries.     |
+| `src/features/contests/lib/discovery.ts`                     | Validates discovery choices and ranks upcoming contests using IST availability.   |
+| `src/features/contests/server/get-contests.ts`               | Fetches upcoming contests from CLIST with the existing cache policy.              |
+| `src/features/contests/server/recent-contests.ts`            | Loads a cached recent contest feed for journal prefills without prior bookmarks.  |
+| `src/features/contests/server/feed.ts`                       | Wraps feed loading with recoverable error information.                            |
+| `src/features/contests/server/verify-contest.ts`             | Validates a selected contest against the trusted feed before saving it.           |
+| `src/features/contests/lib/calendar.ts`                      | Calculates IST contest dates and calendar days.                                   |
+| `src/features/contests/lib/platforms.ts`                     | Defines platform names, visual identities and host matching.                      |
+| `src/features/profile/server/storage.ts`                     | Reads and writes private profile photos through Supabase Storage.                 |
+| `src/features/reminders/server/service.ts`                   | Saves or cancels reminders and their durable delivery records.                    |
+| `src/features/reminders/server/queue.ts`                     | Claims and submits queued deliveries, retries and records mail events.            |
+| `src/features/reminders/server/email.ts`                     | Builds the reminder email and communicates with Resend.                           |
+| `src/features/reminders/server/recovery-worker.ts`           | Runs reminder recovery and records worker health.                                 |
+| `src/features/week/server/week.ts`                           | Reads the account’s saved contests and reminders for the planner.                 |
+| `src/features/progress/lib/progress.ts`                      | Calculates monthly totals, coverage and checklist completion.                     |
+| `src/features/progress/server/progress.ts`                   | Selects only the signed-in account’s permitted analytics inputs.                  |
+| `src/features/admin/server/access.ts`                        | Enforces the server-side admin allowlist.                                         |
+| `src/features/admin/server/overview.ts`                      | Queries reminder metrics, delivery history and system health.                     |
+| `src/lib/db/schema.ts`                                       | Defines database tables, relations, indexes and ownership fields.                 |
+| `src/lib/db/index.ts`                                        | Creates and reuses the application’s PostgreSQL connection pool.                  |
+| `src/lib/db/connection.ts`                                   | Normalizes the runtime connection to the Supabase transaction pooler.             |
+| `src/lib/http/account-request.ts`                            | Authenticates API requests and returns safe error responses.                      |
+| `src/lib/http/request-body.ts`                               | Limits and parses incoming request bodies.                                        |
+| `src/lib/http/request-error.ts`                              | Defines the shared request error and HTTP status.                                 |
+| `src/lib/supabase/browser.ts`                                | Creates the browser client using public Supabase configuration.                   |
+| `src/lib/date.ts`                                            | Parses contest timestamps consistently as UTC.                                    |
+| `src/lib/utils.ts`                                           | Combines CSS class names for shared controls.                                     |
+| `src/hooks/useClock.ts`                                      | Supplies a shared live clock for countdowns and time-sensitive screens.           |
+| `src/components/theme/ThemeProvider.tsx`                     | Applies the saved appearance preference, defaulting to light mode.                |
+| `src/styles/globals.css`                                     | Defines theme tokens, base styles and shared CSS imports.                         |
+| `src/styles/components.css`                                  | Holds existing shared component and application layout rules.                     |
+| `src/styles/discovery.css`                                   | Holds landing-page and contest-browsing layout overrides.                         |
+| `scripts/checks/structure.mjs`                               | Checks file placement, imports, entry points and client/server boundaries.        |
+| `drizzle.config.ts`                                          | Configures schema generation and migration database access.                       |
+| `next.config.ts`                                             | Configures Next.js and includes the database CA certificate in deployment output. |
+| `components.json`                                            | Tells shadcn where shared UI, utilities and global CSS live.                      |
+| `supabase-ca.crt`                                            | Supplies the public CA certificate needed for verified database TLS.              |
 
 Some existing shared HTTP function names retain `Profile` for compatibility with
 the current internal callers; they now live in the common HTTP folder rather than

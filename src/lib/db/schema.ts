@@ -1,3 +1,4 @@
+import type { DiscoveryPreferences } from "@/features/contests/lib/discovery";
 import {
   bigint,
   boolean,
@@ -249,6 +250,7 @@ export const accountPreferences = pgTable(
     userId: text("user_id")
       .primaryKey()
       .references(() => users.id, { onDelete: "cascade" }),
+    discovery: jsonb("discovery").$type<DiscoveryPreferences>(),
     defaultReminder: text("default_reminder").notNull().default("15m"),
     remindersPaused: boolean("reminders_paused").notNull().default(false),
     onboardingDismissed: boolean("onboarding_dismissed")

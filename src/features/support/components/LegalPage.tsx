@@ -5,7 +5,7 @@ export default function LegalPage({ kind }: { kind: "privacy" | "terms" }) {
   return (
     <article className="site-container account-page legal-page">
       <header className="account-heading">
-        <p className="eyebrow">CONTEST MANAGER · UPDATED 25 OCTOBER 2026</p>
+        <p className="eyebrow">CONTEST MANAGER · UPDATED 27 OCTOBER 2026</p>
         <h1>{kind === "privacy" ? "Privacy policy." : "Terms of use."}</h1>
       </header>
       {kind === "privacy" ? (
@@ -21,18 +21,19 @@ export default function LegalPage({ kind }: { kind: "privacy" | "terms" }) {
             When you sign in with Google, we receive your verified account
             identity, email, name and profile photo reference. We store the
             profile information you choose to add, uploaded profile photos,
-            bookmarks, reminder preferences and delivery history, journal notes
-            and problem checklists, weekly goals, and feedback you submit. Your
-            journal, feedback and uploaded photos are private to your account
-            and authorized administrators.
+            bookmarks, discovery choices (platforms, days, start times and
+            contest length), reminder preferences and delivery history, journal
+            notes and problem checklists, weekly goals, and feedback you submit.
+            Your journal, feedback and uploaded photos are private to your
+            account and authorized administrators.
           </p>
           <h2>How it is used</h2>
           <p>
             We use this information to provide your account, display your saved
             work, send the reminders you request, calculate journal-based
-            progress, respond to feedback, prevent abuse and troubleshoot
-            failures. We do not sell personal information or use journal content
-            for advertising.
+            progress, suggest contests using your discovery choices, respond to
+            feedback, prevent abuse and troubleshoot failures. We do not sell
+            personal information or use journal content for advertising.
           </p>
           <h2>Services involved</h2>
           <p>
@@ -46,7 +47,10 @@ export default function LegalPage({ kind }: { kind: "privacy" | "terms" }) {
           <h2>Browser storage and links</h2>
           <p>
             The browser stores your sign-in session, appearance preference and a
-            private status receipt if you request account deletion.
+            private status receipt if you request account deletion. Visitors who
+            have not signed in can save discovery choices in this browser.
+            Signed-in discovery choices are stored privately with your account.
+            You can reset or turn off suggestions in the discovery panel.
             Authentication can use browser storage or cookies as required by the
             sign-in flow. External contest, calendar, portfolio and social links
             open services with separate privacy policies. We do not currently
