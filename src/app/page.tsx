@@ -1,3 +1,4 @@
+import PersonalizedDiscovery from "@/features/contests/components/PersonalizedDiscovery";
 import GettingStarted from "@/features/account/components/GettingStarted";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -11,10 +12,14 @@ import ExplorePlatforms from "@/features/home/components/ExplorePlatforms";
 export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const { contests, error } = await getContestFeed();
+  const requestTime = new Date();
   return (
     <div className="site-container discovery-home">
       <HeroSection contests={contests} />
       <GettingStarted />
+      {!error && (
+        <PersonalizedDiscovery contests={contests} initialNow={requestTime.getTime()} />
+      )}
       <section
         id="contests"
         className="home-contests"

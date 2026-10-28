@@ -1,3 +1,4 @@
+import { DEFAULT_DISCOVERY } from "@/features/contests/lib/discovery";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "@/lib/db";
 import {
@@ -37,6 +38,7 @@ export async function getSettings(
     })
     .from(sql`(select 1) as source`);
   return {
+    discovery: preference?.discovery ?? DEFAULT_DISCOVERY,
     defaultReminder: (preference?.defaultReminder ??
       "15m") as AccountSettings["defaultReminder"],
     remindersPaused: preference?.remindersPaused ?? false,

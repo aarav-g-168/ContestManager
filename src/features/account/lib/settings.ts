@@ -1,9 +1,14 @@
 import {
+  validateDiscovery,
+  type DiscoveryPreferences,
+} from "@/features/contests/lib/discovery";
+import {
   isReminderType,
   type ReminderType,
 } from "@/features/reminders/lib/timing";
 import { ProfileRequestError } from "@/lib/http/request-error";
 export type AccountSettings = {
+  discovery?: DiscoveryPreferences;
   defaultReminder: ReminderType;
   remindersPaused: boolean;
   onboardingDismissed: boolean;
@@ -14,7 +19,11 @@ export type AccountSettings = {
 };
 export type SettingsValues = Pick<
   AccountSettings,
-  "defaultReminder" | "remindersPaused" | "onboardingDismissed" | "revision"
+  | "defaultReminder"
+  | "remindersPaused"
+  | "onboardingDismissed"
+  | "revision"
+  | "discovery"
 >;
 export function validateSettings(input: unknown): SettingsValues {
   if (!input || typeof input !== "object" || Array.isArray(input))
@@ -33,7 +42,16 @@ export function validateSettings(input: unknown): SettingsValues {
       "Choose valid preferences and reload before saving.",
       400,
     );
+  let discovery: DiscoveryPreferences | undefined;
+  if (Object.hasOwn(raw, "discovery")) {
+    try {
+      discovery = validateDiscovery(raw.discovery);
+    } catch {
+      throw new ProfileRequestError("Choose valid discovery preferences.", 400);
+    }
+  }
   return {
+    ...(discovery ? { discovery } : {}),
     defaultReminder: raw.defaultReminder,
     remindersPaused: raw.remindersPaused,
     onboardingDismissed: raw.onboardingDismissed,

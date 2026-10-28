@@ -171,3 +171,11 @@ additive journal migration before deploying. See [journal behavior and checks](d
 ## Launch controls
 
 See [launch controls and deployment](docs/launch-operations.md), [encrypted backup and recovery](docs/backup-recovery.md), and the [release checklist](docs/launch-readiness.md). GitHub CI includes browser regression definitions; production health checks are separate from the reminder scheduler. Backups are application-data exports, not complete Supabase/Auth/Storage recovery. No paid services are enabled.
+
+### Personalised discovery
+
+Home and the contest calendar offer explained suggestions using favourite platforms,
+available days, IST start times and contest length. Account choices sync privately
+through Supabase; visitors can save choices in their browser. Apply migration 0006
+before deploying. See [personalised discovery](docs/personalized-discovery.md) and run
+`npm run test:discovery` for ranking and persistence checks.

@@ -1,3 +1,4 @@
+import PersonalizedDiscovery from "@/features/contests/components/PersonalizedDiscovery";
 import type { Metadata } from "next";
 import { Clock3 } from "lucide-react";
 import ContestClientComponent from "@/features/contests/components/ContestBrowser";
@@ -52,17 +53,23 @@ export default async function ContestsPage({
       {error ? (
         <FeedError message={error} />
       ) : (
-        <ContestClientComponent
-          key={`${platform}-${date}-${query}-${range}`}
-          initialContests={contests}
-          showFilters
-          today={getContestDay(requestTime)}
-          initialPlatform={platform}
-          initialDate={date}
-          initialQuery={query}
-          initialRange={range}
-          initialNow={requestTime.getTime()}
-        />
+        <>
+          <PersonalizedDiscovery
+            contests={contests}
+            initialNow={requestTime.getTime()}
+          />
+          <ContestClientComponent
+            key={`${platform}-${date}-${query}-${range}`}
+            initialContests={contests}
+            showFilters
+            today={getContestDay(requestTime)}
+            initialPlatform={platform}
+            initialDate={date}
+            initialQuery={query}
+            initialRange={range}
+            initialNow={requestTime.getTime()}
+          />
+        </>
       )}
       <p className="mt-8 text-center font-mono text-[10px] leading-6 text-muted-foreground">
         Contest data from CLIST · Looking ahead 30 days · Schedules may change
