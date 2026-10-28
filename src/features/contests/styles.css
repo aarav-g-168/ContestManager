@@ -1,0 +1,231 @@
+.personalized-discovery {
+  margin-block: 28px 44px;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(
+    125deg,
+    color-mix(in srgb, var(--primary) 5%, var(--card)),
+    var(--background) 65%
+  );
+}
+.personalized-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.personalized-heading h2 {
+  font-size: clamp(24px, 3vw, 32px);
+  letter-spacing: -0.035em;
+  line-height: 1.25;
+  margin-block: 8px;
+  font-weight: 500;
+}
+.personalized-heading p:not(.eyebrow),
+.personalized-footer {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  line-height: 1.7;
+}
+.personalized-heading > button {
+  flex-shrink: 0;
+  min-height: 44px;
+}
+.personalized-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+}
+.personalized-footer a {
+  flex-shrink: 0;
+}
+.discovery-pick {
+  display: flex;
+  flex-direction: column;
+}
+.discovery-pick .contest-card {
+  flex: 1;
+}
+.discovery-reasons {
+  min-height: 58px;
+  align-content: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 9px;
+}
+.discovery-reasons span {
+  border: 1px solid color-mix(in srgb, var(--primary) 23%, var(--border));
+  border-radius: 5px;
+  padding: 4px 7px;
+  font-size: 11px;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, var(--card));
+}
+.discovery-preferences {
+  padding: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+.discovery-preferences fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.discovery-preferences-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.discovery-preferences h3 {
+  font-size: 17px;
+  font-weight: 500;
+}
+.discovery-preferences-heading > span,
+.discovery-preference-group span {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  font-weight: 400;
+}
+.discovery-enable {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.discovery-enable input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+.discovery-preference-group {
+  margin-bottom: 22px;
+}
+.discovery-preference-group > label,
+.discovery-preference-group > p,
+.discovery-preference-grid > label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.discovery-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 176px;
+  overflow-y: auto;
+  padding: 4px;
+  margin: 8px -4px 0;
+}
+.discovery-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.discovery-preferences .filter-chip {
+  min-height: 44px;
+  padding: 9px 13px;
+}
+.discovery-preferences .filter-chip[aria-pressed="true"] {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 9%, var(--card));
+}
+.discovery-preferences .filter-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.discovery-preference-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.discovery-preferences input[type="search"],
+.discovery-preferences select {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 16px;
+}
+.discovery-preferences input:focus-visible,
+.discovery-preferences select:focus-visible,
+.discovery-preferences button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+.discovery-storage-note {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted-foreground);
+  margin-block: 18px;
+}
+.discovery-preference-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.discovery-preference-actions > div {
+  display: flex;
+  gap: 10px;
+}
+.discovery-preference-actions button {
+  min-height: 44px;
+}
+.discovery-save-error {
+  color: var(--destructive);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.discovery-notice {
+  font-size: 13px;
+  line-height: 1.8;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 18px;
+  background: var(--card);
+}
+@media (max-width: 640px) {
+  .discovery-reasons {
+    min-height: 0;
+  }
+  .personalized-discovery {
+    padding: 18px 14px;
+    margin-block: 20px 32px;
+  }
+  .personalized-heading,
+  .personalized-footer,
+  .discovery-preference-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .discovery-preferences {
+    padding: 18px 14px;
+  }
+  .discovery-preference-grid {
+    grid-template-columns: 1fr;
+  }
+  .discovery-preference-actions > div > button {
+    flex: 1;
+  }
+}

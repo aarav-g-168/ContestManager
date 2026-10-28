@@ -42,6 +42,8 @@ import { getContestDay } from "@/features/contests/lib/calendar";
 import type { Contest } from "@/features/contests/types";
 import { useClock } from "@/hooks/useClock";
 interface Props {
+  preserveOrder?: boolean;
+  recommendationReasons?: Record<number, string[]>;
   feedError?: string | null;
   initialContests: Contest[];
   showFilters?: boolean;
@@ -56,6 +58,8 @@ interface Props {
 }
 export default function ContestClientComponent({
   feedError,
+  preserveOrder = false,
+  recommendationReasons,
   initialContests,
   showFilters = false,
   bookmarksOnly = false,
@@ -111,6 +115,7 @@ export default function ContestClientComponent({
       }
       return true;
     });
+    if (preserveOrder) return results;
     return [...results].sort((a, b) =>
       sort === "platform"
         ? getPlatform(a.host).name.localeCompare(getPlatform(b.host).name)
@@ -123,6 +128,7 @@ export default function ContestClientComponent({
     );
   }, [
     initialContests,
+    preserveOrder,
     bookmarksOnly,
     remindersOnly,
     bookmarks.bookmarkedContests,
@@ -443,8 +449,20 @@ export default function ContestClientComponent({
                   duration: reduced ? 0 : 0.22,
                   delay: reduced ? 0 : Math.min(index, 5) * 0.035,
                 }}
-                className="min-w-0"
+                className={
+                  recommendationReasons ? "min-w-0 discovery-pick" : "min-w-0"
+                }
               >
+                {recommendationReasons?.[contest.id] && (
+                  <div
+                    className="discovery-reasons"
+                    aria-label="Why this contest is suggested"
+                  >
+                    {recommendationReasons[contest.id].map((reason) => (
+                      <span key={reason}>{reason}</span>
+                    ))}
+                  </div>
+                )}
                 <ContestCard
                   accountLoading={
                     authLoading || bookmarks.loading || reminder.loading

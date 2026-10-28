@@ -39,6 +39,7 @@ export async function exportAccount(db: Database, uid: string) {
         .where(eq(users.id, uid)),
       tx
         .select({
+          discovery: accountPreferences.discovery,
           defaultReminder: accountPreferences.defaultReminder,
           remindersPaused: accountPreferences.remindersPaused,
           onboardingDismissed: accountPreferences.onboardingDismissed,
