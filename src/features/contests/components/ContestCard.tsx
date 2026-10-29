@@ -1,5 +1,5 @@
 "use client";
-import { useState, type CSSProperties } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import ReminderChoices from "@/features/reminders/components/ReminderChoices";
 import { DropdownMenu } from "radix-ui";
 import {
@@ -59,7 +59,8 @@ export default function ContestCard({
   onReminderSet,
   onReminderRemove,
 }: Props) {
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<"bookmark" | "reminder" | null>(null);
+  const actionLock = useRef(false);
   const now = useClock();
   const platform = getPlatform(contest.host);
   const start = parseAsUTC(contest.start);
@@ -69,13 +70,18 @@ export default function ContestCard({
       ? `${Math.floor(contest.duration / 3600) ? Math.floor(contest.duration / 3600) + "h " : ""}${Math.floor((contest.duration % 3600) / 60) ? Math.floor((contest.duration % 3600) / 60) + "m" : ""}`.trim() ||
         "< 1m"
       : "Not specified";
-  async function run(action: () => Promise<void>) {
-    if (busy) return;
-    setBusy(true);
+  async function run(
+    kind: "bookmark" | "reminder",
+    action: () => Promise<void>,
+  ) {
+    if (actionLock.current) return;
+    actionLock.current = true;
+    setBusy(kind);
     try {
       await action();
     } finally {
-      setBusy(false);
+      actionLock.current = false;
+      setBusy(null);
     }
   }
   return (
@@ -187,13 +193,14 @@ export default function ContestCard({
             <>
               <button
                 className={`icon-button ${isBookmarked ? "!text-primary" : ""}`}
-                disabled={busy}
+                disabled={busy !== null}
+                aria-busy={busy === "bookmark"}
                 aria-pressed={isBookmarked}
                 aria-label={`${isBookmarked ? "Remove bookmark for" : "Bookmark"} ${contest.event}`}
                 title={isBookmarked ? "Remove bookmark" : "Save contest"}
-                onClick={() => run(() => onBookmarkToggle(contest))}
+                onClick={() => run("bookmark", () => onBookmarkToggle(contest))}
               >
-                {busy ? (
+                {busy === "bookmark" ? (
                   <LoaderCircle
                     size={16}
                     className="animate-spin"
@@ -210,16 +217,25 @@ export default function ContestCard({
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger asChild>
                   <button
-                    disabled={busy}
+                    disabled={busy !== null}
                     className={`icon-button ${hasReminder ? "!text-primary" : ""}`}
+                    aria-busy={busy === "reminder"}
                     aria-label={`Reminder options for ${contest.event}`}
                     title="Set a reminder"
                   >
-                    <Bell
-                      size={16}
-                      fill={hasReminder ? "currentColor" : "none"}
-                      aria-hidden="true"
-                    />
+                    {busy === "reminder" ? (
+                      <LoaderCircle
+                        size={16}
+                        className="animate-spin"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <Bell
+                        size={16}
+                        fill={hasReminder ? "currentColor" : "none"}
+                        aria-hidden="true"
+                      />
+                    )}
                   </button>
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Portal>
@@ -234,10 +250,10 @@ export default function ContestCard({
                     <ReminderChoices
                       start={start.getTime()}
                       now={now ?? 0}
-                      disabled={busy || !validDate}
+                      disabled={busy !== null || !validDate}
                       selected={reminderType}
                       onChoose={(type) =>
-                        run(() => onReminderSet(contest, type))
+                        run("reminder", () => onReminderSet(contest, type))
                       }
                     />
                     {hasReminder && (
@@ -246,7 +262,7 @@ export default function ContestCard({
                         <DropdownMenu.Item
                           className="menu-item text-destructive"
                           onSelect={() =>
-                            run(() => onReminderRemove(contest.id))
+                            run("reminder", () => onReminderRemove(contest.id))
                           }
                         >
                           <BellOff size={14} aria-hidden="true" />
